@@ -1,5 +1,19 @@
 # Trạng thái thử nghiệm — ScreenCaptureKit (18/10/2026)
 
+## Linh 0.8 — Học qua nhiều phiên, không lưu ảnh
+
+Bản iOS 27 **giữ nguyên ScreenCaptureKit** và yêu cầu Bệ hạ tự chấp thuận màn hình qua bảng chia sẻ iOS. Không xây bản iOS 18. Không đọc bộ nhớ game, không bấm/đánh hộ, không dùng AI trả phí.
+
+Mã nguồn vừa thêm:
+- `GameReasoner` đợi **hai khung OCR ổn định liên tiếp** trước khi tạo gợi ý hoặc so chênh lệch sát thương; so sánh số liệu không được coi là kết luận về nguyên nhân.
+- `GameEvidenceLedger` lưu `UserDefaults` trên thiết bị, **chỉ số lần gặp nhóm hiệu ứng và số phép so sánh** cho hồ sơ Soul Knight Prequel. Không lưu hình ảnh, video, chuỗi OCR, tên nhân vật hoặc tin nhắn. Gỡ ứng dụng/xóa dữ liệu ứng dụng sẽ xóa trí nhớ này.
+- Gặp lại một nhóm hiệu ứng ở phiên sau, Linh ưu tiên câu hỏi/đề xuất phép thử tiếp theo thay vì lặp lại câu hỏi đầu.
+- Nhận diện bước đầu các nhãn game như `Fatebound`, chí mạng, xuyên giáp, thiêu đốt, cộng dồn và hồi chiêu. **Không tự coi những nhãn đó là công thức sát thương đã được xác minh**.
+- Bộ lọc thông báo cũ giữ nguyên: chỉ Gợi ý/Tính toán/Câu hỏi, tối đa 96 ký tự và chống làm phiền.
+
+**Giới hạn còn lại:** chưa ký/cài thử trên iPhone 14 Plus chạy iOS 27; chưa kiểm chứng OCR khi game ở tiền cảnh và Linh ở nền; chưa có bong bóng tương tác nổi tự do trong game. Chỉ có thể đề nghị iOS hiển thị thông báo ngắn, nếu được hệ thống cho phép. Cơ chế chống gian lận Soul Knight Prequel vẫn cần tôn trọng; đây không phải lời khẳng định trợ lý gợi ý trực tiếp đã được ChillyRoom chấp thuận.
+
+
 - [x] Swift app biên dịch Xcode 27 (GitHub Actions, không ký).
 - [x] Giới hạn OCR nhận khung hình trạng thái `.complete`, bỏ qua màn hình trống, khung tạm dừng.
 - [x] Chỉ nhận phân tích khung hình đúng phiên chia sẻ hiện tại; dừng thì hủy phiên.
@@ -8,7 +22,7 @@
 - [ ] Cài trực tiếp lên iPhone bằng chữ ký Apple, thử picker và nhận khung hình game khi app chạy nền.
 - [ ] Kiểm tra thông báo có hiện trên Soul Knight Prequel khi iOS cho phép.
 - [ ] Nghiên cứu chính sách nhà phát hành đối với **gợi ý tự động trong khi chơi** (việc chia sẻ hình ảnh không chứng minh mọi loại trợ giúp đều được phép).
-- [ ] Bộ nhớ bền vững riêng theo game; hiện dữ liệu OCR chỉ dùng trong phiên để bảo vệ riêng tư.
+- [x] Bộ nhớ cục bộ chỉ lưu thống kê suy luận tổng hợp cho hồ sơ Soul Knight Prequel; OCR nguyên văn chỉ tồn tại tạm thời trong RAM.
 
 Xem [build Xcode thành công](https://github.com/hoaianhdoan0209-hue/Linh-Ai/actions/runs/39145793889).
 

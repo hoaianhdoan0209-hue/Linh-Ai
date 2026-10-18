@@ -15,7 +15,7 @@ struct CheckLinhInsights {
                "Do not transcribe general text")
         let burn = reasoner.inspect("Thiêu đốt và xuyên giáp")
         verify(burn?.kind == .suggestion, "Expected one actionable suggestion")
-        verify(burn?.body.count ?? 999 <= 96, "Suggestion must be short")
+        verify((burn?.body.count ?? 999) <= 96, "Suggestion must be short")
         verify(reasoner.inspect("Thiêu đốt và xuyên giáp") == nil,
                "Do not repeat identical OCR frame")
         let stack = reasoner.inspect("Cộng dồn 4 stack")

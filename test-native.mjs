@@ -18,7 +18,7 @@ for(const key of ['SCContentSharingPicker.shared','picker.present()','SCStream('
  assert.ok(session.includes(key),'Missing safe native observation code: '+key);
 assert.ok(plist.includes('<string>screen-capture</string>'));
 assert.ok(project.includes('27.0'));
-for(const key of ['currentStream === stream','currentGeneration','generation: incoming',
+for(const key of ['currentStream === stream','currentGeneration','generation incoming: Int',
                    'CMSampleBufferIsValid','CMSampleBufferGetSampleAttachmentsArray',
                    'SCFrameStatus(rawValue: rawStatus) == .complete','endSession()']) {
  assert.ok(session.includes(key),'Screen sharing safety gate missing: '+key);

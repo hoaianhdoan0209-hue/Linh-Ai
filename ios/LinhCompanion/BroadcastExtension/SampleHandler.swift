@@ -15,6 +15,16 @@ final class SampleHandler: RPBroadcastSampleHandler {
     private var lastFrameAt = Date.distantPast
 
     override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
+        guard LinhSharedStore.hasSharedContainer else {
+            // Fail visibly. Otherwise the extension could analyze all screen
+            // frames but the companion app would silently see none of the data.
+            finishBroadcastWithError(NSError(
+                domain: "ai.linh.companion.broadcast", code: 1,
+                userInfo: [NSLocalizedDescriptionKey:
+                           "Linh chưa có quyền App Group. Hãy kiểm tra chữ ký ứng dụng."]
+            ))
+            return
+        }
         isBroadcasting = true
         lastFrameAt = .distantPast
         brain.reset()

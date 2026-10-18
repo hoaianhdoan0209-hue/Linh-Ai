@@ -9,6 +9,6 @@ const manifest=JSON.parse(readFileSync(new URL('./manifest.webmanifest',import.m
 assert.equal(manifest.start_url,'./');
 assert.equal(manifest.display,'standalone');
 assert.ok(html.includes('./assistant-engine.js')&&html.includes('./assistant-ui.js'),'Missing Linh 0.5 reasoning scripts');
-assert.ok(html.includes('./cloud-connector.js')&&html.includes('./cloud-ui.js'),'Missing opt-in Linh 0.6 scripts');
+assert.ok(!html.includes('<script src="./cloud-connector.js">')&&!html.includes('<script src="./cloud-ui.js">'),'Linh game-only mode must not load cloud AI');
 assert.ok(!/getDisplayMedia\(/.test(html),'PWA must not pretend to screen capture other apps');
 console.log('PASS: Web syntax, UI, opt-in image flow, PWA');

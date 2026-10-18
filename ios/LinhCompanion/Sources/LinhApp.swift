@@ -2,18 +2,21 @@ import SwiftUI
 
 @main
 struct LinhApp: App {
-    @StateObject private var session = LinhSession()
+    @StateObject private var session = LinhCoordinator()
 
     var body: some Scene {
         WindowGroup {
             LinhFace(session: session)
+                .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                    session.refreshFromReplayKit()
+                }
         }
     }
 }
 
 /// The only visible interface is Linh. iOS owns every permission picker.
 struct LinhFace: View {
-    @ObservedObject var session: LinhSession
+    @ObservedObject var session: LinhCoordinator
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hovering = false
 
@@ -116,9 +119,18 @@ struct LinhFace: View {
                     }
                 }
                 .animation(.easeInOut(duration: 0.2), value: session.latestInsight)
+                .overlay(alignment: .bottom) {
+                    // iOS 18 requires Apple's REAL picker button; no fake auto-start.
+                    if session.usesReplayKit {
+                        ReplayKitPicker()
+                            .frame(width: 64, height: 64)
+                            .offset(y: 22)
+                            .accessibilityLabel("Cho Linh xem game")
+                    }
+                }
                 .contentShape(Circle())
                 .gesture(
-                    LongPressGesture(minimumDuration: 0.85)
+                    session.usesReplayKit ? nil : LongPressGesture(minimumDuration: 0.85)
                         .exclusively(before: TapGesture())
                         .onEnded { action in
                             switch action {

@@ -110,7 +110,79 @@
   }
   return {simulate, optimize, analyzeEvidence, effectsActive, types, n, clamp};
 });
-</script><script src="./vision-engine.js"></script><script>(() => {
+</script><script src="./vision-engine.js"></script><script>
+/* Linh Learning 0.4: opt-in on-device memory of OCR-derived game observations.
+ * This is evidence tracking, not neural-network training and not proof of mechanics.
+ * Raw screenshots, full OCR text, account data and API keys are never stored here.
+ */
+(function(root,factory){
+ const api=factory();
+ if(typeof module!=='undefined'&&module.exports)module.exports=api;
+ root.LinhLearning=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+ 'use strict';
+ const TAG_KEYS=['burn','poison','crit','cooldown','armor','heal','duration','stacks','vulnerable'];
+ const FACT_KEYS=['critChance','critDamage','attack','armorPen','resistPen','vulnerable'];
+ const safeText=(v,n=180)=>String(v??'').slice(0,n);
+ const finite=(n)=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=1000;
+ function sanitize(source){
+  const x=source&&typeof source==='object'?source:{};
+  return {enabled:x.enabled===true,items:(Array.isArray(x.items)?x.items:[]).slice(-50).map(item=>{
+   if(!item||typeof item!=='object')return null;
+   return {id:safeText(item.id,64),signature:safeText(item.signature,16),date:safeText(item.date,80),
+    status:['pending','accepted','rejected'].includes(item.status)?item.status:'pending',
+    tags:(Array.isArray(item.tags)?item.tags:[]).filter(t=>TAG_KEYS.includes(t)).slice(0,12),
+    facts:(Array.isArray(item.facts)?item.facts:[]).filter(f=>f&&FACT_KEYS.includes(f.key)&&finite(f.value)).slice(0,10).map(f=>({key:f.key,label:safeText(f.label,60),value:f.value})),
+    hypothesis:safeText(item.hypothesis,360),question:safeText(item.question,300)
+   };
+  }).filter(Boolean)};
+ }
+ function fingerprint(text){
+  const s=String(text||'').normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim().slice(0,16000);
+  let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0).toString(16).padStart(8,'0');
+ }
+ function addObservation(memory,vision,date,id){
+  if(!memory||!memory.enabled||!vision||!vision.text?.trim())return {added:false,reason:'disabled-or-empty'};
+  const sig=fingerprint(vision.text);
+  if((memory.items||[]).some(x=>x.signature===sig))return {added:false,reason:'duplicate'};
+  const item={id:safeText(id||'entry-'+Date.now()+'-'+sig,64),signature:sig,date:safeText(date,80),status:'pending',
+   tags:(vision.tags||[]).map(t=>t.key).filter(t=>TAG_KEYS.includes(t)).slice(0,12),
+   facts:(vision.facts||[]).filter(f=>FACT_KEYS.includes(f.key)&&finite(f.value)).slice(0,10).map(f=>({key:f.key,label:safeText(f.label,60),value:f.value})),
+   hypothesis:safeText((vision.hypotheses||[])[0],360),question:safeText((vision.questions||[])[0],300)};
+  memory.items=Array.isArray(memory.items)?memory.items:[];memory.items.push(item);memory.items=memory.items.slice(-50);
+  return {added:true,item};
+ }
+ function feedback(memory,id,status){
+  if(!['accepted','rejected'].includes(status))return false;
+  const item=(memory?.items||[]).find(x=>x.id===id);if(!item)return false;
+  item.status=status;return true;
+ }
+ function summary(memory){
+  const items=(memory?.items||[]).filter(x=>x.status!=='rejected');
+  const counts=new Map(),labels={burn:'thiêu đốt',poison:'độc',crit:'chí mạng',cooldown:'hồi chiêu',armor:'giáp',heal:'hồi phục',duration:'thời lượng',stacks:'cộng dồn',vulnerable:'nhận thêm sát thương'};
+  for(const item of items)for(const tag of new Set(item.tags)) counts.set(tag,(counts.get(tag)||0)+1);
+  return {total:(memory?.items||[]).length,accepted:items.filter(x=>x.status==='accepted').length,pending:items.filter(x=>x.status==='pending').length,
+   signals:[...counts].sort((a,b)=>b[1]-a[1]).map(([key,count])=>({key,label:labels[key]||key,count})),
+   nextQuestion:items.slice().reverse().map(x=>x.question).find(Boolean)||'Bệ hạ có thể cho Linh xem thêm một kỹ năng hoặc kết quả sát thương để kiểm chứng không?'};
+ }
+ function recall(memory,query){
+  const sum=summary(memory);if(!sum.total)return null;
+  const q=String(query||'').toLowerCase();
+  if(!/nhớ|học|trước|đã thấy|đã đọc|dữ kiện|bằng chứng|biết gì|combo|hiệu ứng|cơ chế/.test(q))return null;
+  const active=(memory?.items||[]).filter(x=>x.status!=='rejected');
+  const stats=active.flatMap(x=>x.facts.map(f=>({ ...f,date:x.date,confirmed:x.status==='accepted'})));
+  const latest=[...new Map(stats.slice().reverse().map(x=>[x.key,x])).values()].slice(0,4);
+  let response=`Trí nhớ từ ảnh game: ${sum.total} lần quan sát, ${sum.accepted} lần Bệ hạ xác nhận OCR đúng, ${sum.pending} lần chưa xác nhận.`;
+  if(sum.signals.length)response+=' Những dấu hiệu xuất hiện nhiều: '+sum.signals.slice(0,4).map(x=>x.label+' ('+x.count+' ảnh)').join(', ')+'.';
+  if(latest.length)response+=' Một số chỉ số OCR đã thấy: '+latest.map(x=>`${x.label} ${x.value}%${x.confirmed?' (đã xác nhận OCR)':''}`).join(', ')+'.';
+  response+=' Đây là bằng chứng ảnh/OCR, chưa chứng minh công thức của game.';
+  return {reply:response,question:sum.nextQuestion};
+ }
+ return {sanitize,fingerprint,addObservation,feedback,summary,recall};
+});
+
+</script><script>(() => {
 'use strict';
 const E = window.LinhEngine;
 const $= id=>document.getElementById(id);
@@ -136,7 +208,8 @@ function validateGame(src){
  modes:{stacking:src.modes?.stacking==='add'?'add':'multiply',armorMode:src.modes?.armorMode==='none'?'none':'softcap'},
  effects:(Array.isArray(src.effects)?src.effects:[]).slice(0,60).filter(o=>o&&typeof o.name==='string'&&Object.hasOwn(E.types,o.type)).map(o=>({id:String(o.id||uid()).slice(0,100),name:o.name.slice(0,45),type:o.type,value:E.n(o.value),grants:String(o.grants||'').slice(0,120),requires:String(o.requires||'').slice(0,120),enabled:o.enabled!==false})),
  observations:(Array.isArray(src.observations)?src.observations:[]).slice(-80).map(o=>({id:String(o.id||uid()).slice(0,100),date:String(o.date||'').slice(0,80),context:String(o.context||'').slice(0,120),actual:E.n(o.actual),addPrediction:E.n(o.addPrediction),multiplyPrediction:E.n(o.multiplyPrediction)})).filter(o=>o.actual>0),
- notes:(Array.isArray(src.notes)?src.notes:[]).slice(-150).map(o=>({id:String(o.id||uid()).slice(0,100),date:String(o.date||'').slice(0,80),kind:String(o.kind||'Giả thuyết').slice(0,30),text:String(o.text||'').slice(0,1500)})).filter(o=>o.text)
+ notes:(Array.isArray(src.notes)?src.notes:[]).slice(-150).map(o=>({id:String(o.id||uid()).slice(0,100),date:String(o.date||'').slice(0,80),kind:String(o.kind||'Giả thuyết').slice(0,30),text:String(o.text||'').slice(0,1500)})).filter(o=>o.text),
+ learning:window.LinhLearning.sanitize(src.learning)
  };
 }
 function validateState(data){if(!data||typeof data!=='object'||!Array.isArray(data.games)||data.games.length>100)throw Error('Tệp sao lưu không đúng định dạng hoặc quá lớn.');
@@ -198,7 +271,7 @@ async function scanCurrentPhoto(){const file=$('photoInput').files?.[0];if(!file
  const result=await worker.recognize(file);
  if($('photoInput').files?.[0]!==file) return;
  const raw=(result?.data?.text||'').trim();lastVision=window.LinhVision.observe(raw);visionGameId=game().id;
- $('ocrText').value=raw;renderVision(lastVision);
+ $('ocrText').value=raw;renderVision(lastVision);window.dispatchEvent(new Event('linh:vision'));
  $('visionStatus').textContent=raw?'Đã đọc chữ trong ảnh. Linh mới đưa ra giả thuyết, chưa tự lưu.':'Linh chưa đọc rõ chữ. Hãy chọn ảnh có chữ lớn, rõ hơn.';
  $('saveOcrNote').classList.toggle('hidden',!raw);
  $('speech').textContent=lastVision.questions[0]||'Thần đã nhìn ảnh, Bệ hạ muốn tìm combo nào?';
@@ -218,7 +291,7 @@ function applyExtractedStats(){if(!lastVision?.facts?.length || game().id!==visi
 function answerLinh(question){const g=game(),response=window.LinhVision.answer(question,{...g,slots:Number($('slots').value)||3},lastVision,E);
  $('askLinhAnswer').innerHTML=`<div class="note"><div class="text">${esc(response.reply)}</div>${response.question?`<div class="hint">Linh muốn hỏi thêm: ${esc(response.question)}</div>`:''}</div>`;
 }
-function renderAll(){renderGames();renderStatForm();renderResults();renderNotes();renderEvidence();renderStorage();$('optimizeResult').innerHTML='';}
+function renderAll(){renderGames();renderStatForm();renderResults();renderNotes();renderEvidence();renderStorage();$('optimizeResult').innerHTML='';window.dispatchEvent(new Event('linh:game'));}
 $('addGame').addEventListener('click',()=>{const name=$('newGame').value.trim();if(!name){toast('Xin nhập tên game.');return;}if(state.games.length>=100){toast('Đã đạt giới hạn 100 game.');return;}const g={id:uid(),name:name.slice(0,60),createdAt:now(),stats:templateStats(),modes:{stacking:'multiply',armorMode:'softcap'},effects:[],observations:[],notes:[]};state.games.push(g);state.selectedId=g.id;$('newGame').value='';save();renderAll();toast('Đã tạo hồ sơ riêng cho '+g.name+'.');});
 $('newGame').addEventListener('keydown',e=>{if(e.key==='Enter')$('addGame').click();});
 $('stacking').addEventListener('change',e=>{game().modes.stacking=e.target.value;save();renderResults();});
@@ -249,8 +322,54 @@ mascot.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-dra
 mascot.addEventListener('pointerup',()=>{drag=null;if(!moved)greet();});mascot.addEventListener('pointercancel',()=>drag=null);
 mascot.addEventListener('click',e=>{if(e.detail===0)greet();});
 window.addEventListener('beforeunload',()=>{if(photoURL)URL.revokeObjectURL(photoURL);});
+window.LinhBridge={getGame:game,save:()=>{save();renderGames();renderStorage();},vision:()=>lastVision,visionGameId:()=>visionGameId,notify:toast};
 renderAll();save();
 $('offlineStatus').textContent=location.protocol==='https:'?'HTTPS · sẵn sàng lưu offline sau lần mở đầu':'Cần hosting HTTPS để cài PWA và offline đầy đủ';
 if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').then(()=>{$('offlineStatus').textContent='Bộ nhớ offline PWA đã đăng ký';}).catch(()=>{$('offlineStatus').textContent='Đang chạy online; bộ nhớ offline chưa kích hoạt';});
 })();
+</script><script>
+/* Linh 0.4 learning UI: requires LinhLearning + LinhBridge; no network requests. */
+(()=>{
+ 'use strict';
+ const L=window.LinhLearning, B=window.LinhBridge;
+ if(!L||!B)return;
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const root=document.createElement('div');
+ root.id='learningBox';root.className='card';
+ root.innerHTML=`<h2>Trí nhớ từ quan sát · beta</h2>
+ <p>Linh chỉ ghi nhớ <strong>dấu hiệu và giả thuyết rút ra từ OCR</strong> khi Bệ hạ bật quyền. Không tự lưu ảnh gốc hoặc toàn bộ chữ trong ảnh.</p>
+ <label style="display:flex;gap:10px;align-items:center;font-size:13px;color:#e8f2ff;margin:12px 0"><input type="checkbox" id="autoLearn" style="width:20px;height:20px;flex:none">Cho Linh ghi nhớ quan sát của game này</label>
+ <div class="row wrap" style="margin:8px 0"><button class="btn" id="learnCurrent">Ghi nhớ ảnh đang xem</button><button class="btn ghost" id="clearLearned">Xóa trí nhớ ảnh của game</button></div>
+ <div id="learningSummary" class="sub"></div><div id="learningEntries"></div>
+ <div class="hint">“OCR đúng” chỉ xác nhận chữ/số Linh đọc; không chứng minh cơ chế sát thương trong game. Những gì chưa rõ vẫn là giả thuyết.</div>`;
+ document.getElementById('visionQuestions').insertAdjacentElement('afterend',root);
+ const $=id=>document.getElementById(id);
+ const current=()=>{const g=B.getGame();if(!g.learning)g.learning=L.sanitize(null);return g;};
+ const save=()=>{B.save();render();};
+ const record=()=>{const g=current(),v=B.vision();if(!v||B.visionGameId()!==g.id){B.notify('Ảnh này không thuộc game đang chọn.');return;}
+  const result=L.addObservation(g.learning,v,new Date().toLocaleString('vi-VN'),'memo-'+Date.now()+'-'+Math.random().toString(36).slice(2,8));
+  if(result.added){save();B.notify('Linh đã ghi nhớ dấu hiệu từ ảnh, chưa kết luận công thức.');}
+  else if(result.reason==='duplicate') B.notify('Linh đã nhớ ảnh này rồi, không tính trùng.');
+  else B.notify('Cần bật quyền ghi nhớ và chọn ảnh có chữ.');
+ };
+ const render=()=>{const g=current(),m=g.learning,s=L.summary(m);
+  $('autoLearn').checked=m.enabled;
+  $('learningSummary').textContent=`${s.total} lần quan sát · ${s.accepted} kết quả OCR đã xác nhận · ${s.pending} cần kiểm tra.${s.signals.length?' Dấu hiệu lặp lại: '+s.signals.slice(0,3).map(t=>t.label+' ('+t.count+')').join(', ')+'.':''}`;
+  $('learningEntries').innerHTML=m.items.length?m.items.slice().reverse().slice(0,8).map(item=>{
+   const label=item.status==='accepted'?'Đã xác nhận OCR':item.status==='rejected'?'Đọc sai (đã loại)':'Chưa xác nhận';
+   const details=item.facts.length?item.facts.map(f=>esc(f.label)+' '+esc(f.value)+'%').join(', '):'Chưa có chỉ số rõ ràng';
+   return `<div class="note"><div class="row between"><span class="chip">${esc(label)}</span><span class="sub">${esc(item.date)}</span></div><div class="text" style="margin-top:7px">${details}</div>${item.hypothesis?`<p class="sub">Giả thuyết: ${esc(item.hypothesis)}</p>`:''}${item.question?`<p class="sub">Linh muốn hỏi: ${esc(item.question)}</p>`:''}<div class="row wrap" style="margin-top:8px"><button class="btn ghost" data-learn-id="${esc(item.id)}" data-decision="accepted">OCR đúng</button><button class="btn ghost" data-learn-id="${esc(item.id)}" data-decision="rejected">OCR sai</button></div></div>`;
+  }).join(''):'<div class="empty" style="margin-top:10px">Chưa ghi nhớ ảnh nào. Bật quyền trên và chọn ảnh game để Linh bắt đầu học.</div>';
+ };
+ $('autoLearn').addEventListener('change',e=>{const g=current();g.learning.enabled=e.target.checked;save();if(e.target.checked&&B.vision()?.text&&B.visionGameId()===g.id)record();else B.notify(e.target.checked?'Đã bật ghi nhớ cho game này.':'Đã tắt ghi nhớ tự động.');});
+ $('learnCurrent').addEventListener('click',record);
+ $('clearLearned').addEventListener('click',()=>{if(!confirm('Xóa toàn bộ trí nhớ quan sát từ ảnh của game này?'))return;const g=current();g.learning.items=[];save();B.notify('Đã xóa trí nhớ ảnh của game.');});
+ $('learningEntries').addEventListener('click',e=>{const btn=e.target.closest('button[data-learn-id]');if(!btn)return;const g=current();if(L.feedback(g.learning,btn.dataset.learnId,btn.dataset.decision)){save();B.notify(btn.dataset.decision==='accepted'?'Đã đánh dấu OCR đúng.':'Đã loại dữ kiện OCR sai.');}});
+ window.addEventListener('linh:vision',()=>{if(current().learning.enabled)record();else render();});
+ window.addEventListener('linh:game',render);
+ $('askLinhBtn').addEventListener('click',()=>{const memory=L.recall(current().learning,$('askLinh').value);if(!memory)return;const box=document.createElement('div');box.className='note';box.innerHTML=`<div class="smallcaps">TRÍ NHỚ CỦA LINH</div><div class="text" style="margin-top:7px">${esc(memory.reply)}</div>${memory.question?`<div class="hint">Điều Linh còn muốn biết: ${esc(memory.question)}</div>`:''}`;
+   $('askLinhAnswer').append(box);});
+ render();
+})();
+
 </script></body></html>

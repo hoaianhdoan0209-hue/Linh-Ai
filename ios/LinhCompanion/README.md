@@ -1,3 +1,17 @@
+# Trạng thái thử nghiệm — ScreenCaptureKit (18/10/2026)
+
+- [x] Swift app biên dịch Xcode 27 (GitHub Actions, không ký).
+- [x] Giới hạn OCR nhận khung hình trạng thái `.complete`, bỏ qua màn hình trống, khung tạm dừng.
+- [x] Chỉ nhận phân tích khung hình đúng phiên chia sẻ hiện tại; dừng thì hủy phiên.
+- [x] Phân tích hoàn toàn trên máy, không gửi hình ảnh, không sửa hay điều khiển game.
+- [x] Chỉ gợi ý ngắn / so sánh số / câu hỏi, không nói liên tục, có chống spam.
+- [ ] Cài trực tiếp lên iPhone bằng chữ ký Apple, thử picker và nhận khung hình game khi app chạy nền.
+- [ ] Kiểm tra thông báo có hiện trên Soul Knight Prequel khi iOS cho phép.
+- [ ] Nghiên cứu chính sách nhà phát hành đối với **gợi ý tự động trong khi chơi** (việc chia sẻ hình ảnh không chứng minh mọi loại trợ giúp đều được phép).
+- [ ] Bộ nhớ bền vững riêng theo game; hiện dữ liệu OCR chỉ dùng trong phiên để bảo vệ riêng tư.
+
+Xem [build Xcode thành công](https://github.com/hoaianhdoan0209-hue/Linh-Ai/actions/runs/39145793889).
+
 # Linh iPhone — Swift native prototype (iOS 27+)
 
 ## Chốt giao diện gợi ý ngắn — 0.7.1
@@ -11,7 +25,7 @@
 - Mã Swift riêng có bài thử trong `Tests/InsightTests.swift` và chạy trong CI qua `swiftc`. **Kiểm thử này không thay thế việc chạy bằng Xcode trên iPhone thật.**
 
 
-**Chưa kiểm thử, chưa biên dịch hoặc cài lên iPhone.** Đây là mã nguồn thử nghiệm iOS, được chuẩn bị để mở trong Xcode trên máy Mac.
+**ĐÃ BIÊN DỊCH thành công bằng Xcode 27 trên GitHub Actions**, nhưng **CHƯA được ký, cài hoặc thử với game thật trên iPhone**. Mã iOS vẫn là bản thử nghiệm.
 
 ## Đích sử dụng
 
@@ -22,7 +36,7 @@ Linh dùng bộ quy tắc để nêu câu hỏi, so sánh **hai số sát thươ
 ### Điểm cần kiểm chứng trên iPhone thật
 
 - **iOS 27 trở lên.** Apple hướng dẫn sử dụng `SCContentSharingPicker`, `SCStream` và background mode `screen-capture` (xem nguồn bên dưới). Không hỗ trợ chạy app native này trực tiếp trên iOS 18.
-- Tạo project: cài Xcode tương thích SDK iOS 27 + XcodeGen (miễn phí); từ thư mục `ios/LinhCompanion` chạy `xcodegen generate` rồi mở `LinhCompanion.xcodeproj`. Cần ký để cài lên iPhone 14 Plus. **Chưa xác minh biên dịch**; có thể cần cập nhật API theo SDK thực tế.
+- Tạo project: cài Xcode tương thích SDK iOS 27 + XcodeGen (miễn phí); từ thư mục `ios/LinhCompanion` chạy `xcodegen generate` rồi mở `LinhCompanion.xcodeproj`. Cần ký để cài lên iPhone 14 Plus. **Đã biên dịch trên SDK iOS 27**, song vẫn cần kiểm thử chia sẻ màn hình, OCR trong nền và thông báo trên iPhone thật.
 - Chọn **chia sẻ toàn màn hình** trong picker hệ thống, sau đó mở game. Phải kiểm tra stream có nhận frame khi ứng dụng bị đưa xuống nền. Các ứng dụng/game có bảo vệ nội dung có thể không cho ghi hình.
 - Hình ảnh có thể chứa thông báo hoặc app khác. Mã chỉ xử lý dòng OCR chứa từ khóa game, **không kiểm chứng chắc chắn đang xem đúng trò chơi**. Không nên mở thông tin riêng tư trong một phiên chia sẻ toàn màn hình.
 - **Giọng nói khi Linh chạy nền không được cam kết**. Mã chỉ xin quyền thông báo và đề nghị iOS hiện câu gợi ý ngắn, im lặng khi app chạy nền, nếu hệ thống cho phép. Không tự đọc giọng nói. Không có bong bóng nổi trên game khác. Một số trạng thái system privacy / vòng đời background / pin có thể khiến tính năng dừng hoặc hoạt động kém.
@@ -44,4 +58,4 @@ Apple:
 - https://developer.apple.com/documentation/screencapturekit
 - https://developer.apple.com/documentation/vision/vnrecognizetextrequest
 
-**Không coi việc commit mã Swift là bằng chứng ứng dụng native đã hoạt động trên iPhone.**
+**Có bản build không ký chạy qua CI, nhưng chưa có bằng chứng Linh quan sát được game trên iPhone thật.**

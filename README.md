@@ -1,3 +1,11 @@
+## 0.7.2 — Chia sẻ màn hình như Discord, xử lý cục bộ
+
+**Đã build thành công trên GitHub Actions với Xcode 27**: [Linh iPhone build](https://github.com/hoaianhdoan0209-hue/Linh-Ai/actions/runs/39145793889). iOS dùng picker ScreenCaptureKit để xin quyền cả màn hình mỗi phiên; OCR nhận pixel buffer trong RAM khi được phép và chỉ phân tích khung `.complete` từ đúng phiên đang hoạt động. Linh không tự mở Soul Knight Prequel, không đọc tiến trình, không đụng bộ nhớ game hoặc điều khiển thao tác. Không gọi AI máy chủ.
+
+**Chưa thể chơi với Linh ngay**: bản iOS chưa được ký và cài trên iPhone, chưa xác nhận stream chạy nền trên thiết bị thật và chưa xác minh quy định ChillyRoom cho trợ lý gợi ý trong trận. Trên iPhone, không cam kết bong bóng nổi tự do; hiện chỉ đề nghị iOS hiện thông báo ngắn khi được cấp quyền. Bản Web không xem được game khác.
+
+Cấu hình thử nghiệm: [ios/LinhCompanion](ios/LinhCompanion/README.md). **Không có dịch vụ hay runner trả phí**; ứng dụng được build bằng standard runner của repo công khai.
+
 # Linh 0.7 — Một nhân vật, không cần nhập liệu
 
 ## Linh 0.7.1 — Chỉ hiện điều đáng chú ý
@@ -6,7 +14,7 @@
 
 Trên ứng dụng Linh native khi đang được mở, thẻ ngắn ở dưới nhân vật xuất hiện tạm thời, không có cửa sổ cài đặt hay hộp thoại. Khi chuyển sang game, hệ thống iOS **có thể hiển thị một thông báo ngắn** nếu người dùng đã cấp quyền và ứng dụng vẫn được phép xử lý stream nền. Bản prototype này **không có bong bóng nổi cố định trên game**, không cam kết thông báo luôn hiển thị. Không bật giọng nói tự động.
 
-Các phần trên đã được thêm vào mã Swift và có kiểm thử engine, **chưa phải một ứng dụng iOS được biên dịch bằng Xcode và chạy thành công trên iPhone thật**. Không dùng dịch vụ AI trả phí.
+Các phần trên đã được thêm vào mã Swift, bộ thử engine và đã biên dịch bằng Xcode 27; **chưa xác nhận hoạt động trên iPhone thật**. Không dùng dịch vụ AI trả phí.
 
 
 **Hướng đã chốt với Bệ hạ:** Linh quan sát khi được cấp quyền, đọc chữ trong game, tính toán, thắc mắc và đề xuất. Người chơi không phải xem bảng chỉ số, nhập văn bản hoặc đọc mô tả chức năng. UI mặc định **chỉ có Linh**, không nút tính toán, không menu, không thanh điều hướng.
@@ -17,7 +25,7 @@ Các phần trên đã được thêm vào mã Swift và có kiểm thử engine
 | --- | --- |
 | Trang đầu Web chỉ có nhân vật Linh | Đã code, kiểm thử tĩnh và CI |
 | Bộ tính/OCR/trí nhớ Web 0.6.1 cũ | Được bảo toàn tại `legacy-dashboard.html`, không xuất hiện trên trang đầu; vẫn dùng chung localStorage |
-| Theo dõi một phiên game trên iPhone | **Chưa chạy được**: đã thêm mã Swift prototype trong `ios/LinhCompanion/`, chưa biên dịch Xcode/kiểm thử iPhone thật |
+| Theo dõi một phiên game trên iPhone | **Build iOS 27 đã thành công**; chưa ký/cài/kiểm thử chia sẻ toàn màn hình trên iPhone thật |
 | Tự nhận khung hình từ game khác | **Chưa được xác nhận**; cần iOS 27 + iPhone thật + quyền chia sẻ toàn màn hình qua bộ chọn của hệ thống |
 | Đọc chữ từ live frame | Có mã Vision OCR dùng pixel buffer, chưa được xác minh trên thiết bị |
 | Tự tính toán/học hỏi khi quan sát | Bản native thử nghiệm chỉ có quy tắc nhận diện từ khóa và so sai lệch 2 phép đo. **Chưa nối engine combo/trí nhớ Web** |

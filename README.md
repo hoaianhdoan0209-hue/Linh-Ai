@@ -1,4 +1,35 @@
-# Linh AI · Web 0.5 beta (iPhone / Safari)
+# Linh AI · Web 0.6 beta (iPhone / Safari)
+
+## Nâng cấp 0.6: AI tạo sinh tùy chọn, phải xin phép
+
+- Bộ não 0.5 vẫn dùng ngoại tuyến, không bắt buộc có dịch vụ AI.
+- 0.6 có phần **Trò chuyện bằng mô hình AI** bên trong khung tư vấn. Muốn dùng cần cổng HTTPS riêng và mã truy cập.
+- **Mặc định không gửi dữ liệu**. Bệ hạ bấm **Xem dữ liệu sắp gửi**, kiểm tra chính xác nội dung, rồi **Xác nhận và hỏi AI** cho từng câu hỏi.
+- Mặc định gói gửi chỉ chứa câu hỏi và tên game; chỉ số, hiệu ứng, OCR đã xác nhận và giả thuyết đều ở trạng thái không chia sẻ.
+- Không gửi hình ảnh gốc, toàn bộ OCR, chat cũ hoặc OCR bị đánh dấu sai. Chuyển game thì hủy phiên hỏi.
+- AI có thể đoán sai; mọi gợi ý đều là tham khảo và không được tự lưu vào trí nhớ đã xác minh.
+- Mã nguồn cổng bảo vệ API key trong thư mục `gateway/`. **Cổng AI chưa được triển khai và không có khóa AI nào được gắn sẵn.** Vì vậy chế độ tạo sinh chưa hoạt động ngay nếu không cấu hình máy chủ.
+- Có thể dùng Railway để host gateway, nhưng hosting/API có thể phát sinh phí. Không tạo dịch vụ trả phí nếu chưa có sự đồng ý riêng.
+- Truy vấn gửi tới nhà cung cấp AI chịu chính sách riêng tư của dịch vụ đó; không gửi dữ liệu cá nhân hoặc thông tin nhạy cảm khi chưa hiểu chính sách.
+- Việc quan sát màn hình game liên tục vẫn cần app iOS native; bản PWA không có quyền đó.
+
+Xem [hướng dẫn cổng riêng](gateway/README.md).
+
+## Kiểm thử 0.6
+
+```sh
+node test-site.mjs
+node test-vision.cjs
+node test-learning.cjs
+node test-assistant.cjs
+node test-cloud.cjs
+node test-gateway.mjs
+```
+
+---
+
+
+## Lịch sử · Linh Web 0.5
 
 ## Linh 0.5 — Trò chuyện và lập kế hoạch thử nghiệm ngoại tuyến
 

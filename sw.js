@@ -1,5 +1,5 @@
 // Linh Web 0.3: cache same-origin static assets only, never private screenshots.
-const CACHE='linh-site-0.3.0';
+const CACHE='linh-site-0.4.0';
 const ASSETS=['./','./index.html','./vision-engine.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',ev=>{ev.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',ev=>{ev.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('linh-site-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});

@@ -29,11 +29,12 @@ jobs:
           node test-site.mjs
           node test-vision.cjs
           node test-learning.cjs
+          node test-assistant.cjs
       - name: Chuẩn bị PWA và OCR cùng nguồn
         run: |
           set -euo pipefail
           mkdir -p dist/ocr/lang
-          cp index.html vision-engine.js sw.js manifest.webmanifest icon.svg dist/
+          cp index.html vision-engine.js assistant-engine.js assistant-ui.js sw.js manifest.webmanifest icon.svg dist/
           touch dist/.nojekyll
           npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund tesseract.js@5.1.1 tesseract.js-core@5.1.1
           cp node_modules/tesseract.js/dist/tesseract.min.js dist/ocr/

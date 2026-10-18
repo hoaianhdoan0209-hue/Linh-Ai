@@ -76,6 +76,12 @@ struct CheckLinhInsights {
         let restored = GameEvidenceLedger(defaults: defaults, key: key)
         verify(restored.snapshot.topics["burn-armor"] == 1, "Restores known gameplay topics")
         verify(restored.snapshot.comparisons == 1, "Restores comparison count")
+        let returning = GameReasoner(ledger: restored)
+        _ = returning.inspect("Thiêu đốt và xuyên giáp", at: t.addingTimeInterval(400))
+        let followup = returning.inspect("Thiêu đốt và xuyên giáp", at: t.addingTimeInterval(403))
+        verify(followup?.body.contains("Đã gặp") == true,
+               "Persistent evidence should change a repeated question into a follow-up")
+
         let serialized = String(data: stored!, encoding: .utf8) ?? ""
         verify(!serialized.contains("Thiêu") && !serialized.contains("Damage:"),
                "Never persist raw OCR text")

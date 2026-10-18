@@ -58,7 +58,7 @@
     target.scrollTop=target.scrollHeight;
   }
   function submit(raw){const q=String(raw||'').trim().slice(0,500);if(!q){B.notify('Bệ hạ chưa hỏi gì ạ.');return;}
-    const g=current(),s=session();const vision=B.visionGameId()===g.id?B.vision():null;
+    const original=current(),g={...original,slots:Number(byId('slots')?.value)||3},s=session();const vision=B.visionGameId()===g.id?B.vision():null;
     let result;try{result=A.analyze(q,g,vision,M,s.state);}catch(_e){B.notify('Không tính được câu trả lời này.');return;}
     s.turns.push({role:'user',text:q},{role:'linh',data:result});s.turns=s.turns.slice(-18);s.state=result.state;byId('chatPrompt').value='';render();talk(result.reply);
   }

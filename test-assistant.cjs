@@ -20,6 +20,7 @@ const wrong={...base,learning:{items:[{status:'rejected',tags:['burn']},{status:
 r=A.analyze('Cơ chế burn và poison?',wrong,null,fakeMath);
 assert.ok(!r.reply.includes('thiêu đốt, độc'),'rejected item is not evidence');
 assert.match(r.evidence.join(' '),/1 quan sát OCR đã được xác nhận/);
+r=A.analyze('đánh boss lâu',base,null,fakeMath,{focus:'combo'});assert.match(r.reply,/boss đánh lâu/);
 r=A.analyze('Đúng',base,null,fakeMath,{focus:'combo'});assert.match(r.reply,/phối combo/);
 assert.doesNotMatch(JSON.stringify(A.analyze('X',base,null,fakeMath)),/api_key|Bearer /i);
 console.log('PASS: intent, combo math, experiment plan, image context, memory separation, correction');

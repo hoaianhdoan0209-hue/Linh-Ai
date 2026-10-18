@@ -91,7 +91,16 @@
       }else {lines.push('Trong phiên này Bệ hạ chưa chọn ảnh game để Linh đọc.');next.push('Bệ hạ có thể chọn một ảnh bảng kỹ năng hoặc trang bị không?');}
     }else{
       const lastFocus=previous?.focus;
-      if(/^(có|đúng|được|ừ|ok|oke)\s*[.!?]*$/i.test(q)&&lastFocus){
+      if(lastFocus==='combo'&&/boss|farm|bùng nổ|dài|sustain/.test(l)){
+        if(/boss|dài|sustain/.test(l)){
+          lines.push('Với boss đánh lâu, thần ưu tiên sát thương duy trì, thời gian hiệu ứng và nhịp hồi chiêu. Công cụ hiện tại mới tính sát thương mỗi đòn nên chưa kết luận combo nào có DPS cao nhất.');
+          next.push('Bệ hạ cho Linh xem thời lượng buff và hồi chiêu của hai kỹ năng được không?');
+        }else{
+          lines.push('Với farm, hiệu quả còn phụ thuộc số mục tiêu, diện rộng và tốc độ dọn quái. Mô hình sát thương một mục tiêu chưa đủ để xếp hạng chính xác.');
+          next.push('Kỹ năng đang gây sát thương một mục tiêu hay diện rộng?');
+        }
+        unknown.push('Chưa có phép đo thời gian hạ mục tiêu hay số mục tiêu trúng đòn.');
+      }else if(/^(có|đúng|được|ừ|ok|oke)\s*[.!?]*$/i.test(q)&&lastFocus){
         lines.push('Thần hiểu, ta tiếp tục chủ đề '+({combo:'phối combo',mechanics:'cơ chế hiệu ứng',test:'kiểm chứng',damage:'sát thương'}[lastFocus]||'phân tích')+'.');
         next.push(lastFocus==='combo'?'Bệ hạ đang ưu tiên đánh boss hay farm?':'Bệ hạ muốn Linh kiểm tra tình huống tiếp theo qua ảnh không?');
       }else if(/^(không|sai|chưa|không đúng)\s*[.!?]*$/i.test(q)&&lastFocus){

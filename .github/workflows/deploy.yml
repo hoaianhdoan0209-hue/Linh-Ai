@@ -1,0 +1,49 @@
+name: Kiểm thử và xuất bản Linh Web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lấy mã nguồn
+        uses: actions/checkout@v4
+      - name: Kiểm tra Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Kiểm thử giao diện và PWA
+        run: node test-site.mjs
+      - name: Cấu hình GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Tạo bản phát hành
+        run: |
+          mkdir -p dist
+          cp index.html sw.js manifest.webmanifest icon.svg dist/
+          touch dist/.nojekyll
+      - name: Đóng gói để triển khai
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: test-and-package
+    steps:
+      - name: Xuất bản
+        id: publish
+        uses: actions/deploy-pages@v4

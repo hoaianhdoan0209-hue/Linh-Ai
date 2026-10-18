@@ -67,6 +67,7 @@ final class LinhCoordinator: ObservableObject {
 
     func refreshFromReplayKit() {
         guard usesReplayKit else { return }
+        state = LinhSharedStore.isBroadcastActive() ? .observing : .idle
         if let insight = LinhSharedStore.recent() {
             latestInsight = insight
             expireTask?.cancel()

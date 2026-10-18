@@ -1,3 +1,15 @@
+# Linh 0.9 — Một ứng dụng iPhone tự đổi theo phiên bản iOS
+
+**Thiết kế hiện tại: không cần hai bản cài.** Cùng một app `LinhCompanion` có mức hỗ trợ iOS 18.0, tự chọn **ReplayKit Broadcast Extension trên iOS 18–26** và **ScreenCaptureKit trên iOS 27+**. Cùng sử dụng Vision OCR, bộ suy luận và trí nhớ tổng hợp cục bộ. Trên iOS 18, người chơi nhấn nút chia sẻ chính thức nằm trên nhân vật Linh; trên iOS 27, chạm Linh để mở bộ chọn của iOS. Không có menu chọn phiên bản.
+
+Mã biên dịch bằng Xcode 27 **không có nghĩa đã được cài/kiểm chứng trên iPhone**. App chưa ký, chưa thử chia sẻ game thật ở nền, không bảo đảm hiển thị thông báo trên Soul Knight Prequel, và không có bong bóng tương tác nổi trên game. Nhà phát hành game chưa xác nhận cho phép trợ lý gợi ý trực tiếp. Không can thiệp dữ liệu/trình chạy game, không dịch vụ AI trả phí.
+
+Để xem trạng thái kỹ thuật và cách ký App Group cho host/extension: [ios/LinhCompanion/README.md](ios/LinhCompanion/README.md).
+
+---
+
+## Lịch sử các bản trước
+
 ## 0.7.2 — Chia sẻ màn hình như Discord, xử lý cục bộ
 
 **Đã build thành công trên GitHub Actions với Xcode 27**: [Linh iPhone build](https://github.com/hoaianhdoan0209-hue/Linh-Ai/actions/runs/39145793889). iOS dùng picker ScreenCaptureKit để xin quyền cả màn hình mỗi phiên; OCR nhận pixel buffer trong RAM khi được phép và chỉ phân tích khung `.complete` từ đúng phiên đang hoạt động. Linh không tự mở Soul Knight Prequel, không đọc tiến trình, không đụng bộ nhớ game hoặc điều khiển thao tác. Không gọi AI máy chủ.

@@ -5,6 +5,7 @@ const face=read('./ios/LinhCompanion/Sources/LinhApp.swift');
 const session=read('./ios/LinhCompanion/Sources/LinhSession.swift');
 const math=read('./ios/LinhCompanion/Sources/GameReasoner.swift');
 const insight=read('./ios/LinhCompanion/Sources/GameInsight.swift');
+const evidence=read('./ios/LinhCompanion/Sources/GameEvidenceLedger.swift');
 const tests=read('./ios/LinhCompanion/Tests/InsightTests.swift');
 const plist=read('./ios/LinhCompanion/Sources/Info.plist');
 const project=read('./ios/LinhCompanion/project.yml');
@@ -25,6 +26,14 @@ for(const key of ['currentStream === stream','currentGeneration','generation inc
 }
 assert.ok(!session.includes('URLSession')&&!session.includes('GEMINI_API_KEY'),
           'No network/AI service in local native prototype');
+assert.ok(evidence.includes('GameEvidenceSnapshot') && evidence.includes('UserDefaults'),
+          'Must persist minimal evidence on device');
+assert.ok(!evidence.includes('screenshotData')&&!evidence.includes('rawOCR'),
+          'Never archive screenshot or OCR text');
+assert.ok(math.includes('candidateDamage') && math.includes('damageHits >= 2'),
+          'Require stable damage across frames');
+assert.ok(math.includes('topicHits >= 2'),
+          'Require stable mechanic signals across frames');
 assert.ok(math.includes('lastDamage')&&math.includes('inspect('),
           'Missing numeric experiment observations');
 for(const token of ['case suggestion','case calculation','case question',

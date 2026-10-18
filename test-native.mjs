@@ -40,7 +40,7 @@ assert.ok(project.includes('NSExtensionPointIdentifier: com.apple.broadcast-serv
           'XcodeGen generates Info.plist: extension point must be in project.yml');
 assert.ok(project.includes('UIBackgroundModes: [screen-capture]'),
           'XcodeGen must preserve system capture background mode');
-assert.ok((project.match(/com\\.apple\\.security\\.application-groups:/g)||[]).length === 2,
+assert.ok((project.split('com.apple.security.application-groups:').length - 1) === 2,
           'App Group must be declared for BOTH signed targets in XcodeGen');
 assert.ok(broadcast.includes('guard LinhSharedStore.hasSharedContainer') &&
           shared.includes('containerURL('),

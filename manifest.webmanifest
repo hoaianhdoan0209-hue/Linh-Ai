@@ -1,0 +1,20 @@
+{
+  "name": "Linh — Trợ lý chiến thuật đa game",
+  "short_name": "Linh",
+  "description": "Bong bóng phân tích chỉ số, combo và lưu kiến thức riêng từng game",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070b18",
+  "theme_color": "#070b18",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

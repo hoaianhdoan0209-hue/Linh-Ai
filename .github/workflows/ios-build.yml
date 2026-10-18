@@ -1,0 +1,44 @@
+name: Linh iOS 27 — Build miễn phí
+on:
+  push:
+    paths:
+      - 'ios/LinhCompanion/**'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-native:
+    name: Build ứng dụng Linh bằng Xcode 27
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Kiểm tra bộ SDK Apple
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+      - name: Tạo project Xcode (XcodeGen)
+        run: |
+          if ! command -v xcodegen >/dev/null; then brew install xcodegen; fi
+          cd ios/LinhCompanion
+          xcodegen generate
+      - name: Biên dịch iPhone app (không ký, không phát hành)
+        run: |
+          cd ios/LinhCompanion
+          xcodebuild -project LinhCompanion.xcodeproj \
+            -scheme LinhCompanion \
+            -configuration Debug \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath /tmp/LinhBuild \
+            CODE_SIGNING_ALLOWED=NO build
+      - name: Kiểm thử bộ tính cục bộ
+        run: |
+          swiftc ios/LinhCompanion/Sources/GameInsight.swift \
+            ios/LinhCompanion/Sources/GameReasoner.swift \
+            ios/LinhCompanion/Tests/InsightTests.swift \
+            -o /tmp/LinhInsightTests
+          /tmp/LinhInsightTests

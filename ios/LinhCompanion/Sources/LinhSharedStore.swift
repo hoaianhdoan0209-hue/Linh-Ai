@@ -4,6 +4,7 @@ import Foundation
 enum LinhSharedStore {
     static let groupID = "group.ai.linh.companion"
     static let eventKey = "linh-native-latest-insight-v1"
+    static let liveKey = "linh-native-broadcast-heartbeat-v1"
     static let sharedDefaults: UserDefaults = UserDefaults(suiteName: groupID) ?? .standard
 
     static func publish(_ insight: GameInsight, at now: Date = Date(),
@@ -27,7 +28,25 @@ enum LinhSharedStore {
         return GameInsight(kind: kind, body: body, fingerprint: "recent-shared")
     }
 
+    // ReplayKit runs in another process; a heartbeat avoids treating crashed
+    // broadcasts as active forever. This is status metadata, not a screenshot.
+    static func heartbeat(at now: Date = Date(),
+                          defaults: UserDefaults = sharedDefaults) {
+        defaults.set(now.timeIntervalSince1970, forKey: liveKey)
+    }
+
+    static func isBroadcastActive(now: Date = Date(),
+                                  defaults: UserDefaults = sharedDefaults) -> Bool {
+        guard let stamp = defaults.object(forKey: liveKey) as? TimeInterval else { return false }
+        return (0...15).contains(now.timeIntervalSince1970 - stamp)
+    }
+
     static func clear(defaults: UserDefaults = sharedDefaults) {
         defaults.removeObject(forKey: eventKey)
+    }
+
+    static func stopped(defaults: UserDefaults = sharedDefaults) {
+        defaults.removeObject(forKey: liveKey)
+        clear(defaults: defaults)
     }
 }

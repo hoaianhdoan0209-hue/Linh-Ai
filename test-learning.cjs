@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict');
 const vm=require('node:vm');
 const fs=require('node:fs');
-const html=fs.readFileSync('./index.html','utf8');
+const html=fs.readFileSync('./legacy-dashboard.html','utf8');
 const block=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .map(m=>m[1]).find(s=>s.includes('Linh Learning 0.4:'));
 assert.ok(block,'Missing embedded learning engine');

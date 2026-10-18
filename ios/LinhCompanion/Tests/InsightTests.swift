@@ -108,6 +108,16 @@ struct CheckLinhInsights {
         LinhSharedStore.clear(defaults: defaults)
         verify(LinhSharedStore.recent(now: t, defaults: defaults) == nil,
                "Stopping broadcast removes last shared insight")
+        LinhSharedStore.heartbeat(at: t, defaults: defaults)
+        verify(LinhSharedStore.isBroadcastActive(now: t.addingTimeInterval(10),
+                                                 defaults: defaults),
+               "Broadcast activity should cross app/extension boundary")
+        verify(!LinhSharedStore.isBroadcastActive(now: t.addingTimeInterval(16),
+                                                  defaults: defaults),
+               "Crash without heartbeat must not remain active")
+        LinhSharedStore.stopped(defaults: defaults)
+        verify(!LinhSharedStore.isBroadcastActive(now: t, defaults: defaults),
+               "Stop broadcast clears activity")
 
         let limiter = InsightPolicy(minGap: 75, repeatGap: 300)
         let a = GameInsight(kind: .suggestion, body: "Thử từng hiệu ứng", fingerprint: "x")

@@ -40,6 +40,7 @@ jobs:
       - name: Kiểm thử bộ tính cục bộ
         run: |
           swiftc ios/LinhCompanion/Sources/GameInsight.swift \
+            ios/LinhCompanion/Sources/GameEvidenceLedger.swift \
             ios/LinhCompanion/Sources/GameReasoner.swift \
             ios/LinhCompanion/Tests/InsightTests.swift \
             -o /tmp/LinhInsightTests

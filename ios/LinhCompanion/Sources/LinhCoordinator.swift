@@ -15,15 +15,21 @@ final class LinhCoordinator: ObservableObject {
 
     private var subscriptions: Set<AnyCancellable> = []
     private var expireTask: Task<Void, Never>?
+    // Stored properties must be valid on iOS 18; instantiate the 27-only
+    // backend only inside an availability-checked method.
+    private var modernObject: AnyObject?
+
     @available(iOS 27.0, *)
-    private lazy var modern: LinhSession = {
+    private func modernSession() -> LinhSession {
+        if let current = modernObject as? LinhSession { return current }
         let capture = LinhSession()
         capture.$state.sink { [weak self] value in self?.state = value }
             .store(in: &subscriptions)
         capture.$latestInsight.sink { [weak self] value in self?.latestInsight = value }
             .store(in: &subscriptions)
+        modernObject = capture
         return capture
-    }()
+    }
 
     var usesReplayKit: Bool {
         if #available(iOS 27.0, *) { return false }
@@ -39,7 +45,7 @@ final class LinhCoordinator: ObservableObject {
 
     func handleTap() {
         if #available(iOS 27.0, *) {
-            modern.handleTap()
+            modernSession().handleTap()
         } else {
             // On iOS 18 the actual RPSystemBroadcastPickerView is placed
             // ON Linh. The system button must be tapped by the user.
@@ -49,7 +55,7 @@ final class LinhCoordinator: ObservableObject {
 
     func stop() {
         if #available(iOS 27.0, *) {
-            modern.stop()
+            modernSession().stop()
         } else {
             // ReplayKit broadcast is owned by iOS/the extension, not the host.
             // Stop it using the iOS broadcast/recording indicator.

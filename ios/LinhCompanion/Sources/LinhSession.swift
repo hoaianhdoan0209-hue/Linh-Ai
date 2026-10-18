@@ -5,10 +5,11 @@ import UserNotifications
 import Vision
 import UIKit
 
-// Prototype for iOS 27+. No cloud AI, no microphone/camera, no raw frame storage.
+// The modern capture backend exists only on iOS 27+. The host can deploy to iOS 18.
+@available(iOS 27.0, *)
 @MainActor
 final class LinhSession: NSObject, ObservableObject {
-    enum State { case idle, awaitingPermission, observing, stopping, interrupted }
+    typealias State = LinhVisualState
     @Published private(set) var state: State = .idle
     @Published private(set) var latestInsight: GameInsight?
 
@@ -128,6 +129,7 @@ final class LinhSession: NSObject, ObservableObject {
 
     // Delegate callbacks can arrive off the main thread. This adapter forwards
     // all session/UI changes onto the main actor rather than racing with SwiftUI.
+@available(iOS 27.0, *)
 final class LinhCaptureCallbacks: NSObject, SCContentSharingPickerObserver, SCStreamDelegate {
     private weak var owner: LinhSession?
 
@@ -161,6 +163,7 @@ final class LinhCaptureCallbacks: NSObject, SCContentSharingPickerObserver, SCSt
     }
 }
 
+@available(iOS 27.0, *)
 extension LinhSession {
     fileprivate func streamDidStop(_ stopped: SCStream) {
         guard stream === stopped else { return }
@@ -170,9 +173,12 @@ extension LinhSession {
 
 /// Receives pixel buffers only while iOS holds a live user-authorized stream.
 /// Performs OCR and game heuristics on the capture queue; nothing is persisted.
+@available(iOS 27.0, *)
 final class LinhFrameInterpreter: NSObject, SCStreamOutput {
     let queue = DispatchQueue(label: "ai.linh.local.vision", qos: .utility)
-    private let brain = GameReasoner()
+    private let brain = GameReasoner(ledger: GameEvidenceLedger(
+        defaults: LinhSharedStore.sharedDefaults
+    ))
     private let policy = InsightPolicy()
     private let onInsight: (Int, GameInsight) -> Void
     private var lastFrame = Date.distantPast

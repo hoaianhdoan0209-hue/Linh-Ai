@@ -5,6 +5,7 @@ on:
       - 'ios/LinhCompanion/Sources/**'
       - 'ios/LinhCompanion/Tests/**'
       - 'ios/LinhCompanion/project.yml'
+      - 'ios/LinhCompanion/BroadcastExtension/**'
       - '.github/workflows/ios-build.yml'
   workflow_dispatch:
 
@@ -37,6 +38,37 @@ jobs:
             -destination 'generic/platform=iOS' \
             -derivedDataPath /tmp/LinhBuild \
             CODE_SIGNING_ALLOWED=NO build
+      - name: Kiểm tra ứng dụng và ReplayKit Extension trong gói iOS 18+
+        run: |
+          set -euo pipefail
+          APP=/tmp/LinhBuild/Build/Products/Debug-iphoneos/LinhCompanion.app
+          EXT="$APP/PlugIns/LinhBroadcast.appex"
+          test -d "$APP"
+          test -d "$EXT"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist" | grep -Fx 'ai.linh.companion'
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$EXT/Info.plist" | grep -Fx 'ai.linh.companion.broadcast'
+          /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$EXT/Info.plist" | grep -Fx 'com.apple.broadcast-services-upload'
+          /usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$APP/Info.plist" | grep -Fx '18.0'
+          /usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$EXT/Info.plist" | grep -Fx '18.0'
+          # CI creates an unsigned binary. This is NOT an installable IPA.
+          if codesign --verify "$APP" >/dev/null 2>&1; then
+            echo "Unexpectedly signed build: publishing is not permitted"; exit 1
+          fi
+          echo "PASS: both iOS18 targets packaged, expected identifiers, UNSIGNED"
+      - name: Đóng gói bản không ký cho kiểm tra nội bộ
+        run: |
+          set -euo pipefail
+          ditto -c -k --keepParent \
+            /tmp/LinhBuild/Build/Products/Debug-iphoneos/LinhCompanion.app \
+            /tmp/LinhCompanion-ios18plus-UNSIGNED.app.zip
+          unzip -tq /tmp/LinhCompanion-ios18plus-UNSIGNED.app.zip
+      - name: Lưu bản build không ký (không cài trực tiếp được)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linh-ios18plus-UNSIGNED-app
+          path: /tmp/LinhCompanion-ios18plus-UNSIGNED.app.zip
+          if-no-files-found: error
+          retention-days: 7
       - name: Kiểm thử bộ tính cục bộ
         run: |
           swiftc ios/LinhCompanion/Sources/GameInsight.swift \

@@ -52,7 +52,7 @@ final class LinhSession: NSObject, ObservableObject {
     private func requestSession() {
         // Notifications are optional. A refusal NEVER blocks screen reading.
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { _, _ in }
-        let config = SCContentSharingPickerConfiguration()
+        var config = SCContentSharingPickerConfiguration()
         config.showsCameraControl = false
         config.showsMicrophoneControl = false
         picker.defaultConfiguration = config
@@ -75,8 +75,6 @@ final class LinhSession: NSObject, ObservableObject {
             if let previous { try? await previous.stopCapture() }
             guard self.generation == id, self.state == .awaitingPermission else { return }
             let options = SCStreamConfiguration()
-            options.minimumFrameInterval = CMTime(seconds: 2.5, preferredTimescale: 600)
-            options.queueDepth = 2
             options.capturesAudio = false
             let next = SCStream(filter: filter, configuration: options, delegate: self)
             do {

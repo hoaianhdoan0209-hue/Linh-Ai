@@ -1,4 +1,4 @@
-name: Linh iOS 27 — Build miễn phí
+name: Linh iOS 18–27 — Build miễn phí
 on:
   push:
     paths:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-native:
-    name: Build ứng dụng Linh bằng Xcode 27
+    name: Build ứng dụng Linh iOS 18–27 bằng Xcode 27
     runs-on: xcode-27
     timeout-minutes: 30
     steps:
@@ -40,6 +40,7 @@ jobs:
       - name: Kiểm thử bộ tính cục bộ
         run: |
           swiftc ios/LinhCompanion/Sources/GameInsight.swift \
+            ios/LinhCompanion/Sources/LinhSharedStore.swift \
             ios/LinhCompanion/Sources/GameEvidenceLedger.swift \
             ios/LinhCompanion/Sources/GameReasoner.swift \
             ios/LinhCompanion/Tests/InsightTests.swift \

@@ -9,7 +9,7 @@ const evidence=read('./ios/LinhCompanion/Sources/GameEvidenceLedger.swift');
 const tests=read('./ios/LinhCompanion/Tests/InsightTests.swift');
 const plist=read('./ios/LinhCompanion/Sources/Info.plist');
 const project=read('./ios/LinhCompanion/project.yml');
-for(const key of ['struct LinhFace','LinhSession','LongPressGesture','TapGesture'])
+for(const key of ['struct LinhFace','LinhCoordinator','LongPressGesture','TapGesture'])
  assert.ok(face.includes(key),'Missing native Linh-only UI marker: '+key);
 for(const bad of ['TextField(', 'Form {', 'TabView {', 'List {', 'NavigationStack'])
  assert.ok(!face.includes(bad),'Native UI must not contain '+bad);

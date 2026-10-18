@@ -54,6 +54,11 @@ jobs:
           /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$EXT/Info.plist" | grep -Fx 'com.apple.broadcast-services-upload'
           /usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$APP/Info.plist" | grep -Fx '18.0'
           /usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$EXT/Info.plist" | grep -Fx '18.0'
+          /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPrincipalClass" "$EXT/Info.plist" | grep -Fx 'LinhBroadcast.SampleHandler'
+          /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionAttributes:RPBroadcastProcessMode" "$EXT/Info.plist" | grep -Fx 'RPBroadcastProcessModeSampleBuffer'
+          # XcodeGen rewrites entitlements; check the GENERATED files as well.
+          /usr/libexec/PlistBuddy -c "Print :com.apple.security.application-groups:0" ios/LinhCompanion/Sources/Linh.entitlements | grep -Fx 'group.ai.linh.companion'
+          /usr/libexec/PlistBuddy -c "Print :com.apple.security.application-groups:0" ios/LinhCompanion/BroadcastExtension/LinhBroadcast.entitlements | grep -Fx 'group.ai.linh.companion'
           # CI creates an unsigned binary. This is NOT an installable IPA.
           if codesign --verify "$APP" >/dev/null 2>&1; then
             echo "Unexpectedly signed build: publishing is not permitted"; exit 1

@@ -1,7 +1,7 @@
 {
-  "name": "Linh — Trợ lý chiến thuật đa game",
+  "name": "Linh",
   "short_name": "Linh",
-  "description": "Bong bóng phân tích chỉ số, combo và lưu kiến thức riêng từng game",
+  "description": "Linh",
   "id": "./",
   "start_url": "./",
   "scope": "./",

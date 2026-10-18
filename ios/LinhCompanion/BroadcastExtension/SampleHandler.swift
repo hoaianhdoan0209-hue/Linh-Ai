@@ -20,23 +20,26 @@ final class SampleHandler: RPBroadcastSampleHandler {
         brain.reset()
         policy.reset()
         LinhSharedStore.clear()
+        LinhSharedStore.heartbeat()
     }
 
     override func broadcastPaused() {
         isBroadcasting = false
         brain.reset()
+        LinhSharedStore.stopped()
     }
 
     override func broadcastResumed() {
         isBroadcasting = true
         lastFrameAt = .distantPast
         brain.reset()
+        LinhSharedStore.heartbeat()
     }
 
     override func broadcastFinished() {
         isBroadcasting = false
         brain.reset()
-        LinhSharedStore.clear()
+        LinhSharedStore.stopped()
     }
 
     override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer,
@@ -48,6 +51,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
         let now = Date()
         guard now.timeIntervalSince(lastFrameAt) >= 2.5 else { return }
         lastFrameAt = now
+        LinhSharedStore.heartbeat(at: now)
 
         let textRequest = VNRecognizeTextRequest()
         textRequest.recognitionLevel = .fast

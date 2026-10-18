@@ -45,6 +45,10 @@ jobs:
           EXT="$APP/PlugIns/LinhBroadcast.appex"
           test -d "$APP"
           test -d "$EXT"
+          echo "APP INFO:"
+          plutil -p "$APP/Info.plist" | head -45
+          echo "EXTENSION INFO:"
+          plutil -p "$EXT/Info.plist" | head -80
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist" | grep -Fx 'ai.linh.companion'
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$EXT/Info.plist" | grep -Fx 'ai.linh.companion.broadcast'
           /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$EXT/Info.plist" | grep -Fx 'com.apple.broadcast-services-upload'

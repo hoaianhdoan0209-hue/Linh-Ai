@@ -2,6 +2,22 @@
 
 Trạng thái: **đã được chủ ứng dụng chọn làm mục tiêu phát triển**; **chưa triển khai tính năng chia sẻ màn hình thực tế**.
 
+## Thiết bị đã xác nhận — iPhone 14 Plus
+
+- Máy mục tiêu: **iPhone 14 Plus**. Phiên bản khi thảo luận: **iOS 18.3.1**; người dùng cân nhắc nâng lên iOS 27.0.1.
+- **Trải nghiệm đã chốt:** Nhấn **“Cho Linh đi cùng”** một lần mỗi phiên, hoàn tất picker/cấp quyền chia sẻ của hệ thống, chuyển vào game, Linh quan sát + suy luận + ghi nhớ (nếu đã cho phép) và tự ngừng ngay khi người dùng dừng phiên.
+- iPhone 14 Plus **nằm trong danh sách hỗ trợ iOS 27**. Ưu tiên xây iOS 27 native bằng **ScreenCaptureKit** (SCContentSharingPicker + SCStream + screen-capture background mode), không xây capture trong Safari PWA.
+- **iPhone 14 Plus không nằm trong nhóm hỗ trợ Apple Intelligence của Apple.** Không phụ thuộc vào Apple Foundation Model tích hợp. Ưu tiên Vision OCR + engine chỉ số offline; AI lập giả thuyết/giải thích có thể dùng mô hình nhỏ chạy trên máy nếu đo hiệu năng đạt, hoặc dịch vụ online **chỉ theo opt-in riêng**.
+- Nếu người dùng giữ iOS 18.3.1, nhánh tương thích cần thử **ReplayKit Broadcast Upload Extension**; ReplayKit đã bị deprecated trong tài liệu Apple, vì vậy không bảo đảm hoạt động tới khi chạy thử.
+- **Không bắt nhập chỉ số bằng tay**: AI đọc từ hình ảnh được chia sẻ, tự hỏi để làm rõ khi hình ảnh không đủ thông tin. Không coi phỏng đoán là công thức đã kiểm chứng.
+- Nhân vật không thể là overlay tương tác trên màn hình của game khác. Khi đang chơi, cần định nghĩa cách giao tiếp thật (ví dụ thông báo/âm thanh có phép) và thử trên thiết bị. Không cam kết tự phát lời nói xuyên app khi chưa kiểm thử.
+- **Không có bản native chạy được trên iPhone tại thời điểm ghi chú này.** Việc commit đặc tả không đồng nghĩa tính năng đã phát hành.
+
+Nguồn Apple:
+- https://support.apple.com/vi-vn/guide/iphone/iphe3fa5df43/27/ios/27
+- https://developer.apple.com/documentation/screencapturekit/capturing-screen-content-on-ios
+- https://support.apple.com/vi-vn/guide/iphone/iphc28624b81/27/ios/27
+
 ## Hành vi bắt buộc
 
 1. Mặc định **TẮT**. Không ghi, phân tích hoặc truyền khung hình khi chưa có phiên chia sẻ do người dùng chủ động bắt đầu qua giao diện hệ thống iOS.

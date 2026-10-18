@@ -83,6 +83,39 @@ struct LinhFace: View {
                 .scaleEffect(hovering && !reduceMotion ? 1.04 : 1.0)
                 .offset(y: hovering && !reduceMotion ? -9 : 2)
                 .animation(reduceMotion ? .none : .easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: hovering)
+                .overlay(alignment: .bottom) {
+                    // An occasional concise thought, not a transcript or an interface menu.
+                    if let insight = session.latestInsight {
+                        VStack(spacing: 3) {
+                            Text(insight.kind.rawValue.uppercased())
+                                .font(.system(size: 10, weight: .bold))
+                                .tracking(1)
+                                .foregroundStyle(Color(red: 0.51, green: 0.90, blue: 1))
+                            Text(insight.body)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+                                .lineLimit(3)
+                        }
+                        .padding(.horizontal, 15)
+                        .padding(.vertical, 11)
+                        .frame(maxWidth: 308)
+                        .background(
+                            RoundedRectangle(cornerRadius: 18)
+                                .fill(Color(red: 0.05, green: 0.12, blue: 0.24).opacity(0.96))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(Color(red: 0.40, green: 0.68, blue: 0.88).opacity(0.6))
+                        )
+                        .shadow(color: .black.opacity(0.25), radius: 14, y: 7)
+                        .offset(y: 103)
+                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                        .accessibilityAddTraits(.updatesFrequently)
+                        .allowsHitTesting(false)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.2), value: session.latestInsight)
                 .contentShape(Circle())
                 .gesture(
                     LongPressGesture(minimumDuration: 0.85)

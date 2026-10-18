@@ -13,6 +13,7 @@ final class LinhSession: NSObject, ObservableObject {
     @Published private(set) var latestInsight: GameInsight?
 
     private let picker = SCContentSharingPicker.shared
+    private lazy var callbacks = LinhCaptureCallbacks(owner: self)
     private var stream: SCStream?
     private var subscribed = false
     private var generation = 0
@@ -38,7 +39,7 @@ final class LinhSession: NSObject, ObservableObject {
         latestInsight = nil
         picker.isActive = false
         if subscribed {
-            picker.remove(self)
+            picker.remove(callbacks)
             subscribed = false
         }
         let old = stream
@@ -57,7 +58,7 @@ final class LinhSession: NSObject, ObservableObject {
         config.showsMicrophoneControl = false
         picker.defaultConfiguration = config
         if !subscribed {
-            picker.add(self)
+            picker.add(callbacks)
             subscribed = true
         }
         state = .awaitingPermission
@@ -65,7 +66,7 @@ final class LinhSession: NSObject, ObservableObject {
         picker.present() // System consent is required for EVERY sharing session.
     }
 
-    private func begin(with filter: SCContentFilter) {
+    fileprivate func begin(with filter: SCContentFilter) {
         generation += 1
         let id = generation
         let previous = stream
@@ -76,7 +77,7 @@ final class LinhSession: NSObject, ObservableObject {
             guard self.generation == id, self.state == .awaitingPermission else { return }
             let options = SCStreamConfiguration()
             options.capturesAudio = false
-            let next = SCStream(filter: filter, configuration: options, delegate: self)
+            let next = SCStream(filter: filter, configuration: options, delegate: callbacks)
             // Match captured frames to exactly this system-authorized stream.
             interpreter.bind(stream: next, generation: id)
             do {
@@ -125,25 +126,44 @@ final class LinhSession: NSObject, ObservableObject {
     }
 }
 
-extension LinhSession: SCContentSharingPickerObserver {
+    // Delegate callbacks can arrive off the main thread. This adapter forwards
+    // all session/UI changes onto the main actor rather than racing with SwiftUI.
+final class LinhCaptureCallbacks: NSObject, SCContentSharingPickerObserver, SCStreamDelegate {
+    private weak var owner: LinhSession?
+
+    init(owner: LinhSession) {
+        self.owner = owner
+    }
+
     func contentSharingPicker(_ picker: SCContentSharingPicker,
                               didUpdateWith filter: SCContentFilter,
                               for stream: SCStream?) {
-        begin(with: filter)
+        Task { @MainActor [weak self] in self?.owner?.begin(with: filter) }
     }
 
-    func contentSharingPicker(_ picker: SCContentSharingPicker, didCancelFor stream: SCStream?) {
-        if state == .awaitingPermission { stop() }
+    func contentSharingPicker(_ picker: SCContentSharingPicker,
+                              didCancelFor stream: SCStream?) {
+        Task { @MainActor [weak self] in
+            guard let owner = self?.owner, owner.state == .awaitingPermission else { return }
+            owner.stop()
+        }
     }
 
     func contentSharingPickerStartDidFailWithError(_ error: Error) {
-        if state == .awaitingPermission { stop() }
+        Task { @MainActor [weak self] in
+            guard let owner = self?.owner, owner.state == .awaitingPermission else { return }
+            owner.stop()
+        }
+    }
+
+    func stream(_ stream: SCStream, didStopWithError error: Error) {
+        Task { @MainActor [weak self] in self?.owner?.streamDidStop(stream) }
     }
 }
 
-extension LinhSession: SCStreamDelegate {
-    func stream(_ stream: SCStream, didStopWithError error: Error) {
-        guard self.stream === stream else { return }
+extension LinhSession {
+    fileprivate func streamDidStop(_ stopped: SCStream) {
+        guard stream === stopped else { return }
         stop()
     }
 }

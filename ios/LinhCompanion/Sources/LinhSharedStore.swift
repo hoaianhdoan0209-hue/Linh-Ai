@@ -5,6 +5,17 @@ enum LinhSharedStore {
     static let groupID = "group.ai.linh.companion"
     static let eventKey = "linh-native-latest-insight-v1"
     static let liveKey = "linh-native-broadcast-heartbeat-v1"
+    // The CLI unit tests run without iOS entitlements. On real iPhone builds,
+    // never treat a local defaults fallback as a working cross-process App Group.
+    static var hasSharedContainer: Bool {
+        #if os(iOS)
+        return FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: groupID
+        ) != nil && UserDefaults(suiteName: groupID) != nil
+        #else
+        return UserDefaults(suiteName: groupID) != nil
+        #endif
+    }
     static let sharedDefaults: UserDefaults = UserDefaults(suiteName: groupID) ?? .standard
 
     static func publish(_ insight: GameInsight, at now: Date = Date(),

@@ -1,75 +1,41 @@
-# Trạng thái thử nghiệm — ScreenCaptureKit (18/10/2026)
+# Linh 0.9 — một app tự thích nghi iOS 18–27
 
-## Linh 0.8 — Học qua nhiều phiên, không lưu ảnh
+**Trạng thái:** Mã nguồn đã có cả hai nhánh screen-sharing, thử biên dịch không ký bằng Xcode 27 trên GitHub Actions. **Chưa cài lên iPhone thật / chưa xác minh lấy màn hình Soul Knight Prequel ở nền.** Không có .ipa ký sẵn, không có nút nổi xuyên ứng dụng.
 
-Bản iOS 27 **giữ nguyên ScreenCaptureKit** và yêu cầu Bệ hạ tự chấp thuận màn hình qua bảng chia sẻ iOS. Không xây bản iOS 18. Không đọc bộ nhớ game, không bấm/đánh hộ, không dùng AI trả phí.
+## Hoạt động tự động
 
-Mã nguồn vừa thêm:
-- `GameReasoner` đợi **hai khung OCR ổn định liên tiếp** trước khi tạo gợi ý hoặc so chênh lệch sát thương; so sánh số liệu không được coi là kết luận về nguyên nhân.
-- `GameEvidenceLedger` lưu `UserDefaults` trên thiết bị, **chỉ số lần gặp nhóm hiệu ứng và số phép so sánh** cho hồ sơ Soul Knight Prequel. Không lưu hình ảnh, video, chuỗi OCR, tên nhân vật hoặc tin nhắn. Gỡ ứng dụng/xóa dữ liệu ứng dụng sẽ xóa trí nhớ này.
-- Gặp lại một nhóm hiệu ứng ở phiên sau, Linh ưu tiên câu hỏi/đề xuất phép thử tiếp theo thay vì lặp lại câu hỏi đầu.
-- Nhận diện bước đầu các nhãn game như `Fatebound`, chí mạng, xuyên giáp, thiêu đốt, cộng dồn và hồi chiêu. **Không tự coi những nhãn đó là công thức sát thương đã được xác minh**.
-- Bộ lọc thông báo cũ giữ nguyên: chỉ Gợi ý/Tính toán/Câu hỏi, tối đa 96 ký tự và chống làm phiền.
+- **iOS 18–26:** Một app Linh với nút chia sẻ chính thức **ReplayKit** đặt trên nhân vật. Khi người dùng nhấn nút và chấp thuận trong giao diện iOS, **LinhBroadcast** (Broadcast Upload Extension) nhận luồng toàn màn hình. Mã OCR và GameReasoner chạy ngay trong extension (không upload video). Để dừng, dùng biểu tượng/bảng phát sóng của iOS. Host không có quyền dừng ReplayKit từ nút tùy ý trong game.
+- **iOS 27+:** App tự dùng **ScreenCaptureKit** và bộ chọn hệ thống. Không chạy extension ReplayKit, không cần chọn phiên bản trong giao diện. Giữ Linh trong app để dừng.
+- **Dùng chung:** Vision OCR, GameReasoner, InsightPolicy, bộ nhớ tổng hợp GameEvidenceLedger, ba dạng Gợi ý / Tính toán / Câu hỏi, không bảng nhập liệu hay chức năng trả phí.
+- **Thông tin nhỏ gọn:** Chỉ hiện tin quan trọng tối đa 96 ký tự, hạn chế thông báo. ReplayKit gửi thông báo cục bộ khi hệ thống cho phép và chia sẻ insight ngắn qua App Group; không thể tự bảo đảm tin nổi ngay trên game hay có bong bóng PiP.
+- **Dữ liệu:** Chỉ giữ thống kê nhóm hiệu ứng và chênh lệch tổng hợp trong UserDefaults App Group. Không ghi hình, không lưu văn bản OCR, không dùng AI trên mạng. Việc xem đúng trò chơi dựa vào các tín hiệu OCR, **không xác thực tuyệt đối** đó là Soul Knight Prequel.
 
-**Giới hạn còn lại:** chưa ký/cài thử trên iPhone 14 Plus chạy iOS 27; chưa kiểm chứng OCR khi game ở tiền cảnh và Linh ở nền; chưa có bong bóng tương tác nổi tự do trong game. Chỉ có thể đề nghị iOS hiển thị thông báo ngắn, nếu được hệ thống cho phép. Cơ chế chống gian lận Soul Knight Prequel vẫn cần tôn trọng; đây không phải lời khẳng định trợ lý gợi ý trực tiếp đã được ChillyRoom chấp thuận.
+## Project và cài đặt thử
 
+Dùng Xcode có iOS SDK 27 và XcodeGen:
 
-- [x] Swift app biên dịch Xcode 27 (GitHub Actions, không ký).
-- [x] Giới hạn OCR nhận khung hình trạng thái `.complete`, bỏ qua màn hình trống, khung tạm dừng.
-- [x] Chỉ nhận phân tích khung hình đúng phiên chia sẻ hiện tại; dừng thì hủy phiên.
-- [x] Phân tích hoàn toàn trên máy, không gửi hình ảnh, không sửa hay điều khiển game.
-- [x] Chỉ gợi ý ngắn / so sánh số / câu hỏi, không nói liên tục, có chống spam.
-- [ ] Cài trực tiếp lên iPhone bằng chữ ký Apple, thử picker và nhận khung hình game khi app chạy nền.
-- [ ] Kiểm tra thông báo có hiện trên Soul Knight Prequel khi iOS cho phép.
-- [ ] Nghiên cứu chính sách nhà phát hành đối với **gợi ý tự động trong khi chơi** (việc chia sẻ hình ảnh không chứng minh mọi loại trợ giúp đều được phép).
-- [x] Bộ nhớ cục bộ chỉ lưu thống kê suy luận tổng hợp cho hồ sơ Soul Knight Prequel; OCR nguyên văn chỉ tồn tại tạm thời trong RAM.
+```sh
+cd ios/LinhCompanion
+xcodegen generate
+open LinhCompanion.xcodeproj
+```
 
-Xem [build Xcode thành công](https://github.com/hoaianhdoan0209-hue/Linh-Ai/actions/runs/39145793889).
+Trong Xcode, hai target `LinhCompanion` và `LinhBroadcast` cần được **ký bởi cùng một Apple Development Team** và cài đúng **App Groups** entitlement (`group.ai.linh.companion`). Bundle ID và group ID cần đổi nếu không sở hữu namespace đó. XcodeGen hiện chỉ tạo project và build **không ký** trên CI. Việc dùng App Groups có thể phụ thuộc loại tài khoản Apple/cấu hình provisioning, và có thể không được Personal Team miễn phí hỗ trợ; không giả định phát hành/cài đặt miễn phí nếu chưa xác minh. Không lưu mật khẩu/chứng chỉ trong repository.
 
-# Linh iPhone — Swift native prototype (iOS 27+)
+Kiểm thử phải thực hiện trên iPhone thật: thử start/stop/pause ReplayKit iOS 18, thông báo khi app đã vào nền, OCR lúc game chạy, sức nóng/pin, App Group giữa extension và app, rồi thử riêng picker ScreenCaptureKit iOS 27. **Không tự điều khiển, sửa file, quét bộ nhớ hay chạy plugin vào Soul Knight Prequel.** ChillyRoom chưa xác nhận gợi ý tự động trực tiếp hợp lệ; người chơi tự cân nhắc điều khoản.
 
-## Chốt giao diện gợi ý ngắn — 0.7.1
+## Giới hạn
 
-- Không có transcript hay phụ đề chạy theo lời Linh; không chủ động đọc thành tiếng giữa trận.
-- Chỉ sinh ba loại thẻ: **Gợi ý**, **Tính toán** và **Câu hỏi**.
-- Mỗi thẻ tối đa 96 ký tự, không hiện quá một thẻ một lúc. Ở màn hình Linh, thẻ tự biến mất sau khoảng 7 giây.
-- Khi ứng dụng ở nền, chỉ đề nghị iOS hiển thị thông báo chữ không có âm thanh (nếu được cấp quyền); tối thiểu 75 giây giữa các thông báo, không lặp một gợi ý trong 300 giây.
-- Kết quả số học giữa hai quan sát được ghi là **so sánh**, không tự nhận đã tìm ra nguyên nhân như buff, crit hoặc giáp.
-- Nếu iOS không cho hiển thị thông báo hoặc không giữ stream nền, **không hứa** sẽ có chữ nổi trên game. Không dùng Picture-in-Picture sai mục đích để giả overlay.
-- Mã Swift riêng có bài thử trong `Tests/InsightTests.swift` và chạy trong CI qua `swiftc`. **Kiểm thử này không thay thế việc chạy bằng Xcode trên iPhone thật.**
+- ReplayKit picker trên iOS 18 cần **nhấn đúng nút chia sẻ hệ thống trên Linh**; không thể giả thao tác nhấn nút hệ thống.
+- Ảnh chụp được từ ReplayKit/ScreenCaptureKit chỉ dùng trong RAM để OCR; iOS có thể giới hạn nội dung riêng tư/game được bảo vệ.
+- Nếu App Group chưa cấp đúng quyền, trí nhớ không thể chia sẻ giữa extension và host. 
+- Hiệu lực hiển thị local notification lúc đang mở game phụ thuộc quyền thông báo và iOS.
+- Không có bong bóng tương tác nổi đè lên ứng dụng khác; nhân vật Linh chỉ hiện bên trong app.
+- Chưa ký, cài và xác nhận hoạt động trên thiết bị thật. CI biên dịch ≠ tính năng đã chạy thực tế.
 
-
-**ĐÃ BIÊN DỊCH thành công bằng Xcode 27 trên GitHub Actions**, nhưng **CHƯA được ký, cài hoặc thử với game thật trên iPhone**. Mã iOS vẫn là bản thử nghiệm.
-
-## Đích sử dụng
-
-Màn hình chỉ có Linh. Không có ô nhập, danh sách chức năng, màn hình chỉ số hoặc PI AI. Chạm Linh để mở **bảng chia sẻ màn hình do iOS cung cấp**; khi Bệ hạ cấp quyền, Linh nhận khung hình và dùng Vision OCR trên thiết bị. Giữ Linh 0,85 giây để dừng. Trong hệ thống iOS, người dùng cũng có thể dừng chia sẻ.
-
-Linh dùng bộ quy tắc để nêu câu hỏi, so sánh **hai số sát thương OCR** và gợi ý cách kiểm chứng, không được coi đó là công thức game đã xác minh. Giới hạn mẫu 1 khung / ~2,5 giây, tránh xử lý mọi frame. Ảnh gốc và OCR đầy đủ chỉ tồn tại trong RAM, không tự lưu ảnh, không gọi HTTP hay API mô hình AI.
-
-### Điểm cần kiểm chứng trên iPhone thật
-
-- **iOS 27 trở lên.** Apple hướng dẫn sử dụng `SCContentSharingPicker`, `SCStream` và background mode `screen-capture` (xem nguồn bên dưới). Không hỗ trợ chạy app native này trực tiếp trên iOS 18.
-- Tạo project: cài Xcode tương thích SDK iOS 27 + XcodeGen (miễn phí); từ thư mục `ios/LinhCompanion` chạy `xcodegen generate` rồi mở `LinhCompanion.xcodeproj`. Cần ký để cài lên iPhone 14 Plus. **Đã biên dịch trên SDK iOS 27**, song vẫn cần kiểm thử chia sẻ màn hình, OCR trong nền và thông báo trên iPhone thật.
-- Chọn **chia sẻ toàn màn hình** trong picker hệ thống, sau đó mở game. Phải kiểm tra stream có nhận frame khi ứng dụng bị đưa xuống nền. Các ứng dụng/game có bảo vệ nội dung có thể không cho ghi hình.
-- Hình ảnh có thể chứa thông báo hoặc app khác. Mã chỉ xử lý dòng OCR chứa từ khóa game, **không kiểm chứng chắc chắn đang xem đúng trò chơi**. Không nên mở thông tin riêng tư trong một phiên chia sẻ toàn màn hình.
-- **Giọng nói khi Linh chạy nền không được cam kết**. Mã chỉ xin quyền thông báo và đề nghị iOS hiện câu gợi ý ngắn, im lặng khi app chạy nền, nếu hệ thống cho phép. Không tự đọc giọng nói. Không có bong bóng nổi trên game khác. Một số trạng thái system privacy / vòng đời background / pin có thể khiến tính năng dừng hoặc hoạt động kém.
-- Không đọc hay thu microphone, camera, Photos, danh bạ. Không tự xin micro/camera. Mã không sử dụng speech synthesis tự động, cũng không ghi âm.
-- Bộ nhớ trong prototype hiện **chỉ sống trong phiên**. Chưa nối với hồ sơ game và engine toán chi tiết của Web 0.5. Đây là việc cần làm tiếp trước khi tuyên bố trải nghiệm hoàn chỉnh.
-- Dừng ngay khi người dùng dừng session, mất quyền, hoặc iOS thông báo stream lỗi. Không vượt bảo vệ của game/hệ thống.
-
-## Cấu trúc
-
-- `Sources/LinhApp.swift`: giao diện **chỉ Linh**, không menu.
-- `Sources/LinhSession.swift`: xin quyền iOS + SCStream + OCR Vision, thông báo/giọng nói.
-- `Sources/GameReasoner.swift`: suy luận có giới hạn, tạo ba loại gợi ý ngắn từ OCR.
-- `Sources/GameInsight.swift`: giới hạn độ dài và chống làm phiền (75 giây giữa các gợi ý, 300 giây chống lặp).
-- `Sources/Info.plist`: `UIBackgroundModes: screen-capture` để iOS cho phép capture nền.
-- `project.yml`: cấu hình nguồn XcodeGen.
-
-Apple:
+Apple docs:
+- https://developer.apple.com/documentation/replaykit/rpsystembroadcastpickerview
+- https://developer.apple.com/documentation/replaykit/rpbroadcastsamplehandler
 - https://developer.apple.com/documentation/screencapturekit/capturing-screen-content-on-ios
-- https://developer.apple.com/documentation/screencapturekit
-- https://developer.apple.com/documentation/vision/vnrecognizetextrequest
+- https://developer.apple.com/documentation/xcode/configuring-app-groups
 
-**Có bản build không ký chạy qua CI, nhưng chưa có bằng chứng Linh quan sát được game trên iPhone thật.**

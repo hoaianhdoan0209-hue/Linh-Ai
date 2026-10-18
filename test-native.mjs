@@ -36,6 +36,15 @@ for(const marker of ['RPBroadcastSampleHandler','processSampleBuffer(','CMSample
 assert.ok(extInfo.includes('com.apple.broadcast-services-upload'));
 assert.ok(project.includes('LinhBroadcast')&&project.includes('embed: true'),
           'Broadcast extension must ship with host app');
+assert.ok(project.includes('NSExtensionPointIdentifier: com.apple.broadcast-services-upload'),
+          'XcodeGen generates Info.plist: extension point must be in project.yml');
+assert.ok(project.includes('UIBackgroundModes: [screen-capture]'),
+          'XcodeGen must preserve system capture background mode');
+assert.ok((project.match(/com\\.apple\\.security\\.application-groups:/g)||[]).length === 2,
+          'App Group must be declared for BOTH signed targets in XcodeGen');
+assert.ok(broadcast.includes('guard LinhSharedStore.hasSharedContainer') &&
+          shared.includes('containerURL('),
+          'ReplayKit must stop if host/extension cannot share an App Group');
 assert.ok(shared.includes('group.ai.linh.companion'),'Both iOS paths must share bounded evidence');
 for(const key of ['currentStream === stream','currentGeneration','generation incoming: Int',
                    'CMSampleBufferIsValid','CMSampleBufferGetSampleAttachmentsArray',

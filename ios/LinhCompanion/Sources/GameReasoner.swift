@@ -52,6 +52,7 @@ final class GameReasoner {
         let text = valid.joined(separator: " ")
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
             .lowercased()
+            .replacingOccurrences(of: "đ", with: "d")
         let burn = text.contains("thieu dot") || text.contains("burn")
         let armor = text.contains("xuyen giap") || text.contains("armor")
         let stack = text.contains("cong don") || text.contains("stack")

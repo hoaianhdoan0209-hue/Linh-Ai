@@ -9,11 +9,11 @@
 - Không gửi hình ảnh gốc, toàn bộ OCR, chat cũ hoặc OCR bị đánh dấu sai. Chuyển game thì hủy phiên hỏi.
 - AI có thể đoán sai; mọi gợi ý đều là tham khảo và không được tự lưu vào trí nhớ đã xác minh.
 - Mã nguồn cổng bảo vệ API key trong thư mục `gateway/`. **Cổng AI chưa được triển khai và không có khóa AI nào được gắn sẵn.** Vì vậy chế độ tạo sinh chưa hoạt động ngay nếu không cấu hình máy chủ.
-- Có thể dùng Railway để host gateway, nhưng hosting/API có thể phát sinh phí. Không tạo dịch vụ trả phí nếu chưa có sự đồng ý riêng.
+- Đã chuẩn bị cấu hình triển khai Render Free tại `render.yaml` (chỉ $0, không kích hoạt trả phí). Để không phát sinh phí, yêu cầu Render Free không thêm phương thức thanh toán và khóa Gemini thuộc dự án Free tier không bật billing. Chưa tạo service, và AI online chưa kết nối.
 - Truy vấn gửi tới nhà cung cấp AI chịu chính sách riêng tư của dịch vụ đó; không gửi dữ liệu cá nhân hoặc thông tin nhạy cảm khi chưa hiểu chính sách.
 - Việc quan sát màn hình game liên tục vẫn cần app iOS native; bản PWA không có quyền đó.
 
-Xem [hướng dẫn cổng riêng](gateway/README.md).
+Xem [hướng dẫn cổng riêng và miễn phí](gateway/README.md).
 
 ## Kiểm thử 0.6
 

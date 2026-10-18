@@ -4,6 +4,8 @@ const read=p=>readFileSync(new URL(p,import.meta.url),'utf8');
 const face=read('./ios/LinhCompanion/Sources/LinhApp.swift');
 const session=read('./ios/LinhCompanion/Sources/LinhSession.swift');
 const math=read('./ios/LinhCompanion/Sources/GameReasoner.swift');
+const insight=read('./ios/LinhCompanion/Sources/GameInsight.swift');
+const tests=read('./ios/LinhCompanion/Tests/InsightTests.swift');
 const plist=read('./ios/LinhCompanion/Sources/Info.plist');
 const project=read('./ios/LinhCompanion/project.yml');
 for(const key of ['struct LinhFace','LinhSession','LongPressGesture','TapGesture'])
@@ -20,4 +22,14 @@ assert.ok(!session.includes('URLSession')&&!session.includes('GEMINI_API_KEY'),
           'No network/AI service in local native prototype');
 assert.ok(math.includes('lastDamage')&&math.includes('inspect('),
           'Missing numeric experiment observations');
+for(const token of ['case suggestion','case calculation','case question',
+                   'minGap: TimeInterval = 75','repeatGap: TimeInterval = 300'])
+ assert.ok(insight.includes(token),'Missing concise insight restriction: '+token);
+assert.ok(session.includes('message.sound = nil')&&session.includes('policy.shouldPresent('),
+          'Alerts must be quiet and frequency limited');
+assert.ok(!session.includes('AVSpeechSynthesizer')&&!session.includes('voice.speak('),
+          'Do not speak long explanations while playing');
+assert.ok(face.includes('session.latestInsight')&&face.includes('lineLimit(3)'),
+          'Only one brief insight near Linh instead of live subtitle');
+assert.ok(tests.includes('CheckLinhInsights'),'Missing executable Swift tests');
 console.log('PASS: iOS prototype static architecture and privacy assertions (NOT an Xcode build)');

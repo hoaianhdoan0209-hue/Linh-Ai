@@ -98,6 +98,17 @@ struct CheckLinhInsights {
         verify(skp.inspect("Fatebound", at: t.addingTimeInterval(3))?.kind == .question,
                "Fatebound must be a question, not a fabricated bonus")
 
+        // App and extension must understand the same minimal alert envelope.
+        let short = GameInsight(kind: .question, body: "Fatebound cần thử gì?", fingerprint: "fb")
+        LinhSharedStore.publish(short, at: t, defaults: defaults)
+        let shared = LinhSharedStore.recent(now: t.addingTimeInterval(10), defaults: defaults)
+        verify(shared?.body == short.body, "Shared insight readable by host")
+        verify(LinhSharedStore.recent(now: t.addingTimeInterval(61), defaults: defaults) == nil,
+               "Stale shared insight expires")
+        LinhSharedStore.clear(defaults: defaults)
+        verify(LinhSharedStore.recent(now: t, defaults: defaults) == nil,
+               "Stopping broadcast removes last shared insight")
+
         let limiter = InsightPolicy(minGap: 75, repeatGap: 300)
         let a = GameInsight(kind: .suggestion, body: "Thử từng hiệu ứng", fingerprint: "x")
         let b = GameInsight(kind: .question, body: "Có cần thêm dữ kiện?", fingerprint: "y")

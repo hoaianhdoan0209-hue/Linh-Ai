@@ -1,69 +1,115 @@
 import Foundation
 
-/// Rule-based, offline analysis of transient OCR strings.
-/// The system never saves raw screenshots or OCR text, does not claim a game mechanic as fact.
+/// Offline observation. Produces ONLY hints, numeric comparisons and questions.
+/// Never copies full OCR text into UI and never infers an unproven damage formula.
 final class GameReasoner {
-    private var lastObservation = ""
     private var lastDamage: Double?
-    private var lastAnnouncement = Date.distantPast
+    private var lastRecognizedTopic = ""
+    private var damageSampleCount = 0
 
     func reset() {
-        lastObservation = ""
         lastDamage = nil
-        lastAnnouncement = .distantPast
+        lastRecognizedTopic = ""
+        damageSampleCount = 0
     }
 
-    func inspect(_ source: String) -> String? {
+    func inspect(_ source: String) -> GameInsight? {
+        // OCR can contain chat/messages from another app: do not relay general text.
         let lines = source.split(separator: "\n", omittingEmptySubsequences: true)
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { $0.count <= 110 }
-        let useful = lines.filter {
-            $0.range(of: #"(?i)chí mạng|bạo kích|crit|sát thương|damage|thiêu đốt|burn|poison|độc|xuyên giáp|armor|giáp|stack|cộng dồn|hồi chiêu|cooldown"#,
-                      options: .regularExpression) != nil
+            .filter { $0.count <= 96 }
+        let valid = lines.filter {
+            $0.range(
+                of: #"(?i)chí mạng|bạo kích|crit|sát thương|damage|thiêu đốt|burn|poison|độc|xuyên giáp|armor|giáp|stack|cộng dồn|hồi chiêu|cooldown"#,
+                options: .regularExpression
+            ) != nil
         }
-        if useful.isEmpty { return nil }
+        guard !valid.isEmpty else { return nil }
 
-        let normalized = useful.joined(separator: "|")
-            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        if normalized == lastObservation { return nil }
-        lastObservation = normalized
-
-        // Throttle voluntary speech/notifications; never interrupt on every frame.
-        guard Date().timeIntervalSince(lastAnnouncement) >= 24 else { return nil }
-
-        let text = useful.joined(separator: " ").lowercased()
-        var advice: String?
-        if text.contains("thiêu đốt") || text.contains("burn") {
-            if text.contains("xuyên giáp") || text.contains("armor") {
-                advice = "Linh thấy thiêu đốt và giáp. Chưa rõ chúng tương tác thế nào; cần so sát thương khi bật riêng và bật chung."
-            } else {
-                advice = "Linh thấy hiệu ứng thiêu đốt. Chưa rõ số tầng và thời lượng, thần sẽ quan sát tiếp."
+        // Calculate only a descriptive difference between two labeled observations.
+        // Do not claim an increase came from a specific effect.
+        if let damage = extractDamage(valid) {
+            defer {
+                lastDamage = damage
+                damageSampleCount += 1
             }
-        } else if text.contains("chí mạng") || text.contains("crit") || text.contains("bạo kích") {
-            advice = "Có chỉ số chí mạng. Thần cần thêm sát thương của đòn thường để phân biệt phần tăng thực tế."
-        } else if text.contains("cộng dồn") || text.contains("stack") {
-            advice = "Có hiệu ứng cộng dồn. Thần cần quan sát số tầng tối đa và thời gian tồn tại."
-        } else if text.contains("hồi chiêu") || text.contains("cooldown") {
-            advice = "Thần thấy hồi chiêu. Nếu có thời lượng hiệu ứng, thần sẽ so nhịp dùng kỹ năng."
-        }
-
-        // A raw game damage number can be compared with the previous one,
-        // but WITHOUT attributing changes to a buff or enemy defense.
-        if let damage = extractDamage(useful), damage > 0 {
-            if let previous = lastDamage, previous > 0,
-               damage != previous, advice == nil {
-                let delta = (damage / previous - 1) * 100
-                if abs(delta) >= 6 && abs(delta) < 1000 {
-                    let sign = delta > 0 ? "tăng" : "giảm"
-                    advice = "Hai số sát thương quan sát được đã \(sign) khoảng \(Int(abs(delta).rounded())) phần trăm. Chưa thể kết luận do buff hay mục tiêu."
+            if let previous = lastDamage, previous != damage, previous > 0 {
+                let pct = (damage / previous - 1.0) * 100.0
+                if pct.isFinite && abs(pct) >= 6 && abs(pct) <= 300 {
+                    let direction = pct > 0 ? "+" : "−"
+                    let rounded = Int(abs(pct).rounded())
+                    let before = Int(previous.rounded())
+                    let after = Int(damage.rounded())
+                    return GameInsight(
+                        kind: .calculation,
+                        body: "\(before) → \(after) (\(direction)\(rounded)%). Chưa rõ nguyên nhân.",
+                        fingerprint: "damage-\(before)-\(after)"
+                    )
                 }
             }
-            lastDamage = damage
         }
 
-        guard let result = advice else { return nil }
-        lastAnnouncement = Date()
-        return result
+        let text = valid.joined(separator: " ")
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            .lowercased()
+        let burn = text.contains("thieu dot") || text.contains("burn")
+        let armor = text.contains("xuyen giap") || text.contains("armor")
+        let stack = text.contains("cong don") || text.contains("stack")
+        let crit = text.contains("chi mang") || text.contains("bao kich") || text.contains("crit")
+        let cooldown = text.contains("hoi chieu") || text.contains("cooldown")
+        let poison = text.contains("poison") || text.contains("doc")
+
+        let topic: String
+        let suggestion: GameInsight
+        if burn && armor {
+            topic = "burn-armor"
+            suggestion = GameInsight(
+                kind: .suggestion,
+                body: "Thử riêng thiêu đốt, xuyên giáp rồi dùng chung để so sát thương.",
+                fingerprint: topic
+            )
+        } else if burn && poison {
+            topic = "burn-poison"
+            suggestion = GameInsight(
+                kind: .suggestion,
+                body: "Thử độc và thiêu đốt riêng trước khi kết hợp.",
+                fingerprint: topic
+            )
+        } else if stack {
+            topic = "stack-question"
+            suggestion = GameInsight(
+                kind: .question,
+                body: "Hiệu ứng cộng dồn tối đa mấy tầng?",
+                fingerprint: topic
+            )
+        } else if crit {
+            topic = "crit-question"
+            suggestion = GameInsight(
+                kind: .question,
+                body: "Đòn vừa thấy có chí mạng không? Cần so với đòn thường.",
+                fingerprint: topic
+            )
+        } else if cooldown {
+            topic = "cooldown-question"
+            suggestion = GameInsight(
+                kind: .question,
+                body: "Buff kéo dài bao lâu so với hồi chiêu?",
+                fingerprint: topic
+            )
+        } else if burn {
+            topic = "burn-question"
+            suggestion = GameInsight(
+                kind: .question,
+                body: "Thiêu đốt tồn tại bao lâu và cộng được mấy tầng?",
+                fingerprint: topic
+            )
+        } else {
+            return nil
+        }
+        // No fresh tip for identical OCR topic repeated across adjacent frames.
+        guard topic != lastRecognizedTopic else { return nil }
+        lastRecognizedTopic = topic
+        return suggestion
     }
 
     private func extractDamage(_ lines: [String]) -> Double? {
@@ -72,10 +118,21 @@ final class GameReasoner {
         for line in lines {
             let ns = line as NSString
             let range = NSRange(location: 0, length: ns.length)
-            guard let m = regex.firstMatch(in: line, range: range), m.numberOfRanges > 1 else { continue }
-            let raw = ns.substring(with: m.range(at: 1)).replacingOccurrences(of: ",", with: "")
-            if let n = Double(raw), n >= 1, n < 100_000_000 { return n }
+            guard let match = regex.firstMatch(in: line, range: range),
+                  match.numberOfRanges > 1 else { continue }
+            // OCR may use 1.234 or 1,234 grouping; prefer integer damage.
+            let raw = ns.substring(with: match.range(at: 1))
+            guard let number = parseDamage(raw), number >= 1, number < 100_000_000 else { continue }
+            return number
         }
         return nil
+    }
+
+    private func parseDamage(_ raw: String) -> Double? {
+        let source = raw.trimmingCharacters(in: CharacterSet(charactersIn: ".,"))
+        if source.isEmpty { return nil }
+        let normalized = source.replacingOccurrences(of: ".", with: "")
+                               .replacingOccurrences(of: ",", with: "")
+        return Double(normalized)
     }
 }

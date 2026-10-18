@@ -14,8 +14,18 @@ targets:
       - path: Sources
     info:
       path: Sources/Info.plist
+      properties:
+        CFBundleDisplayName: Linh
+        CFBundleShortVersionString: "0.9"
+        CFBundleVersion: "2"
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIBackgroundModes: [screen-capture]
     entitlements:
       path: Sources/Linh.entitlements
+      properties:
+        com.apple.security.application-groups: [group.ai.linh.companion]
     dependencies:
       - target: LinhBroadcast
         embed: true
@@ -38,8 +48,19 @@ targets:
       - path: Sources/LinhSharedStore.swift
     info:
       path: BroadcastExtension/Info.plist
+      properties:
+        CFBundleDisplayName: "Linh Screen Observation"
+        CFBundleShortVersionString: "0.9"
+        CFBundleVersion: "2"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.broadcast-services-upload
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).SampleHandler"
+          NSExtensionAttributes:
+            RPBroadcastProcessMode: RPBroadcastProcessModeSampleBuffer
     entitlements:
       path: BroadcastExtension/LinhBroadcast.entitlements
+      properties:
+        com.apple.security.application-groups: [group.ai.linh.companion]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ai.linh.companion.broadcast

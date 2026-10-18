@@ -1,14 +1,33 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-for(const marker of ['id="mascot"','id="gameList"','id="effectsList"','id="runOptimize"','id="saveObservation"','id="exportData"','id="importData"','id="photoInput"','id="scanPhoto"','id="applyVisionFacts"','id="visionQuestions"','id="askLinhBtn"','vision-engine.js','./ocr/tesseract.min.js','localStorage','serviceWorker'])assert.ok(html.includes(marker),'Missing '+marker);
-const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
-assert.ok(scripts.length>=2,'No scripts');
-for(const m of scripts)if(m[1].trim())new Function(m[1]);
+
+const ui = readFileSync(new URL('./index.html',import.meta.url),'utf8');
+const legacy = readFileSync(new URL('./legacy-dashboard.html',import.meta.url),'utf8');
+
+assert.ok(ui.includes('id="linh"'),'Missing the single visible Linh character');
+assert.equal((ui.match(/<button\b/g)||[]).length,1,'Home must have one visible interaction');
+assert.ok(!/<(?:input|select|textarea|nav|section|h1|h2|h3)\b/i.test(ui),
+  'Home must not expose settings, explanations, forms or menus');
+assert.ok(ui.includes('Safari PWA cannot stream the screen'),
+  'Do not promise web screen capture');
+assert.ok(!/getDisplayMedia\(/.test(ui),'Web must not pretend to capture other apps');
+assert.ok(ui.includes('serviceWorker'),'PWA service worker must be registered');
+
+for(const marker of [
+'id="mascot"','id="gameList"','id="effectsList"','id="runOptimize"',
+'id="saveObservation"','id="exportData"','id="importData"',
+'id="photoInput"','id="scanPhoto"','id="applyVisionFacts"',
+'id="visionQuestions"','id="askLinhBtn"','vision-engine.js','./ocr/tesseract.min.js',
+'localStorage'])assert.ok(legacy.includes(marker),'Legacy analysis missing: '+marker);
+
+for(const page of [ui,legacy]){
+ const scripts=[...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
+ assert.ok(scripts.length>=1,'Missing scripts');
+ for(const s of scripts)if(s[1].trim())new Function(s[1]);
+}
+assert.ok(!legacy.includes('<script src="./cloud-ui.js">'),
+  'Paid AI integration must remain disabled');
 const manifest=JSON.parse(readFileSync(new URL('./manifest.webmanifest',import.meta.url),'utf8'));
 assert.equal(manifest.start_url,'./');
 assert.equal(manifest.display,'standalone');
-assert.ok(html.includes('./assistant-engine.js')&&html.includes('./assistant-ui.js'),'Missing Linh 0.5 reasoning scripts');
-assert.ok(!html.includes('<script src="./cloud-connector.js">')&&!html.includes('<script src="./cloud-ui.js">'),'Linh game-only mode must not load cloud AI');
-assert.ok(!/getDisplayMedia\(/.test(html),'PWA must not pretend to screen capture other apps');
-console.log('PASS: Web syntax, UI, opt-in image flow, PWA');
+console.log('PASS: Linh-only UI, preserved analysis engine, no fake screen capture, PWA');

@@ -1,4 +1,16 @@
-# Linh AI · Web 0.4 beta (iPhone / Safari)
+# Linh AI · Web 0.5 beta (iPhone / Safari)
+
+## Linh 0.5 — Trò chuyện và lập kế hoạch thử nghiệm ngoại tuyến
+
+- Có mục **Linh tư vấn chiến thuật** và lối tắt ở trang chủ. Trò chuyện nhiều lượt trong cùng phiên; mỗi game có ngữ cảnh riêng.
+- Khi hỏi về **combo, sát thương, cơ chế, ảnh hoặc những gì đã học**, Linh sử dụng bộ tính và dấu hiệu OCR/trí nhớ riêng của game để giải thích câu trả lời.
+- Tách bạch **dữ kiện**, **điều chưa xác minh** và **câu hỏi kế tiếp**. Các quan sát OCR bị đánh dấu sai hoàn toàn không được dùng làm bằng chứng.
+- Có phép thử đối chứng bật riêng A, riêng B, A+B để phân biệt cộng dồn/nhân hiệu ứng.
+- Chỉ bấm **Lưu giả thuyết** mới ghi gợi ý vào bộ nhớ lâu dài, dưới loại **Giả thuyết**. Hội thoại mặc định chỉ nằm trong RAM của phiên Safari.
+- Có đọc câu trả lời bằng giọng tiếng Việt qua speech synthesis của thiết bị, tùy chọn, không dùng dịch vụ TTS trả phí.
+- **Chưa có mô hình AI tạo sinh hoặc AI tự xem game.** Đây là engine suy luận có cấu trúc; bước AI trực tuyến sẽ cần máy chủ bảo vệ khóa API và sự đồng ý riêng trước khi gửi dữ liệu.
+
+
 
 Linh là **bản thử nghiệm** một trợ lý phân tích game đa trò: bong bóng sống, hồ sơ nhiều game, máy tính sát thương/hiệu ứng, và tính năng mới **đọc chữ từ ảnh game người dùng tự chọn**.
 

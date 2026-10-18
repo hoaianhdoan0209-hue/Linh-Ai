@@ -8,5 +8,6 @@ for(const m of scripts)if(m[1].trim())new Function(m[1]);
 const manifest=JSON.parse(readFileSync(new URL('./manifest.webmanifest',import.meta.url),'utf8'));
 assert.equal(manifest.start_url,'./');
 assert.equal(manifest.display,'standalone');
+assert.ok(html.includes('./assistant-engine.js')&&html.includes('./assistant-ui.js'),'Missing Linh 0.5 reasoning scripts');
 assert.ok(!/getDisplayMedia\(/.test(html),'PWA must not pretend to screen capture other apps');
 console.log('PASS: Web syntax, UI, opt-in image flow, PWA');

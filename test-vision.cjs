@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('node:assert/strict');
+const V=require('./vision-engine.js');
+const x=V.observe('Tỷ lệ chí mạng: 35%\nXuyên giáp: 12%\nThiêu đốt mục tiêu. Mục tiêu nhận thêm 20% sát thương.');
+assert.equal(x.facts.find(f=>f.key==='critChance')?.value,35);
+assert.equal(x.facts.find(f=>f.key==='armorPen')?.value,12);
+assert.ok(x.tags.some(t=>t.key==='burn'));
+assert.ok(x.hypotheses.some(s=>s.includes('tương tác')));
+const skill=V.observe('Khi gây sát thương, tăng 20% công trong 5 giây.');
+assert.equal(skill.facts.length,0,'do not incorrectly treat skill prose as player stats');
+assert.equal(V.observe('Tấn công 1800, sát thương kỹ năng 2000').facts.length,0);
+assert.ok(V.observe('???').questions.length>0);
+const reply=V.answer('Combo nào tốt?',{name:'test',stats:{},effects:[],observations:[]},x,{});
+assert.ok(reply.reply.includes('Chưa có'));
+console.log('PASS: OCR parsing, false positive defenses, hypothesis and local response');

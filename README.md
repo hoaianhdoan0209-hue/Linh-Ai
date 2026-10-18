@@ -1,43 +1,40 @@
-# Linh AI — Trợ lý chiến thuật đa game
+# Linh AI · Web 0.3 beta (iPhone / Safari)
 
-**Bản Web 0.2 (PWA) dành cho Safari iPhone.** Phiên bản thử nghiệm không cần tài khoản, không có API AI trả phí và giữ hồ sơ game trong bộ nhớ cục bộ của trình duyệt.
+Linh là **bản thử nghiệm** một trợ lý phân tích game đa trò: bong bóng sống, hồ sơ nhiều game, máy tính sát thương/hiệu ứng, và tính năng mới **đọc chữ từ ảnh game người dùng tự chọn**.
 
-## Dùng trên điện thoại
+## Những gì 0.3 đã làm được
 
-Khi GitHub Pages đã bật và workflow `Kiểm thử và xuất bản Linh Web` triển khai thành công, mở:
+- Giữ nguyên giao diện Linh Web 0.2 và bộ nhớ hồ sơ game trong Safari (không đổi khóa lưu trữ).
+- OCR tiếng Việt và tiếng Anh **trên thiết bị** qua Tesseract.js chạy trong WebAssembly. Thư viện và gói ngôn ngữ **được đóng gói trên chính website Linh**, không tải ảnh lên dịch vụ AI.
+- Khi người dùng chọn ảnh, Linh bắt đầu thử đọc ảnh, tìm vài chỉ số có nhãn rõ (chí mạng, xuyên giáp...), nhận biết dấu hiệu (thiêu đốt, độc, hồi chiêu, cộng dồn), đề xuất phép thử và câu hỏi.
+- Trước khi áp dụng chỉ số nhận từ ảnh vào hồ sơ, Linh **đề nghị xác nhận**. Không tự ghi đè số liệu từ OCR.
+- Nút **Lưu giả thuyết** lưu trích chữ và lập luận vào nhật ký của game hiện tại; mặc định **không lưu ảnh gốc**.
+- Mục **Hỏi Linh** dùng suy luận quy tắc cục bộ và bộ tính sẵn có, biết nhận xét từ ảnh/ghi nhớ/đo đạc, **chưa phải mô hình AI tạo sinh**.
+- Thử công thức và bảng combo trên dữ liệu sẵn có; không tự coi mô phỏng là cơ chế thực của game.
 
-https://hoaianhdoan0209-hue.github.io/Linh-Ai/
+## Cài trên iPhone
 
-Safari → Chia sẻ → **Thêm vào Màn hình chính**.
+Website: https://hoaianhdoan0209-hue.github.io/Linh-Ai/
 
-Nếu trang báo 404, hãy vào repository **Settings → Pages → Build and deployment → Source → GitHub Actions**, sau đó vào tab **Actions** chạy lại workflow hoặc đẩy cập nhật lên nhánh main. Không coi URL là đã hoạt động cho tới khi triển khai thành công.
+Mở bằng Safari → Chia sẻ → Thêm vào Màn hình chính. Để OCR sử dụng tốt, nên mở lần đầu khi có mạng để tải gói OCR lớn; sau đó ứng dụng cố gắng dùng cache trình duyệt. iPhone 14 Plus chạy được trang; **OCR thực tế trên Safari cần người dùng thử với ảnh thật** vì chất lượng phụ thuộc cỡ chữ và tình trạng máy.
 
-## Chức năng hiện có
+## Quyền riêng tư
 
-- Nhân vật Linh biết chuyển động và phản hồi thao tác bên trong Web App.
-- Tạo nhiều hồ sơ game, lưu riêng chỉ số, hiệu ứng, phép đo và nhật ký.
-- Tính sát thương theo quy tắc giả định, tỷ lệ chí mạng và tương tác hiệu ứng.
-- Tìm các tổ hợp hiệu ứng theo số ô.
-- Đối chiếu giả thuyết cộng hoặc nhân hiệu ứng với sát thương quan sát.
-- Xem trước ảnh game do người dùng chủ động chọn; **chưa OCR hay tự hiểu ảnh**.
-- Xuất/nhập bản sao lưu JSON và xóa bộ nhớ.
+- Mặc định Linh không tự truy cập màn hình game, camera, mic, danh bạ hay thư viện ảnh.
+- Khi người dùng chủ động chọn một ảnh, Linh có thể xử lý ảnh đó trong trình duyệt; ảnh **không tự tải lên** máy chủ. Website và các tệp mã OCR vẫn được tải từ GitHub Pages; đó không phải việc gửi ảnh.
+- Trích chữ OCR chỉ ở RAM trừ khi người dùng nhấn **Lưu giả thuyết**; các hồ sơ game và ghi nhớ tự chọn được lưu cục bộ trong Safari.
+- Bệ hạ có thể xuất/nhập bản sao lưu JSON và xóa trí nhớ.
+- Repository công khai chứa mã nguồn, **không chứa ảnh, dữ liệu riêng tư hoặc khóa API**.
 
-**Giới hạn:** chưa có mô hình AI hội thoại thực sự; công thức game cần được kiểm chứng; ứng dụng web không thể nổi đè lên các game khác. Dữ liệu lưu trong Safari và có thể mất nếu xóa dữ liệu duyệt web. Hãy xuất bản sao lưu định kỳ.
+## Giới hạn và roadmap
 
-## Mã nguồn và triển khai
+Chưa có LLM trò chuyện tự do, hiểu toàn bộ biểu tượng game, tự học hoàn toàn từ video, ghi màn hình liên tục hay bong bóng nổi đè lên app khác. Các đề xuất được đánh dấu là giả thuyết. Để quan sát phiên chơi trên iPhone cần thành phần native iOS riêng với quyền chia sẻ hệ thống; không thể làm từ PWA Safari.
 
-- `index.html`: bản hoạt động độc lập, có CSS và engine JS nhúng.
-- `manifest.webmanifest`, `sw.js`, `icon.svg`: cấu hình PWA/offline.
-- `test-site.mjs`: kiểm tra cú pháp JavaScript nội tuyến và các thành phần cốt lõi.
-- `.github/workflows/deploy.yml`: tự kiểm thử rồi triển khai GitHub Pages mỗi lần cập nhật `main`.
+### Kiểm thử
 
-Kiểm tra cục bộ:
-
-```sh
+```
 node test-site.mjs
-python3 -m http.server 8000
+node test-vision.cjs
 ```
 
-Không đưa khóa API, ảnh riêng tư hoặc thông tin đăng nhập vào repository công khai. Nội dung ảnh/thông tin game không tự gửi lên GitHub.
-
-Đây là **bản thử nghiệm**; chưa xác nhận chạy thực tế trên Safari iPhone.
+GitHub Actions đóng gói Tesseract.js 5.1.1, core v5.1.1 và traineddata eng/vie dưới `ocr/`, kiểm thử rồi triển khai GitHub Pages nếu thành công. Chỉ nhánh `main` đã chạy kiểm thử mới được xuất bản.

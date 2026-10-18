@@ -1,3 +1,44 @@
+# Triển khai Linh 0.6 bằng các gói miễn phí — KHÔNG bật thanh toán
+
+**Điều kiện của chủ ứng dụng: 0 đồng, không dùng dịch vụ trả phí.** Repository chỉ chứa mã nguồn, tuyệt đối không chứa khóa.
+
+## Chuẩn bị
+
+1. Dùng dự án Gemini API được đánh dấu **Free tier** trong [Google AI Studio](https://aistudio.google.com/apikey). Không chọn `Set up billing`, không nâng lên Paid tier và không thêm thẻ thanh toán. Tạo khóa từ dự án Free tier.
+2. Dùng **Render Free Web Service** từ `render.yaml` ở thư mục gốc repository. Phải xác nhận gói dịch vụ hiển thị đúng **Free ($0)**, không tạo gói Starter/Hobby/Paid. **Không thêm phương thức thanh toán vào Render**; nếu hết hạn mức dịch vụ sẽ bị tạm dừng, không thể phát sinh thu phí vượt hạn mức do không có phương thức thanh toán.
+3. Khi tạo service, bí mật `GEMINI_API_KEY` là khóa API của *Free tier project*, `LINH_ACCESS_TOKEN` là một mật khẩu riêng dài/ngẫu nhiên dùng để gọi gateway (không phải khóa Gemini). Chỉ nhập các bí mật này vào phần Environment của Render, **không gửi trong cuộc trò chuyện và không commit lên GitHub**. 
+4. Khi Deploy thành công, Render cấp HTTPS URL. Trên trang Linh, vào **AI tùy chọn**, nhập URL `https://<your-service>.onrender.com/chat` và mật khẩu `LINH_ACCESS_TOKEN`.
+5. Bệ hạ xem trước chính xác nội dung sắp gửi, sau đó mới bấm xác nhận. Không tự động gửi ảnh, OCR thô hoặc trò chuyện cũ.
+
+**Chú ý:** Dùng đúng model `gemini-2.5-flash-lite` trong `render.yaml`. Đây là model có bậc miễn phí nhưng **khóa từ dự án Paid tier vẫn có thể bị tính phí**. Nếu không thể xác nhận dự án Gemini thực sự ở Free tier, **không triển khai hoặc không bật truy cập AI**. Dữ liệu gửi đến Gemini Free tier có thể được Google sử dụng để cải thiện sản phẩm; chỉ gửi dữ kiện game đã đồng ý.
+
+Render Free: giới hạn giờ chạy, băng thông và thời gian build; service có thể ngủ khi không hoạt động, cần chờ khi gọi lại. Không phải backend luôn trực tuyến 24/7.
+
+## Mã nguồn
+- `handler.mjs`: lọc trường dữ liệu, bảo vệ cổng bằng mã truy cập, chặn origin ngoài trang Linh, giới hạn yêu cầu.
+- `start.mjs`: server Node.js dùng trong Render.
+- `package.json`: cài đặt zero-dependency; chưa gọi AI khi chưa khai báo đủ biến.
+
+Đây là bản dành cho **thử nghiệm cá nhân**, không phù hợp dùng công khai cho nhiều người. Giới hạn số lượt trong tiến trình bộ nhớ không thay thế dịch vụ chống lạm dụng, và nếu nhiều người biết mã truy cập có thể sử dụng hết hạn mức miễn phí.
+
+Nguồn chính thức:
+- https://ai.google.dev/gemini-api/docs/billing
+- https://ai.google.dev/gemini-api/docs/pricing
+- https://render.com/docs/free
+- https://render.com/docs/blueprint-spec
+
+## Trạng thái
+
+- [x] Mã nguồn giao diện và cổng AI đã được viết.
+- [x] Cấu hình Render FREE (`plan: free`) được đưa lên GitHub.
+- [ ] Render plugin kết nối với tài khoản của Bệ hạ.
+- [ ] Xác minh gói Render $0 / không có phương thức thanh toán.
+- [ ] Có khóa Gemini từ dự án **Free tier**, không bật billing.
+- [ ] Triển khai server và kiểm tra trả lời AI bằng cuộc gọi có xin phép.
+
+Không đánh dấu "AI online đang chạy" khi chưa hoàn thành tất cả bước trên.
+
+---
 # Linh 0.6 — Cổng AI riêng (tùy chọn)
 
 Mã mẫu để triển khai trên Railway hoặc một máy chủ Node.js riêng. **Chưa có máy chủ nào được triển khai chỉ bởi việc thêm mã vào GitHub.**

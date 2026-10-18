@@ -1,5 +1,14 @@
 # Linh 0.7 — Một nhân vật, không cần nhập liệu
 
+## Linh 0.7.1 — Chỉ hiện điều đáng chú ý
+
+**Đã chốt yêu cầu:** Không có phụ đề chạy theo lời nói; không tự nói dài. Linh chỉ trình bày ba thứ: **gợi ý hành động, so sánh/tính toán, câu hỏi cần kiểm chứng**. Câu ngắn tối đa 96 ký tự, giữ một gợi ý trong giao diện tối đa 7 giây. Sau khi đưa gợi ý, đợi tối thiểu 75 giây mới hiện thông báo tiếp; cùng một loại gợi ý phải cách nhau tối thiểu 300 giây.
+
+Trên ứng dụng Linh native khi đang được mở, thẻ ngắn ở dưới nhân vật xuất hiện tạm thời, không có cửa sổ cài đặt hay hộp thoại. Khi chuyển sang game, hệ thống iOS **có thể hiển thị một thông báo ngắn** nếu người dùng đã cấp quyền và ứng dụng vẫn được phép xử lý stream nền. Bản prototype này **không có bong bóng nổi cố định trên game**, không cam kết thông báo luôn hiển thị. Không bật giọng nói tự động.
+
+Các phần trên đã được thêm vào mã Swift và có kiểm thử engine, **chưa phải một ứng dụng iOS được biên dịch bằng Xcode và chạy thành công trên iPhone thật**. Không dùng dịch vụ AI trả phí.
+
+
 **Hướng đã chốt với Bệ hạ:** Linh quan sát khi được cấp quyền, đọc chữ trong game, tính toán, thắc mắc và đề xuất. Người chơi không phải xem bảng chỉ số, nhập văn bản hoặc đọc mô tả chức năng. UI mặc định **chỉ có Linh**, không nút tính toán, không menu, không thanh điều hướng.
 
 ## Tình trạng triển khai
@@ -12,7 +21,7 @@
 | Tự nhận khung hình từ game khác | **Chưa được xác nhận**; cần iOS 27 + iPhone thật + quyền chia sẻ toàn màn hình qua bộ chọn của hệ thống |
 | Đọc chữ từ live frame | Có mã Vision OCR dùng pixel buffer, chưa được xác minh trên thiết bị |
 | Tự tính toán/học hỏi khi quan sát | Bản native thử nghiệm chỉ có quy tắc nhận diện từ khóa và so sai lệch 2 phép đo. **Chưa nối engine combo/trí nhớ Web** |
-| AI máy chủ/trả phí | Không sử dụng, không kết nối, không triển khai |
+| I máy chủ/trả phí | Không sử dụng, không kết nối, không triển khai |
 
 Màn hình Safari/PWA không thể xem trực tiếp hình ảnh từ trò chơi khác trên iPhone, nên khi chạm Linh ở Web sẽ nói rõ giới hạn, không giả “đang quan sát”. Trong native prototype, chạm Linh để mở picker chia sẻ hệ thống, giữ để dừng. Dừng từ giao diện chia sẻ của iOS cũng được hỗ trợ theo thiết kế.
 

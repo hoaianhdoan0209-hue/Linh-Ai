@@ -4,16 +4,21 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    IPHONEOS_DEPLOYMENT_TARGET: "27.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "18.0"
 targets:
   LinhCompanion:
     type: application
     platform: iOS
-    deploymentTarget: "27.0"
+    deploymentTarget: "18.0"
     sources:
       - path: Sources
     info:
       path: Sources/Info.plist
+    entitlements:
+      path: Sources/Linh.entitlements
+    dependencies:
+      - target: LinhBroadcast
+        embed: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ai.linh.companion
@@ -21,3 +26,23 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: ""
+  LinhBroadcast:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: BroadcastExtension
+      - path: Sources/GameInsight.swift
+      - path: Sources/GameReasoner.swift
+      - path: Sources/GameEvidenceLedger.swift
+      - path: Sources/LinhSharedStore.swift
+    info:
+      path: BroadcastExtension/Info.plist
+    entitlements:
+      path: BroadcastExtension/LinhBroadcast.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.linh.companion.broadcast
+        GENERATE_INFOPLIST_FILE: NO
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES

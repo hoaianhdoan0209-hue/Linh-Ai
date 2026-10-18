@@ -1,3 +1,43 @@
+# Linh 0.7 — Một nhân vật, không cần nhập liệu
+
+**Hướng đã chốt với Bệ hạ:** Linh quan sát khi được cấp quyền, đọc chữ trong game, tính toán, thắc mắc và đề xuất. Người chơi không phải xem bảng chỉ số, nhập văn bản hoặc đọc mô tả chức năng. UI mặc định **chỉ có Linh**, không nút tính toán, không menu, không thanh điều hướng.
+
+## Tình trạng triển khai
+
+| Thành phần | Trạng thái |
+| --- | --- |
+| Trang đầu Web chỉ có nhân vật Linh | Đã code, kiểm thử tĩnh và CI |
+| Bộ tính/OCR/trí nhớ Web 0.6.1 cũ | Được bảo toàn tại `legacy-dashboard.html`, không xuất hiện trên trang đầu; vẫn dùng chung localStorage |
+| Theo dõi một phiên game trên iPhone | **Chưa chạy được**: đã thêm mã Swift prototype trong `ios/LinhCompanion/`, chưa biên dịch Xcode/kiểm thử iPhone thật |
+| Tự nhận khung hình từ game khác | **Chưa được xác nhận**; cần iOS 27 + iPhone thật + quyền chia sẻ toàn màn hình qua bộ chọn của hệ thống |
+| Đọc chữ từ live frame | Có mã Vision OCR dùng pixel buffer, chưa được xác minh trên thiết bị |
+| Tự tính toán/học hỏi khi quan sát | Bản native thử nghiệm chỉ có quy tắc nhận diện từ khóa và so sai lệch 2 phép đo. **Chưa nối engine combo/trí nhớ Web** |
+| AI máy chủ/trả phí | Không sử dụng, không kết nối, không triển khai |
+
+Màn hình Safari/PWA không thể xem trực tiếp hình ảnh từ trò chơi khác trên iPhone, nên khi chạm Linh ở Web sẽ nói rõ giới hạn, không giả “đang quan sát”. Trong native prototype, chạm Linh để mở picker chia sẻ hệ thống, giữ để dừng. Dừng từ giao diện chia sẻ của iOS cũng được hỗ trợ theo thiết kế.
+
+**Quyền riêng tư:** không tự lấy ảnh/mic/camera/danh bạ, không lưu screenshot gốc, không gửi ảnh/khung hình/OCR lên API. Việc chia sẻ phải bắt đầu bằng hành động và quyền hệ thống mỗi phiên. Không có app nào được cài tự động từ bản commit này.
+
+## Xây native trên Mac (khi sẵn sàng)
+
+Chi tiết: [ios/LinhCompanion/README.md](ios/LinhCompanion/README.md). Cần Xcode SDK iOS 27, XcodeGen, ký app và thiết bị để kiểm chứng. Không cam kết build thành công trước khi chạy Xcode.
+
+Website: https://hoaianhdoan0209-hue.github.io/Linh-Ai/
+
+## Kiểm thử repository
+
+```sh
+node test-site.mjs
+node test-native.mjs
+node test-vision.cjs
+node test-learning.cjs
+node test-assistant.cjs
+```
+
+---
+
+## Lịch sử / bản thảo kỹ thuật
+
 # Linh Web 0.6.1 — Học hỏi & tính toán, hoàn toàn miễn phí
 
 **Hướng phát triển được chốt:** Không cần mô hình AI tạo sinh, không cần Gemini API, Render hoặc Railway. Linh ưu tiên nhận dạng chữ từ ảnh người dùng chọn, trích chỉ số có xác nhận, lưu bằng chứng theo game, so sánh phép đo thực tế, thử công thức, đề xuất combo và tự đặt câu hỏi theo quy tắc. Tất cả làm trong ứng dụng; không phát sinh chi phí máy chủ AI.

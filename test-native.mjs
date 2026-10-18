@@ -18,7 +18,25 @@ for(const key of ['SCContentSharingPicker.shared','picker.present()','SCStream('
                      'stopCapture()','capturesAudio = false'])
  assert.ok(session.includes(key),'Missing safe native observation code: '+key);
 assert.ok(plist.includes('<string>screen-capture</string>'));
-assert.ok(project.includes('27.0'));
+assert.ok(project.includes('18.0'),'Single app must install on iOS 18');
+assert.ok(session.includes('@available(iOS 27.0, *)'),'Modern backend only on iOS 27');
+const coordinator=read('./ios/LinhCompanion/Sources/LinhCoordinator.swift');
+const replayPicker=read('./ios/LinhCompanion/Sources/ReplayKitPicker.swift');
+const broadcast=read('./ios/LinhCompanion/BroadcastExtension/SampleHandler.swift');
+const extInfo=read('./ios/LinhCompanion/BroadcastExtension/Info.plist');
+const shared=read('./ios/LinhCompanion/Sources/LinhSharedStore.swift');
+for(const marker of ['#available(iOS 27.0, *)','modernSession().handleTap()','usesReplayKit'])
+ assert.ok(coordinator.includes(marker),'Auto-select runtime backend missing: '+marker);
+assert.ok(face.includes('ReplayKitPicker()'),'iOS 18 must expose official broadcast control');
+for(const marker of ['RPSystemBroadcastPickerView','preferredExtension','showsMicrophoneButton = false'])
+ assert.ok(replayPicker.includes(marker),'Official ReplayKit picker missing: '+marker);
+for(const marker of ['RPBroadcastSampleHandler','processSampleBuffer(','CMSampleBufferGetImageBuffer',
+                      'VNRecognizeTextRequest','GameReasoner','LinhSharedStore.publish'])
+ assert.ok(broadcast.includes(marker),'Extension must locally analyze authorized frames: '+marker);
+assert.ok(extInfo.includes('com.apple.broadcast-services-upload'));
+assert.ok(project.includes('LinhBroadcast')&&project.includes('embed: true'),
+          'Broadcast extension must ship with host app');
+assert.ok(shared.includes('group.ai.linh.companion'),'Both iOS paths must share bounded evidence');
 for(const key of ['currentStream === stream','currentGeneration','generation incoming: Int',
                    'CMSampleBufferIsValid','CMSampleBufferGetSampleAttachmentsArray',
                    'SCFrameStatus(rawValue: rawStatus) == .complete','endSession()']) {

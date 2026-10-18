@@ -25,8 +25,8 @@ final class GameReasoner {
         candidateDamage = nil
         damageHits = 0
         lastDamage = nil
-        ledger.resetTransientThrottle()
-        // Persistent aggregate gameplay learning intentionally survives reset.
+        // Persistent aggregate gameplay learning survives reset, while
+        // its short-time anti-duplication guard remains active across sessions.
     }
 
     func inspect(_ source: String, at now: Date = Date()) -> GameInsight? {
@@ -67,7 +67,25 @@ final class GameReasoner {
         guard !emittedTopics.contains(tag) else { return nil }
         emittedTopics.insert(tag)
 
+        let previousSessions = ledger.snapshot.topics[tag] ?? 0
         ledger.note(topic: tag, at: now)
+        if previousSessions > 0 {
+            switch tag {
+            case "burn-armor":
+                return GameInsight(kind: .suggestion,
+                    body: "Đã gặp hiệu ứng này. Hãy so cùng đòn và mục tiêu khi bật riêng, bật chung.",
+                    fingerprint: "followup-\(tag)")
+            case "fatebound-question":
+                return GameInsight(kind: .question,
+                    body: "Đã gặp Fatebound trước đó. Đổi một món thì chỉ số nào thay đổi?",
+                    fingerprint: "followup-\(tag)")
+            case "stack-question":
+                return GameInsight(kind: .question,
+                    body: "Đã gặp cộng dồn trước đó. Khi hết thời gian, các tầng mất cùng lúc?",
+                    fingerprint: "followup-\(tag)")
+            default: break
+            }
+        }
         switch tag {
         case "burn-armor":
             return GameInsight(kind: .suggestion,

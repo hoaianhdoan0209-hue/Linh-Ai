@@ -28,6 +28,8 @@ jobs:
         run: node test-site.mjs
       - name: Cấu hình GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Tạo bản phát hành
         run: |
           mkdir -p dist

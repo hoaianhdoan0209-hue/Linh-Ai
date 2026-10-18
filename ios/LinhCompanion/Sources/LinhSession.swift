@@ -17,8 +17,8 @@ final class LinhSession: NSObject, ObservableObject {
     private var subscribed = false
     private var generation = 0
     private lazy var interpreter: LinhFrameInterpreter = {
-        LinhFrameInterpreter { [weak self] insight in
-            Task { @MainActor in self?.handleInsight(insight) }
+        LinhFrameInterpreter { [weak self] generation, insight in
+            Task { @MainActor in self?.handleInsight(insight, generation: generation) }
         }
     }()
 
@@ -34,7 +34,7 @@ final class LinhSession: NSObject, ObservableObject {
         guard state != .stopping else { return }
         generation += 1
         state = .stopping
-        interpreter.reset()
+        interpreter.endSession()
         latestInsight = nil
         picker.isActive = false
         if subscribed {
@@ -77,6 +77,8 @@ final class LinhSession: NSObject, ObservableObject {
             let options = SCStreamConfiguration()
             options.capturesAudio = false
             let next = SCStream(filter: filter, configuration: options, delegate: self)
+            // Match captured frames to exactly this system-authorized stream.
+            interpreter.bind(stream: next, generation: id)
             do {
                 try next.addStreamOutput(self.interpreter, type: .screen,
                                          sampleHandlerQueue: self.interpreter.queue)
@@ -91,13 +93,14 @@ final class LinhSession: NSObject, ObservableObject {
             } catch {
                 guard self.generation == id else { return }
                 self.state = .interrupted
+                self.interpreter.endSession()
                 // Never claim screen observation succeeded when iOS denied it.
             }
         }
     }
 
-    private func handleInsight(_ insight: GameInsight) {
-        guard state == .observing else { return }
+    private func handleInsight(_ insight: GameInsight, generation incoming: Int) {
+        guard state == .observing, incoming == generation else { return }
         if UIApplication.shared.applicationState == .active {
             // Only one ephemeral insight card, never speech transcription.
             latestInsight = insight
@@ -151,43 +154,72 @@ final class LinhFrameInterpreter: NSObject, SCStreamOutput {
     let queue = DispatchQueue(label: "ai.linh.local.vision", qos: .utility)
     private let brain = GameReasoner()
     private let policy = InsightPolicy()
-    private let onInsight: (GameInsight) -> Void
+    private let onInsight: (Int, GameInsight) -> Void
     private var lastFrame = Date.distantPast
+    private var currentStream: SCStream?
+    private var currentGeneration: Int?
 
-    init(onInsight: @escaping (GameInsight) -> Void) {
+    init(onInsight: @escaping (Int, GameInsight) -> Void) {
         self.onInsight = onInsight
     }
 
-    func reset() {
-        queue.async { [weak self] in
-            self?.brain.reset()
-            self?.policy.reset()
-            self?.lastFrame = .distantPast
+    func bind(stream: SCStream, generation: Int) {
+        queue.async {
+            self.currentStream = stream
+            self.currentGeneration = generation
+            self.lastFrame = .distantPast
+            self.brain.reset()
+            self.policy.reset()
+        }
+    }
+
+    func endSession() {
+        queue.async {
+            self.currentStream = nil
+            self.currentGeneration = nil
+            self.lastFrame = .distantPast
+            self.brain.reset()
+            self.policy.reset()
         }
     }
 
     func stream(_ stream: SCStream,
                 didOutputSampleBuffer buffer: CMSampleBuffer,
                 of type: SCStreamOutputType) {
-        guard type == .screen else { return }
+        guard type == .screen,
+              currentStream === stream,
+              let generation = currentGeneration,
+              CMSampleBufferIsValid(buffer) else { return }
+
+        // Ignore black, idle, suspended and stopped buffers. Only complete
+        // frames have picture content worth sending to on-device Vision OCR.
+        guard let metadata = CMSampleBufferGetSampleAttachmentsArray(
+            buffer, createIfNecessary: false
+        ) as? [[SCStreamFrameInfo: Any]],
+              let rawStatus = metadata.first?[.status] as? Int,
+              SCFrameStatus(rawValue: rawStatus) == .complete else { return }
+
         let now = Date()
-        guard now.timeIntervalSince(lastFrame) >= 2.0 else { return }
+        guard now.timeIntervalSince(lastFrame) >= 2.5 else { return }
         lastFrame = now
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else { return }
 
-        let req = VNRecognizeTextRequest()
-        req.recognitionLevel = .fast
-        req.automaticallyDetectsLanguage = true
-        req.usesLanguageCorrection = false
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .fast
+        request.automaticallyDetectsLanguage = true
+        request.usesLanguageCorrection = false
         do {
-            try VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:]).perform([req])
-            let text = (req.results ?? [])
+            try VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+                .perform([request])
+            let text = (request.results ?? [])
                 .compactMap { $0.topCandidates(1).first?.string }
                 .joined(separator: "\n")
-            // Never send the OCR body off device or write it to disk.
-            if let insight = brain.inspect(text), policy.shouldPresent(insight) { onInsight(insight) }
+            // No screenshot storage, no network, no raw OCR logs.
+            if let insight = brain.inspect(text), policy.shouldPresent(insight) {
+                onInsight(generation, insight)
+            }
         } catch {
-            // OCR can fail on protected/private screens; no capture bypass is attempted.
+            // Respect protected content / OCR failures; do not bypass.
         }
     }
 }

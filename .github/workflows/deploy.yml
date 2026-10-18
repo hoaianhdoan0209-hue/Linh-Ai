@@ -20,22 +20,38 @@ jobs:
     steps:
       - name: Lấy mã nguồn
         uses: actions/checkout@v4
-      - name: Kiểm tra Node.js
+      - name: Chuẩn bị Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Kiểm thử giao diện và PWA
-        run: node test-site.mjs
+      - name: Kiểm thử Linh và bộ suy luận
+        run: |
+          node test-site.mjs
+          node test-vision.cjs
+      - name: Chuẩn bị PWA và OCR cùng nguồn
+        run: |
+          set -euo pipefail
+          mkdir -p dist/ocr/lang
+          cp index.html vision-engine.js sw.js manifest.webmanifest icon.svg dist/
+          touch dist/.nojekyll
+          npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund tesseract.js@5.1.1 tesseract.js-core@5.1.1
+          cp node_modules/tesseract.js/dist/tesseract.min.js dist/ocr/
+          cp node_modules/tesseract.js/dist/worker.min.js dist/ocr/
+          cp node_modules/tesseract.js-core/tesseract-core*.wasm* dist/ocr/
+          curl -fLsS --retry 3 https://tessdata.projectnaptha.com/4.0.0/eng.traineddata.gz -o dist/ocr/lang/eng.traineddata.gz
+          curl -fLsS --retry 3 https://tessdata.projectnaptha.com/4.0.0/vie.traineddata.gz -o dist/ocr/lang/vie.traineddata.gz
+          test -s dist/ocr/tesseract.min.js
+          test -s dist/ocr/worker.min.js
+          test -s dist/ocr/lang/eng.traineddata.gz
+          test -s dist/ocr/lang/vie.traineddata.gz
+          gzip -t dist/ocr/lang/eng.traineddata.gz
+          gzip -t dist/ocr/lang/vie.traineddata.gz
+          echo 'OCR library and language data bundled at the Linh origin.'
       - name: Cấu hình GitHub Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
-      - name: Tạo bản phát hành
-        run: |
-          mkdir -p dist
-          cp index.html sw.js manifest.webmanifest icon.svg dist/
-          touch dist/.nojekyll
-      - name: Đóng gói để triển khai
+      - name: Đóng gói GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -46,6 +62,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: test-and-package
     steps:
-      - name: Xuất bản
+      - name: Xuất bản Linh
         id: publish
         uses: actions/deploy-pages@v4

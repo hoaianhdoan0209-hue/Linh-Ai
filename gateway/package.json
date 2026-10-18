@@ -1,0 +1,1 @@
+{"name":"linh-private-ai-gateway","version":"0.6.0","type":"module","private":true,"scripts":{"start":"node start.mjs"},"engines":{"node":">=20"}}

@@ -28,6 +28,7 @@ jobs:
         run: |
           node test-site.mjs
           node test-vision.cjs
+          node test-learning.cjs
       - name: Chuẩn bị PWA và OCR cùng nguồn
         run: |
           set -euo pipefail

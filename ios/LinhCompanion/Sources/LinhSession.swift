@@ -1,5 +1,4 @@
 import Foundation
-import AVFoundation
 import CoreMedia
 import ScreenCaptureKit
 import UserNotifications
@@ -11,15 +10,15 @@ import UIKit
 final class LinhSession: NSObject, ObservableObject {
     enum State { case idle, awaitingPermission, observing, stopping, interrupted }
     @Published private(set) var state: State = .idle
+    @Published private(set) var latestInsight: GameInsight?
 
     private let picker = SCContentSharingPicker.shared
     private var stream: SCStream?
     private var subscribed = false
     private var generation = 0
-    private let voice = AVSpeechSynthesizer()
     private lazy var interpreter: LinhFrameInterpreter = {
         LinhFrameInterpreter { [weak self] insight in
-            DispatchQueue.main.async { self?.handleInsight(insight) }
+            Task { @MainActor in self?.handleInsight(insight) }
         }
     }()
 
@@ -36,6 +35,7 @@ final class LinhSession: NSObject, ObservableObject {
         generation += 1
         state = .stopping
         interpreter.reset()
+        latestInsight = nil
         picker.isActive = false
         if subscribed {
             picker.remove(self)
@@ -51,7 +51,7 @@ final class LinhSession: NSObject, ObservableObject {
 
     private func requestSession() {
         // Notifications are optional. A refusal NEVER blocks screen reading.
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { _, _ in }
         let config = SCContentSharingPickerConfiguration()
         config.showsCameraControl = false
         config.showsMicrophoneControl = false
@@ -89,24 +89,30 @@ final class LinhSession: NSObject, ObservableObject {
                 }
                 self.stream = next
                 self.state = .observing
-                self.speakIfFrontmost("Linh đang quan sát.")
+                // Linh stays silent until a relevant suggestion/calculation/question appears.
             } catch {
                 guard self.generation == id else { return }
                 self.state = .interrupted
-                self.speakIfFrontmost("Chưa nhận được màn hình. Bệ hạ có thể thử lại.")
+                // Never claim screen observation succeeded when iOS denied it.
             }
         }
     }
 
-    private func handleInsight(_ insight: String) {
+    private func handleInsight(_ insight: GameInsight) {
         guard state == .observing else { return }
         if UIApplication.shared.applicationState == .active {
-            speakIfFrontmost(insight)
+            // Only one ephemeral insight card, never speech transcription.
+            latestInsight = insight
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(7))
+                if latestInsight == insight { latestInsight = nil }
+            }
         } else {
-            // iOS may present the notification over a game if permission was granted.
+            // The system controls whether this short notification appears over a game.
+            // No always-on bubble and no custom overlay into another app.
             let message = UNMutableNotificationContent()
-            message.title = "Linh"
-            message.body = insight
+            message.title = "Linh · " + insight.kind.rawValue
+            message.body = insight.body
             message.sound = nil
             let request = UNNotificationRequest(
                 identifier: UUID().uuidString,
@@ -115,15 +121,6 @@ final class LinhSession: NSObject, ObservableObject {
             )
             UNUserNotificationCenter.current().add(request) { _ in }
         }
-    }
-
-    private func speakIfFrontmost(_ text: String) {
-        guard UIApplication.shared.applicationState == .active else { return }
-        guard !voice.isSpeaking else { return }
-        let say = AVSpeechUtterance(string: text)
-        say.voice = AVSpeechSynthesisVoice(language: "vi-VN")
-        say.rate = 0.52
-        voice.speak(say)
     }
 }
 
@@ -155,16 +152,18 @@ extension LinhSession: SCStreamDelegate {
 final class LinhFrameInterpreter: NSObject, SCStreamOutput {
     let queue = DispatchQueue(label: "ai.linh.local.vision", qos: .utility)
     private let brain = GameReasoner()
-    private let onInsight: (String) -> Void
+    private let policy = InsightPolicy()
+    private let onInsight: (GameInsight) -> Void
     private var lastFrame = Date.distantPast
 
-    init(onInsight: @escaping (String) -> Void) {
+    init(onInsight: @escaping (GameInsight) -> Void) {
         self.onInsight = onInsight
     }
 
     func reset() {
         queue.async { [weak self] in
             self?.brain.reset()
+            self?.policy.reset()
             self?.lastFrame = .distantPast
         }
     }
@@ -188,7 +187,7 @@ final class LinhFrameInterpreter: NSObject, SCStreamOutput {
                 .compactMap { $0.topCandidates(1).first?.string }
                 .joined(separator: "\n")
             // Never send the OCR body off device or write it to disk.
-            if let insight = brain.inspect(text) { onInsight(insight) }
+            if let insight = brain.inspect(text), policy.shouldPresent(insight) { onInsight(insight) }
         } catch {
             // OCR can fail on protected/private screens; no capture bypass is attempted.
         }

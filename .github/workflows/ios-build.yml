@@ -2,7 +2,9 @@ name: Linh iOS 27 — Build miễn phí
 on:
   push:
     paths:
-      - 'ios/LinhCompanion/**'
+      - 'ios/LinhCompanion/Sources/**'
+      - 'ios/LinhCompanion/Tests/**'
+      - 'ios/LinhCompanion/project.yml'
       - '.github/workflows/ios-build.yml'
   workflow_dispatch:
 

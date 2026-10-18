@@ -36,6 +36,7 @@ jobs:
       - name: Kiểm tra thực thi Swift của bộ gợi ý gọn
         run: |
           swiftc ios/LinhCompanion/Sources/GameInsight.swift \
+            ios/LinhCompanion/Sources/GameEvidenceLedger.swift \
             ios/LinhCompanion/Sources/GameReasoner.swift \
             ios/LinhCompanion/Tests/InsightTests.swift \
             -o /tmp/linh-insight-tests

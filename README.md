@@ -1,6 +1,33 @@
-# Linh AI · Web 0.6 beta (iPhone / Safari)
+# Linh Web 0.6.1 — Học hỏi & tính toán, hoàn toàn miễn phí
 
-## Nâng cấp 0.6: AI tạo sinh tùy chọn, phải xin phép
+**Hướng phát triển được chốt:** Không cần mô hình AI tạo sinh, không cần Gemini API, Render hoặc Railway. Linh ưu tiên nhận dạng chữ từ ảnh người dùng chọn, trích chỉ số có xác nhận, lưu bằng chứng theo game, so sánh phép đo thực tế, thử công thức, đề xuất combo và tự đặt câu hỏi theo quy tắc. Tất cả làm trong ứng dụng; không phát sinh chi phí máy chủ AI.
+
+## Trạng thái thực tế
+
+- **Đang chạy trên Web:** OCR ảnh chủ động chọn, phân tích hiệu ứng có giới hạn, tính sát thương dự đoán, so sánh phép đo, ghi nhớ tách theo game, hội thoại theo quy tắc nhiều lượt.
+- **Không có:** mô hình AI tạo sinh; tự nhìn màn hình các game khác; overlay nổi xuyên ứng dụng iOS; tự học vô hạn như con người.
+- **Không gửi dữ liệu game đến AI bên ngoài.** Không tự bật quyền ghi màn hình. Ảnh OCR dùng trong máy, chỉ ghi tóm tắt đã bật quyền.
+- **Tính toán chỉ là giả thuyết mô hình** cho đến khi đối chiếu bằng số đo thực chiến.
+- Dữ liệu game cũ vẫn lưu qua khóa Safari cũ; không xóa hoặc di chuyển dữ liệu trong nâng cấp này.
+
+## Các bước sắp tới
+
+1. Cải thiện nhận diện chỉ số, mô tả kỹ năng, phân biệt OCR sai.
+2. Sinh phép thử A, B, A+B và tự đánh giá kết quả dựa trên độ tin cậy.
+3. Tạo bảng tri thức theo từng game: giả thuyết → có bằng chứng → bác bỏ/xác nhận.
+4. Chế độ **“Cho Linh đi cùng”** là bước native iOS riêng (cần quyền chia sẻ màn hình rõ ràng). Chưa triển khai.
+
+**Các tệp cloud-connector, cloud-ui, gateway, render.yaml hiện được giữ trong repo như bản thảo kỹ thuật, không đưa vào bản Web và không triển khai máy chủ.** Không cần kết nối Render, không cần tạo API key.
+
+Website: https://hoaianhdoan0209-hue.github.io/Linh-Ai/
+
+---
+
+## Lịch sử kỹ thuật trước khi chốt hướng miễn phí
+
+### Bản thảo 0.6: AI tùy chọn (không sử dụng)
+
+#### Ghi chú lịch sử (không còn trong giao diện chính)
 
 - Bộ não 0.5 vẫn dùng ngoại tuyến, không bắt buộc có dịch vụ AI.
 - 0.6 có phần **Trò chuyện bằng mô hình AI** bên trong khung tư vấn. Muốn dùng cần cổng HTTPS riêng và mã truy cập.

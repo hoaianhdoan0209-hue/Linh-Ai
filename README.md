@@ -1,6 +1,15 @@
-# Linh AI · Web 0.3 beta (iPhone / Safari)
+# Linh AI · Web 0.4 beta (iPhone / Safari)
 
 Linh là **bản thử nghiệm** một trợ lý phân tích game đa trò: bong bóng sống, hồ sơ nhiều game, máy tính sát thương/hiệu ứng, và tính năng mới **đọc chữ từ ảnh game người dùng tự chọn**.
+
+## Linh 0.4 — Trí nhớ học từ ảnh có xin phép
+
+- Sau khi Bệ hạ bật **Cho Linh ghi nhớ quan sát của game này**, Linh tự lưu một bản tóm tắt *không chứa ảnh gốc hoặc toàn bộ OCR*: chỉ gồm dấu hiệu, chỉ số OCR, giả thuyết, câu hỏi và dấu vân tay để tránh lưu trùng.
+- Mỗi game có quyền ghi nhớ riêng; mặc định **tắt**, bật lên mới bắt đầu lưu. Nếu ảnh hiện tại thuộc game khác, Linh không ghi nhớ nhầm.
+- Có nút **OCR đúng / OCR sai** để Bệ hạ sửa dữ liệu. Thông tin bị đánh dấu sai không còn dùng cho tổng hợp hoặc gợi ý.
+- Hỏi Linh về “đã học”, “combo”, “cơ chế” sẽ có phần trả lời từ những ảnh đã ghi nhớ. Đây là bộ nhớ có kiểm chứng OCR, **không tự huấn luyện mạng AI hay xác nhận công thức game**.
+- Có nút xóa riêng trí nhớ ảnh từng game. Các bản sao lưu JSON xuất từ Linh giữ lại dữ liệu học khi đã bật ghi nhớ.
+- Vẫn không tự quan sát game ngoài Safari; iOS native capture là hạng mục độc lập cần cài ứng dụng iOS.
 
 ## Những gì 0.3 đã làm được
 

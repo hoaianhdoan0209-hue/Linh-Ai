@@ -1,0 +1,375 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#070b18"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Linh AI"><meta name="description" content="Linh: trợ lý phân tích hiệu ứng, sát thương và chiến thuật đa game. Dữ liệu lưu trên máy."><style>:root{color-scheme:dark;--bg:#070b18;--panel:#121b30;--panel2:#17233c;--stroke:#283650;--text:#f5f8ff;--muted:#a2b0cb;--blue:#74c9ff;--lav:#c1a7ff;--mint:#6fe8bc;--warn:#ffd18a;--shadow:0 14px 44px rgba(0,0,0,.28)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font:15px/1.55 -apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:radial-gradient(ellipse at 75% 4%,#1b284e 0%,transparent 40%),var(--bg);color:var(--text);min-height:100dvh;-webkit-tap-highlight-color:transparent}button,input,select,textarea{font:inherit}button{cursor:pointer}input,select,textarea{width:100%;background:#0d1425;border:1px solid #374563;color:var(--text);padding:11px 12px;border-radius:12px;outline:none}input:focus,select:focus,textarea:focus{border-color:#78c5f9;box-shadow:0 0 0 3px #61bbff1f}input::placeholder,textarea::placeholder{color:#7888a6}input[type='checkbox']{width:20px;height:20px;accent-color:#78c5fa;padding:0}textarea{min-height:90px;resize:vertical}label{display:block;color:#c4d1e7;font-size:12px;font-weight:650;margin-bottom:6px}.shell{max-width:560px;margin:0 auto;padding:0 16px 112px}.topbar{padding:19px 0 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;gap:9px;align-items:center;font-size:23px;font-weight:850;letter-spacing:.04em}.brand .mark{width:28px;height:28px;border-radius:10px;background:linear-gradient(140deg,#83ebff,#927bff);box-shadow:0 0 24px #64bffb70}.smallcaps{font-size:10px;letter-spacing:.07em;font-weight:800;text-transform:uppercase;color:var(--muted)}.privacy-pill{padding:7px 10px;border:1px solid #285745;border-radius:999px;color:#7fe8be;background:#10251e;font-size:11px;font-weight:800;white-space:nowrap}.intro{color:#c3cfea;margin:0 0 17px;font-size:13px}.habitat{height:218px;position:relative;overflow:hidden;border:1px solid #334468;border-radius:24px;background:radial-gradient(ellipse at 55% 73%,#233f7b 0%,transparent 58%),linear-gradient(150deg,#171d38,#101a35 65%,#112d37);box-shadow:var(--shadow)}.habitat:after{content:'';position:absolute;inset:0;background-image:radial-gradient(#c1e7ff 1px,transparent 1px);background-size:36px 36px;opacity:.16;pointer-events:none}.hero-copy{position:absolute;top:19px;left:18px;max-width:44%;pointer-events:none}.hero-copy h1{font-size:18px;line-height:1.25;margin:0 0 7px}.hero-copy p{font-size:12px;color:#bfcae8;margin:0}.mascot{position:absolute;left:68%;top:41%;transform:translate(-50%,-50%);width:108px;height:108px;border:0;background:transparent;touch-action:none;z-index:2;filter:drop-shadow(0 13px 13px #0c132c70);animation:bob 3.1s ease-in-out infinite}.mascot .body{position:absolute;inset:12px 8px 10px;background:radial-gradient(circle at 30% 23%,#ffffffdc 0%,#b0f7ff 13%,#5eafff 49%,#7b68e2 90%);border-radius:47% 52% 50% 48%;box-shadow:0 0 0 3px #effeff48 inset,0 0 22px #6dbbff9e,0 0 50px #8c8aff72;animation:wobble 3.8s ease-in-out infinite}.mascot .body:before{content:'';position:absolute;left:22%;top:13%;width:24%;height:14%;border-radius:50%;background:#fff9;transform:rotate(-25deg);filter:blur(2px)}.eyes{display:flex;position:absolute;top:48px;left:33px;gap:25px}.eye{width:8px;height:12px;background:#132044;border-radius:60%;animation:blink 6s infinite}.mouth{position:absolute;top:70px;left:51px;width:11px;height:7px;border-bottom:3px solid #152348;border-radius:0 0 60% 60%}.cheek{position:absolute;top:64px;width:11px;height:6px;border-radius:50%;background:#ff9fc2a0}.cheek.l{left:26px}.cheek.r{right:25px}.mascot:active{animation:none}.speech{position:absolute;right:12px;bottom:12px;padding:6px 10px;border:1px solid #6784bc6b;background:#13243fdf;border-radius:10px;color:#d9f8ff;font-size:11px;max-width:240px}.game-strip{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:13px}.game-strip strong{font-size:15px}.pill{display:inline-flex;border-radius:999px;padding:4px 8px;background:#1b2946;color:#afd2f7;font-size:10px;font-weight:800;border:1px solid #3b5070}.card{background:linear-gradient(180deg,#152039,#111a2e);border:1px solid var(--stroke);border-radius:19px;padding:16px;margin:13px 0;box-shadow:0 7px 25px #0509131a}.card h2{font-size:16px;margin:0 0 7px}.card h3{font-size:14px;margin:0 0 7px}.card p{color:var(--muted);font-size:13px;margin:6px 0}.sec-title{font-weight:800;font-size:13px;color:#dce7fc;letter-spacing:.015em;margin:22px 0 8px}.sub{color:var(--muted);font-size:12px}.muted{color:var(--muted)}.light{color:#e6f3ff}.accent{color:var(--blue)}.mint{color:var(--mint)}.warn{color:var(--warn)}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#243653;color:#eef7ff;border:1px solid #40547a;border-radius:12px;padding:11px 13px;font-size:13px;font-weight:750;min-height:42px}.btn.primary{background:linear-gradient(110deg,#76dbf6,#9684fc);color:#071024;border:none}.btn.ghost{background:transparent}.btn.warn-btn{background:#382520;color:#ffbfaa;border-color:#734d46}.btn.full{width:100%}.btn:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;align-items:center;gap:10px}.between{justify-content:space-between}.wrap{flex-wrap:wrap}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.fields.one{grid-template-columns:1fr}.stack{display:grid;gap:10px}.stack.sm{gap:6px}.quick-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{border:1px solid #354664;background:#0e1b32;border-radius:14px;padding:10px 9px}.stat strong{font-size:19px;letter-spacing:-.02em;font-weight:850;display:block;line-height:1.4;overflow-wrap:anywhere}.stat small{display:block;color:#9baccb;font-size:10px}.stat:nth-child(3) strong{color:#72edc0}.hint{font-size:11px;color:#a9bad9;border-left:2px solid #6abef4;padding-left:10px;margin:13px 0}.rule-banner{padding:11px 12px;border-radius:12px;border:1px solid #655641;background:#30291e;color:#f9d69f;font-size:12px}.effect{background:#0f192c;border:1px solid #30415b;border-radius:14px;padding:11px;display:flex;align-items:flex-start;gap:10px;margin:9px 0}.effect.off{opacity:.62}.effect .effect-title{font-size:13px;font-weight:750}.effect .effect-desc{font-size:11px;color:#a6b6d3;line-height:1.5}.effect .grow{flex:1;min-width:0}.mini-button{background:transparent;border:0;color:#d3a3b6;font-size:21px;line-height:1;padding:1px 4px}.chip{border-radius:7px;padding:2px 6px;border:1px solid #465875;background:#1d2b44;color:#cbe1ff;font-size:10px;display:inline-block;margin:3px 4px 0 0}.chip.wait{border-color:#6a5434;color:#edc991;background:#302719}.result-list{display:grid;gap:8px;margin-top:10px}.result-line{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #293852;padding-bottom:7px;font-size:12px}.result-line:last-child{border:0}.item{background:#101a2d;border:1px solid #2d415f;border-radius:12px;padding:10px;display:flex;gap:10px;align-items:center;justify-content:space-between}.item strong{font-size:13px}.item small{display:block;color:#9fafcb}.empty{border:1px dashed #51617b;padding:15px;text-align:center;border-radius:12px;color:#a9bddc;font-size:12px}.tab{display:none}.tab.active{display:block;animation:fade .18s ease}.tabnav{position:fixed;bottom:0;left:0;width:100%;background:#0a1021ed;backdrop-filter:blur(20px);border-top:1px solid #273755;z-index:20;padding:8px max(14px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:3px}.tabnav button{border:none;background:transparent;color:#899bbd;min-width:0;flex:1;max-width:142px;padding:5px 0 3px;border-radius:11px;display:grid;place-items:center;gap:1px;font-size:11px;font-weight:700}.tabnav button.active{color:#91dfff;background:#1d2b47}.navico{font-size:18px}.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:94px;z-index:99;max-width:calc(100% - 25px);text-align:center;background:#d1f3ff;color:#112443;padding:10px 15px;border-radius:12px;font-size:12px;font-weight:700;box-shadow:var(--shadow)}.hidden{display:none!important}.photo-preview{max-height:240px;object-fit:contain;width:100%;border-radius:12px;border:1px solid #304160;background:#081120}.note{background:#0e1b30;padding:10px;border-radius:12px;margin:8px 0;border:1px solid #2c3b5b}.note .text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;color:#d7e5ff}.audit{display:flex;gap:8px;align-items:start;padding:8px 0;font-size:13px;color:#cfdeef}.audit .tick{color:var(--mint)}.divider{border:0;border-top:1px solid #2b3d59;margin:15px 0}.number{font-variant-numeric:tabular-nums}.wide{grid-column:1/-1}@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -10px}}@keyframes wobble{0%,100%{border-radius:47% 52% 50% 48%;rotate:-2deg}50%{border-radius:52% 45% 44% 54%;rotate:3deg}}@keyframes blink{0%,42%,45%,100%{transform:scaleY(1)}43%{transform:scaleY(.1)}}@keyframes fade{from{opacity:.45;transform:translateY(5px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;scroll-behavior:auto!important}}@media(min-width:700px){.tabnav{width:560px;left:50%;transform:translateX(-50%);border-radius:15px 15px 0 0;border-left:1px solid #273755;border-right:1px solid #273755}}@media(max-width:355px){.quick-stats strong{font-size:16px}.hero-copy{max-width:44%}.mascot{left:73%}.fields{gap:7px}}
+
+#newGame{min-width:0;flex:1}#addGame{flex:0 0 auto;white-space:nowrap}
+</style><title>Linh · Trợ lý game</title></head><body>
+<div class="shell">
+<header class="topbar"><div class="brand"><span class="mark" aria-hidden="true"></span>LINH <span class="smallcaps">WEB 0.5</span></div><span class="privacy-pill">● HỌC CỤC BỘ · 0₫</span></header>
+<p class="intro">Bạn đồng hành tính chỉ số, phối hiệu ứng và học quy tắc từ thử nghiệm.</p>
+<section id="home" class="tab active" aria-label="Trang chủ">
+<div class="habitat" id="habitat"><div class="hero-copy"><div class="smallcaps">TRỢ LÝ ĐA GAME</div><h1>Thần ở đây,<br>Bệ hạ!</h1><p>Chạm hoặc kéo Linh để tương tác.</p></div><button type="button" class="mascot" id="mascot" aria-label="Chạm vào Linh"><span class="body"></span><span class="eyes"><span class="eye"></span><span class="eye"></span></span><span class="mouth"></span><span class="cheek l"></span><span class="cheek r"></span></button><span class="speech" id="speech">"Hôm nay ta phân tích game nào?"</span></div>
+<div class="game-strip"><div><span class="smallcaps">ĐANG PHÂN TÍCH</span><br><strong id="homeGame">Game mẫu</strong></div><span class="pill" id="gameCount">1 GAME</span></div>
+<div class="card"><h2>Kho game riêng của Bệ hạ</h2><p>Mỗi game có chỉ số, hiệu ứng, phép thử và ghi chú riêng.</p><div class="row"><input id="newGame" maxlength="60" placeholder="Tên game mới…" aria-label="Tên game mới"><button class="btn primary" id="addGame">+ Thêm</button></div><div class="stack" id="gameList" style="margin-top:12px"></div></div>
+<div class="card"><h2>Hôm nay Linh làm được gì?</h2><div class="audit"><span class="tick">✦</span><div>So sánh sát thương thường, chí mạng và kỳ vọng.</div></div><div class="audit"><span class="tick">✦</span><div>Tìm bộ phối hiệu ứng tốt nhất theo số ô.</div></div><div class="audit"><span class="tick">✦</span><div>Lưu bằng chứng để kiểm tra quy tắc cộng / nhân.</div></div><div class="rule-banner" style="margin-top:9px">Bản này là máy tính chiến thuật offline, <strong>chưa có mô hình AI tự đọc hiểu mọi game</strong>. Công thức mẫu phải được kiểm chứng riêng theo game.</div><button class="btn primary full" data-goto="analyze" style="margin-top:13px">Bắt đầu phân tích →</button></div>
+</section>
+<section id="analyze" class="tab" aria-label="Phân tích"><div class="sec-title">MÁY TÍNH CHIẾN THUẬT</div><div class="card"><div class="row between"><h2 style="margin:0" id="analyzeGame">Game mẫu</h2><span class="pill">MÔ HÌNH CHƯA XÁC MINH</span></div><p>Nhập chỉ số thật của game. Thay đổi giá trị để thấy kết quả ngay.</p><div class="sec-title">Chỉ số gốc</div><div class="fields" id="statsForm"></div><hr class="divider"><div class="sec-title">Quy tắc tính thử</div><div class="fields"><div><label for="stacking">Các hiệu ứng tăng sát thương</label><select id="stacking"><option value="multiply">Nhân riêng</option><option value="add">Cộng chung</option></select></div><div><label for="armorMode">Công thức giáp</label><select id="armorMode"><option value="softcap">Mẫu giảm dần</option><option value="none">Bỏ qua giáp</option></select></div></div></div>
+<div class="card"><div class="row between"><h2 style="margin:0">Kết quả tính thử</h2><span class="pill">ƯỚC TÍNH</span></div><div class="quick-stats" style="margin-top:12px"><div class="stat"><small>Đòn thường</small><strong class="number" id="normal">—</strong></div><div class="stat"><small>Chí mạng</small><strong class="number" id="critical">—</strong></div><div class="stat"><small>Trung bình</small><strong class="number" id="expected">—</strong></div></div><div id="formulaNote" class="hint"></div><div id="inactiveWarning" class="sub"></div></div>
+<div class="card"><h2>Hiệu ứng và combo</h2><p>Đặt thẻ điều kiện như <span class="chip">burn</span>: kỹ năng cấp thẻ "burn" sẽ mở các hiệu ứng cần "burn".</p><div id="effectsList"></div><hr class="divider"><h3>Thêm hiệu ứng</h3><div class="fields"><div class="wide"><label for="effectName">Tên hiệu ứng</label><input id="effectName" maxlength="45" placeholder="Ví dụ: Thiêu đốt"></div><div><label for="effectType">Loại</label><select id="effectType"></select></div><div><label for="effectValue">Giá trị (+ / −)</label><input id="effectValue" type="number" step="any" value="20" inputmode="decimal"></div><div><label for="effectGrants">Cấp thẻ</label><input id="effectGrants" maxlength="120" placeholder="burn"></div><div><label for="effectRequires">Cần thẻ</label><input id="effectRequires" maxlength="120" placeholder="burn"></div></div><button class="btn" id="addEffect" style="margin-top:13px">+ Thêm vào game</button></div>
+<div class="card"><h2>Tối ưu bộ phối</h2><p>Linh thử mọi tổ hợp tối đa 12 hiệu ứng và xét điều kiện kích hoạt.</p><div class="row"><div style="flex:1"><label for="slots">Số ô sử dụng</label><input id="slots" type="number" min="0" max="12" value="3"></div><button class="btn primary" id="runOptimize" style="align-self:end">Tìm combo tốt nhất</button></div><div id="optimizeResult" style="margin-top:10px"></div></div>
+</section>
+<section id="learn" class="tab" aria-label="Học hỏi"><div class="sec-title">HỌC TỪ PHÉP THỬ</div><div class="card"><h2>Đối chiếu sát thương thực tế</h2><p>Đánh một đòn <strong>không chí mạng</strong>, ghi số sát thương thật. Linh lưu dự đoán theo cả hai cách cộng/nhân tại thời điểm đó.</p><div class="fields"><div><label for="observedDamage">Sát thương nhìn thấy</label><input id="observedDamage" type="number" min="1" step="any" inputmode="decimal" placeholder="Ví dụ: 1820"></div><div><label for="observationContext">Bối cảnh (tùy chọn)</label><input id="observationContext" maxlength="120" placeholder="Boss, không buff khác…"></div></div><button class="btn primary full" id="saveObservation" style="margin-top:12px">Lưu phép đo và so sánh</button><div class="card" style="background:#0b1527;margin-bottom:0"><div class="smallcaps">KẾT QUẢ SUY LUẬN</div><div id="evidenceResult" style="margin-top:8px"></div></div><div id="observationList" style="margin-top:12px"></div></div>
+<div class="card"><h2>Đôi mắt của Linh (beta)</h2><p>Chọn một ảnh game để Linh tự đọc chữ, đề xuất số liệu và đặt câu hỏi kiểm chứng. Ảnh chỉ dùng trong máy, không tự lưu và không gửi tới máy chủ AI.</p><input type="file" id="photoInput" accept="image/*" aria-label="Chọn ảnh game"><img id="photoPreview" class="photo-preview hidden" alt="Ảnh game bạn vừa chọn" style="margin-top:10px"><div class="row wrap" style="margin-top:10px"><button class="btn primary" id="scanPhoto" disabled>Đọc chữ trong ảnh</button><button class="btn ghost hidden" id="clearPhoto">Bỏ ảnh khỏi màn hình</button><button class="btn ghost hidden" id="saveOcrNote">Lưu giả thuyết</button><button class="btn ghost hidden" id="applyVisionFacts">Nhận chỉ số từ ảnh</button></div><p class="sub" id="visionStatus" style="margin-top:8px">Chưa phân tích ảnh nào.</p><div class="fields one" style="margin-top:10px"><div><label for="ocrText">Chữ Linh đọc được</label><textarea id="ocrText" readonly placeholder="Khi Bệ hạ bấm đọc ảnh, Linh sẽ trích chữ ở đây."></textarea></div></div><div id="visionInsight"></div><div id="visionQuestions"></div></div><div class="card"><h2>Hỏi Linh · suy luận thử nghiệm</h2><p>Linh giải thích dựa trên chỉ số hiện có, kết quả OCR và ghi nhớ của game đang chọn. Đây là bộ suy luận theo quy tắc cục bộ; chưa dùng mô hình AI tạo sinh.</p><div class="fields one"><div><label for="askLinh">Bệ hạ muốn hỏi gì?</label><textarea id="askLinh" maxlength="500" placeholder="Ví dụ: Từ ảnh này Linh thấy combo nào đáng thử?"></textarea></div></div><button class="btn primary" id="askLinhBtn">Hỏi Linh</button><div id="askLinhAnswer" style="margin-top:12px"></div></div>
+<div class="card"><h2>Nhật ký kinh nghiệm</h2><p>Ghi quy tắc, combo, kết quả đã thử. Linh lưu theo từng game và giúp tham chiếu về sau.</p><div class="fields one"><div><label for="noteKind">Loại ghi nhớ</label><select id="noteKind"><option value="Giả thuyết">Giả thuyết</option><option value="Đã kiểm chứng">Đã kiểm chứng</option><option value="Chiến thuật">Chiến thuật</option><option value="Sai / cần sửa">Sai / cần sửa</option></select></div><div><label for="noteText">Điều vừa học</label><textarea id="noteText" maxlength="1500" placeholder="Ví dụ: Hiệu ứng A và B dường như nhân với nhau…"></textarea></div></div><button class="btn primary" id="addNote">Lưu kinh nghiệm</button><div id="notesList" style="margin-top:14px"></div></div>
+</section>
+<section id="privacy" class="tab" aria-label="Quyền riêng tư"><div class="sec-title">BỆ HẠ TOÀN QUYỀN QUYẾT ĐỊNH</div><div class="card"><h2>Quyền riêng tư của Linh</h2><div class="audit"><span class="tick">✓</span><div>Không kết nối AI tạo sinh hay máy chủ tính phí; OCR và bộ tính hoạt động trong trình duyệt, ảnh không tự tải lên máy chủ.</div></div><div class="audit"><span class="tick">✓</span><div>Không xin quyền camera, micro, danh bạ, màn hình hay thư viện ảnh.</div></div><div class="audit"><span class="tick">✓</span><div>Ảnh chỉ được nạp khi Bệ hạ chủ động chọn, và không được lưu mặc định.</div></div><div class="audit"><span class="tick">✓</span><div>Hồ sơ và kết quả lưu bằng bộ nhớ trình duyệt trên thiết bị.</div></div><div class="rule-banner">Xóa dữ liệu Safari hoặc dùng chế độ riêng tư có thể mất trí nhớ của Linh. Hãy xuất bản sao lưu nếu cần giữ lâu dài.</div></div>
+<div class="card"><h2>Dữ liệu và sao lưu</h2><p id="storageInfo"></p><div class="stack"><button class="btn full" id="exportData">⬇ Xuất bản sao lưu JSON</button><label for="importData" class="sub">Nhập lại bản sao lưu do chính Bệ hạ chọn</label><input type="file" accept="application/json,.json" id="importData"><button class="btn warn-btn full" id="clearAll">Xóa toàn bộ trí nhớ và game</button></div></div><div class="card"><h2>Cài Linh lên màn hình chính</h2><p>Trên iPhone, mở trang Linh bằng <strong>Safari qua địa chỉ HTTPS</strong> → bấm <strong>Chia sẻ</strong> → <strong>Thêm vào Màn hình chính</strong>.</p><p>Web App chạy như một biểu tượng riêng, nhưng không thể bay đè lên các game khác.</p><span class="pill" id="offlineStatus">Đang kiểm tra chế độ offline…</span></div><p class="sub" style="text-align:center;margin-top:17px">Linh Web 0.3 beta · Đọc ảnh cục bộ · Suy luận có kiểm chứng</p>
+</section></div>
+<nav class="tabnav" aria-label="Điều hướng chính"><button data-tab="home" class="active"><span class="navico">✧</span>Trang chủ</button><button data-tab="analyze"><span class="navico">◈</span>Phân tích</button><button data-tab="learn"><span class="navico">✎</span>Học hỏi</button><button data-tab="privacy"><span class="navico">◇</span>Riêng tư</button></nav><div role="status" aria-live="polite" id="toast" class="toast hidden"></div><script>/* Linh 0.2 — deterministic, offline game maths. No game formula is assumed verified. */
+(function (root, factory) {
+  const engine = factory();
+  if (typeof module !== 'undefined' && module.exports) module.exports = engine;
+  root.LinhEngine = engine;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const n = (x, fallback = 0) => Number.isFinite(Number(x)) ? Number(x) : fallback;
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const tags = value => String(value || '').split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
+  const types = {
+    attack:'% công', damage:'% sát thương', vulnerable:'% sát thương nhận',
+    critChance:'% chí mạng', critDamage:'% ST chí mạng thêm',
+    flat:'Sát thương cộng thẳng', armorPen:'% xuyên giáp', resistPen:'% xuyên kháng'
+  };
+  function effectsActive(items, innateTags) {
+    const selected = (items || []).filter(e=>e && e.enabled !== false);
+    const known = new Set(tags(innateTags));
+    const active = new Set();
+    let changed = true;
+    for (let pass=0; pass<=selected.length && changed; pass++) {
+      changed = false;
+      for (const e of selected) {
+        if (active.has(e.id)) continue;
+        if (tags(e.requires).every(t=>known.has(t))) {
+          active.add(e.id); changed=true;
+          tags(e.grants).forEach(t=>known.add(t));
+        }
+      }
+    }
+    return {active: selected.filter(e=>active.has(e.id)), inactive: selected.filter(e=>!active.has(e.id)), knownTags:[...known]};
+  }
+  function simulate(stats={}, items=[], modes={}) {
+    const {active,inactive,knownTags} = effectsActive(items, stats.innateTags);
+    const get = type => active.filter(e=>e.type===type).map(e=>n(e.value));
+    const sum = xs => xs.reduce((a,b)=>a+b,0);
+    const attack = n(stats.attack) + sum(get('attack'));
+    const skill = Math.max(0,n(stats.skill,100));
+    const flat = n(stats.flat) + sum(get('flat'));
+    const valuesDmg = [n(stats.damage), ...get('damage')];
+    const stacking = modes.stacking === 'add' ? 'add' : 'multiply';
+    const dm = stacking === 'add' ? 1+sum(valuesDmg)/100 : valuesDmg.reduce((a,v)=>a*(1+v/100),1);
+    const vulnerable = n(stats.vulnerable)+sum(get('vulnerable'));
+    const chance = clamp(n(stats.critChance)+sum(get('critChance')),0,100)/100;
+    const critBonus = Math.max(-100, n(stats.critDamage,50)+sum(get('critDamage')));
+    const armorPen = clamp(n(stats.armorPen)+sum(get('armorPen')),0,100);
+    const resistPen = n(stats.resistPen)+sum(get('resistPen'));
+    const armor = Math.max(0,n(stats.armor))*(1-armorPen/100);
+    const scale = Math.max(0.001,n(stats.armorScale,1000));
+    const armorFactor = modes.armorMode==='none'?1: scale/(scale+armor);
+    const resistance = clamp(n(stats.resist)-resistPen,-100,100);
+    const resistFactor = 1-resistance/100;
+    const preCrit=Math.max(0,(n(stats.base)*(1+attack/100)+flat)*skill/100 * Math.max(0,dm) * Math.max(0,1+vulnerable/100) * armorFactor * resistFactor);
+    const critical=preCrit*(1+critBonus/100);
+    const expected=preCrit*(1-chance)+critical*chance;
+    return {normal:preCrit,critical,expected,critChance:chance,critBonus,armorFactor,resistFactor,stacking,active,inactive,knownTags};
+  }
+  function optimize(stats, items, modes, slots=3) {
+    const options = (items||[]).slice(0,12), k=clamp(Math.floor(n(slots,3)),0,options.length);
+    let best={result:simulate(stats,[],modes),items:[],tested:0};
+    const total=2**options.length;
+    for(let mask=0;mask<total;mask++){
+      let count=0;
+      for(let i=0;i<options.length;i++) count+=(mask>>i)&1;
+      if(count>k) continue;
+      const subset=options.filter((_,i)=>(mask>>i)&1).map(x=>({...x,enabled:true}));
+      const result=simulate(stats,subset,modes); best.tested++;
+      if(result.expected>best.result.expected+1e-8) best={result,items:subset,tested:best.tested};
+    }
+    return best;
+  }
+  function analyzeEvidence(observations) {
+    if(!Array.isArray(observations)||observations.length===0)return {status:'empty',message:'Chưa có phép đo thực tế.'};
+    const valid=observations.filter(o=>Number.isFinite(n(o.actual,NaN)) && n(o.actual)>0 && Number.isFinite(n(o.addPrediction,NaN)) && Number.isFinite(n(o.multiplyPrediction,NaN)));
+    if(!valid.length)return {status:'empty',message:'Chưa có phép đo hợp lệ.'};
+    const errs = mode => valid.reduce((sum,o)=>sum+Math.abs(n(o.actual)-n(o[mode+'Prediction']))/n(o.actual),0)/valid.length;
+    const ea=errs('add'), em=errs('multiply');
+    const winner = ea<em?'add':'multiply';
+    const gap=Math.abs(ea-em);
+    const uncertain=valid.length<2 || gap<0.03;
+    return {status:uncertain?'uncertain':'suggestion', winner,addError:ea,multiplyError:em,count:valid.length,
+      message:uncertain?'Chưa đủ phép đo hoặc chênh lệch quá nhỏ để phân biệt. Hãy thử thêm trong điều kiện giống nhau, không chí mạng.':
+      `Dữ liệu đang nghiêng về cách ${winner==='add'?'cộng':'nhân'} hiệu ứng (chưa phải kết luận chắc chắn).`};
+  }
+  return {simulate, optimize, analyzeEvidence, effectsActive, types, n, clamp};
+});
+</script><script src="./vision-engine.js"></script><script>
+/* Linh Learning 0.4: opt-in on-device memory of OCR-derived game observations.
+ * This is evidence tracking, not neural-network training and not proof of mechanics.
+ * Raw screenshots, full OCR text, account data and API keys are never stored here.
+ */
+(function(root,factory){
+ const api=factory();
+ if(typeof module!=='undefined'&&module.exports)module.exports=api;
+ root.LinhLearning=api;
+})(typeof globalThis!=='undefined'?globalThis:this,function(){
+ 'use strict';
+ const TAG_KEYS=['burn','poison','crit','cooldown','armor','heal','duration','stacks','vulnerable'];
+ const FACT_KEYS=['critChance','critDamage','attack','armorPen','resistPen','vulnerable'];
+ const safeText=(v,n=180)=>String(v??'').slice(0,n);
+ const finite=(n)=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=1000;
+ function sanitize(source){
+  const x=source&&typeof source==='object'?source:{};
+  return {enabled:x.enabled===true,items:(Array.isArray(x.items)?x.items:[]).slice(-50).map(item=>{
+   if(!item||typeof item!=='object')return null;
+   return {id:safeText(item.id,64),signature:safeText(item.signature,16),date:safeText(item.date,80),
+    status:['pending','accepted','rejected'].includes(item.status)?item.status:'pending',
+    tags:(Array.isArray(item.tags)?item.tags:[]).filter(t=>TAG_KEYS.includes(t)).slice(0,12),
+    facts:(Array.isArray(item.facts)?item.facts:[]).filter(f=>f&&FACT_KEYS.includes(f.key)&&finite(f.value)).slice(0,10).map(f=>({key:f.key,label:safeText(f.label,60),value:f.value})),
+    hypothesis:safeText(item.hypothesis,360),question:safeText(item.question,300)
+   };
+  }).filter(Boolean)};
+ }
+ function fingerprint(text){
+  const s=String(text||'').normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim().slice(0,16000);
+  let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return (h>>>0).toString(16).padStart(8,'0');
+ }
+ function addObservation(memory,vision,date,id){
+  if(!memory||!memory.enabled||!vision||!vision.text?.trim())return {added:false,reason:'disabled-or-empty'};
+  const sig=fingerprint(vision.text);
+  if((memory.items||[]).some(x=>x.signature===sig))return {added:false,reason:'duplicate'};
+  const item={id:safeText(id||'entry-'+Date.now()+'-'+sig,64),signature:sig,date:safeText(date,80),status:'pending',
+   tags:(vision.tags||[]).map(t=>t.key).filter(t=>TAG_KEYS.includes(t)).slice(0,12),
+   facts:(vision.facts||[]).filter(f=>FACT_KEYS.includes(f.key)&&finite(f.value)).slice(0,10).map(f=>({key:f.key,label:safeText(f.label,60),value:f.value})),
+   hypothesis:safeText((vision.hypotheses||[])[0],360),question:safeText((vision.questions||[])[0],300)};
+  memory.items=Array.isArray(memory.items)?memory.items:[];memory.items.push(item);memory.items=memory.items.slice(-50);
+  return {added:true,item};
+ }
+ function feedback(memory,id,status){
+  if(!['accepted','rejected'].includes(status))return false;
+  const item=(memory?.items||[]).find(x=>x.id===id);if(!item)return false;
+  item.status=status;return true;
+ }
+ function summary(memory){
+  const items=(memory?.items||[]).filter(x=>x.status!=='rejected');
+  const counts=new Map(),labels={burn:'thiêu đốt',poison:'độc',crit:'chí mạng',cooldown:'hồi chiêu',armor:'giáp',heal:'hồi phục',duration:'thời lượng',stacks:'cộng dồn',vulnerable:'nhận thêm sát thương'};
+  for(const item of items)for(const tag of new Set(item.tags)) counts.set(tag,(counts.get(tag)||0)+1);
+  return {total:(memory?.items||[]).length,accepted:items.filter(x=>x.status==='accepted').length,pending:items.filter(x=>x.status==='pending').length,
+   signals:[...counts].sort((a,b)=>b[1]-a[1]).map(([key,count])=>({key,label:labels[key]||key,count})),
+   nextQuestion:items.slice().reverse().map(x=>x.question).find(Boolean)||'Bệ hạ có thể cho Linh xem thêm một kỹ năng hoặc kết quả sát thương để kiểm chứng không?'};
+ }
+ function recall(memory,query){
+  const sum=summary(memory);if(!sum.total)return null;
+  const q=String(query||'').toLowerCase();
+  if(!/nhớ|học|trước|đã thấy|đã đọc|dữ kiện|bằng chứng|biết gì|combo|hiệu ứng|cơ chế/.test(q))return null;
+  const active=(memory?.items||[]).filter(x=>x.status!=='rejected');
+  const stats=active.flatMap(x=>x.facts.map(f=>({ ...f,date:x.date,confirmed:x.status==='accepted'})));
+  const latest=[...new Map(stats.slice().reverse().map(x=>[x.key,x])).values()].slice(0,4);
+  let response=`Trí nhớ từ ảnh game: ${sum.total} lần quan sát, ${sum.accepted} lần Bệ hạ xác nhận OCR đúng, ${sum.pending} lần chưa xác nhận.`;
+  if(sum.signals.length)response+=' Những dấu hiệu xuất hiện nhiều: '+sum.signals.slice(0,4).map(x=>x.label+' ('+x.count+' ảnh)').join(', ')+'.';
+  if(latest.length)response+=' Một số chỉ số OCR đã thấy: '+latest.map(x=>`${x.label} ${x.value}%${x.confirmed?' (đã xác nhận OCR)':''}`).join(', ')+'.';
+  response+=' Đây là bằng chứng ảnh/OCR, chưa chứng minh công thức của game.';
+  return {reply:response,question:sum.nextQuestion};
+ }
+ return {sanitize,fingerprint,addObservation,feedback,summary,recall};
+});
+
+</script><script>(() => {
+'use strict';
+const E = window.LinhEngine;
+const $= id=>document.getElementById(id);
+const esc = str=>String(str??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=> (globalThis.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+const now=()=>new Date().toLocaleString('vi-VN');
+const fmt=x=>Number.isFinite(x)?new Intl.NumberFormat('vi-VN',{maximumFractionDigits:Math.abs(x)<10?2:0}).format(x):'—';
+const storageKey='linh-web-local-v02';
+let memoryOnly=false, photoURL=null, saveWarned=false, lastVision=null, tesseractReady=null, visionGameId=null;
+const templateStats=()=>({base:1000,skill:100,attack:15,damage:20,vulnerable:0,critChance:25,critDamage:50,armor:350,armorScale:1000,armorPen:0,resist:0,resistPen:0,flat:0,innateTags:''});
+const demoGame=()=>({id:uid(),name:'Game mẫu · đổi tên hoặc tạo mới',createdAt:now(),stats:templateStats(),modes:{stacking:'multiply',armorMode:'softcap'},effects:[
+ {id:uid(),name:'Gây thiêu đốt',type:'damage',value:0,grants:'burn',requires:'',enabled:true},
+ {id:uid(),name:'Tăng sát thương lên mục tiêu cháy',type:'damage',value:30,grants:'',requires:'burn',enabled:true},
+ {id:uid(),name:'Kỹ năng cường hóa',type:'damage',value:18,grants:'',requires:'',enabled:true},
+ {id:uid(),name:'Bạo kích',type:'critChance',value:15,grants:'',requires:'',enabled:false}
+ ],observations:[],notes:[]});
+const newState=()=>{const g=demoGame();return{version:2,selectedId:g.id,games:[g]};};
+function safeRead(){try {const raw=localStorage.getItem(storageKey);return raw?JSON.parse(raw):null;}catch(e){memoryOnly=true;return null;}}
+function validateGame(src){
+ if(!src||typeof src!=='object'||typeof src.name!=='string')return null;
+ return {id:String(src.id||uid()).slice(0,100),name:src.name.slice(0,60),createdAt:String(src.createdAt||now()).slice(0,80),
+ stats:{...templateStats(),...Object.fromEntries(Object.entries(src.stats||{}).filter(([key,v])=>Object.hasOwn(templateStats(),key)).map(([k,v])=>[k,k==='innateTags'?String(v).slice(0,120):E.n(v)]))},
+ modes:{stacking:src.modes?.stacking==='add'?'add':'multiply',armorMode:src.modes?.armorMode==='none'?'none':'softcap'},
+ effects:(Array.isArray(src.effects)?src.effects:[]).slice(0,60).filter(o=>o&&typeof o.name==='string'&&Object.hasOwn(E.types,o.type)).map(o=>({id:String(o.id||uid()).slice(0,100),name:o.name.slice(0,45),type:o.type,value:E.n(o.value),grants:String(o.grants||'').slice(0,120),requires:String(o.requires||'').slice(0,120),enabled:o.enabled!==false})),
+ observations:(Array.isArray(src.observations)?src.observations:[]).slice(-80).map(o=>({id:String(o.id||uid()).slice(0,100),date:String(o.date||'').slice(0,80),context:String(o.context||'').slice(0,120),actual:E.n(o.actual),addPrediction:E.n(o.addPrediction),multiplyPrediction:E.n(o.multiplyPrediction)})).filter(o=>o.actual>0),
+ notes:(Array.isArray(src.notes)?src.notes:[]).slice(-150).map(o=>({id:String(o.id||uid()).slice(0,100),date:String(o.date||'').slice(0,80),kind:String(o.kind||'Giả thuyết').slice(0,30),text:String(o.text||'').slice(0,1500)})).filter(o=>o.text),
+ learning:window.LinhLearning.sanitize(src.learning)
+ };
+}
+function validateState(data){if(!data||typeof data!=='object'||!Array.isArray(data.games)||data.games.length>100)throw Error('Tệp sao lưu không đúng định dạng hoặc quá lớn.');
+ const games=data.games.map(validateGame).filter(Boolean);if(!games.length)throw Error('Không tìm thấy game hợp lệ.');
+ const seen=new Set();for(const g of games){if(seen.has(g.id))g.id=uid();seen.add(g.id);}
+ const selectedId=games.some(g=>g.id===data.selectedId)?data.selectedId:games[0].id;
+ return {version:2,games,selectedId};
+}
+let state;try{const saved=safeRead();state=saved?validateState(saved):newState();}catch(e){state=newState();}
+function save(){try {localStorage.setItem(storageKey,JSON.stringify(state));}catch(e){memoryOnly=true;if(!saveWarned){saveWarned=true;toast('Safari không cho lưu bộ nhớ; dữ liệu có thể mất khi đóng trang.');}}}
+function game(){return state.games.find(g=>g.id===state.selectedId)||state.games[0];}
+const phrases=['Bệ hạ muốn thử bộ hiệu ứng nào ạ?','Có thêm số liệu thực chiến, thần sẽ suy luận chính xác hơn.','Mỗi game dùng một công thức riêng, ta phải kiểm chứng!','Thử đổi cách cộng / nhân rồi so kết quả nhé.','Thần không đọc dữ liệu nào khi chưa được Bệ hạ chọn.'];
+let phraseNo=0,timerId;
+function toast(message){const el=$('toast');el.textContent=message;el.classList.remove('hidden');clearTimeout(timerId);timerId=setTimeout(()=>el.classList.add('hidden'),3000);}
+function greet(){phraseNo=(phraseNo+1)%phrases.length;$('speech').textContent='"'+phrases[phraseNo]+'"';if(navigator.vibrate)navigator.vibrate(16);}
+function tab(name){if(!['home','analyze','learn','privacy'].includes(name))return;document.querySelectorAll('.tab').forEach(n=>n.classList.toggle('active',n.id===name));document.querySelectorAll('[data-tab]').forEach(n=>n.classList.toggle('active',n.dataset.tab===name));window.scrollTo({top:0,behavior:'instant'});}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.goto)));
+const statFields=[['base','Sát thương gốc'],['skill','Hệ số kỹ năng (%)'],['attack','Tăng công (%)'],['damage','Tăng sát thương (%)'],['vulnerable','Địch nhận thêm (%)'],['critChance','Tỷ lệ chí mạng (%)'],['critDamage','ST chí mạng thêm (%)'],['armor','Giáp mục tiêu'],['armorScale','Hằng số giáp mẫu'],['armorPen','Xuyên giáp (%)'],['resist','Kháng sát thương (%)'],['resistPen','Xuyên kháng (%)'],['flat','Sát thương cộng thẳng']];
+function renderStatForm(){const g=game();$('statsForm').innerHTML=statFields.map(([k,t])=>`<div><label for="stat-${k}">${esc(t)}</label><input type="number" step="any" inputmode="decimal" id="stat-${k}" data-stat="${k}" value="${esc(g.stats[k])}"></div>`).join('')+`<div class="wide"><label for="stat-innateTags">Thẻ điều kiện có sẵn (ngăn bằng dấu phẩy)</label><input id="stat-innateTags" data-stat="innateTags" maxlength="120" value="${esc(g.stats.innateTags)}" placeholder="Ví dụ: wet, burn"></div>`;
+ document.querySelectorAll('[data-stat]').forEach(inp=>inp.addEventListener('input',()=>{g.stats[inp.dataset.stat]=inp.dataset.stat==='innateTags'?inp.value:E.n(inp.value);save();renderResults();}));
+ $('stacking').value=g.modes.stacking;$('armorMode').value=g.modes.armorMode;}
+function renderResults(){const g=game(),r=E.simulate(g.stats,g.effects,g.modes);$('normal').textContent=fmt(r.normal);$('critical').textContent=fmt(r.critical);$('expected').textContent=fmt(r.expected);
+ $('formulaNote').textContent=`Đã tính ${r.active.length} hiệu ứng hợp lệ. Tỷ lệ chí mạng ${fmt(r.critChance*100)}%; giáp còn hiệu lực ${(r.armorFactor*100).toFixed(1)}%. Mô hình đang ${g.modes.stacking==='add'?'cộng':'nhân'} nhóm tăng sát thương. Đây chỉ là công thức thử, không phải cơ chế đã xác minh.`;
+ $('inactiveWarning').textContent=r.inactive.length?'Chưa kích hoạt vì thiếu điều kiện: '+r.inactive.map(e=>e.name).join(', '):'Các hiệu ứng đang bật đều đủ điều kiện kích hoạt.';
+ renderEffects(r);}
+function renderEffects(r){const list=$('effectsList'),g=game();if(!g.effects.length){list.innerHTML='<div class="empty">Chưa có hiệu ứng. Hãy thêm hiệu ứng của game.</div>';return;}
+ list.innerHTML=g.effects.map(e=>{const active=r.active.some(x=>x.id===e.id),waiting=e.enabled&&!active;return `<div class="effect ${e.enabled?'':'off'}"><input type="checkbox" data-effect-toggle="${esc(e.id)}" ${e.enabled?'checked':''} aria-label="Bật ${esc(e.name)}"><div class="grow"><div class="effect-title">${esc(e.name)} <span class="muted">${e.value>=0?'+':''}${fmt(e.value)}</span></div><div class="effect-desc">${esc(E.types[e.type])}</div>${e.grants?`<span class="chip">Cấp: ${esc(e.grants)}</span>`:''}${e.requires?`<span class="chip ${waiting?'wait':''}">${waiting?'Chưa đủ · ':''}Cần: ${esc(e.requires)}</span>`:''}</div><button class="mini-button" data-delete-effect="${esc(e.id)}" title="Xóa hiệu ứng" aria-label="Xóa ${esc(e.name)}">×</button></div>`;}).join('');
+ list.querySelectorAll('[data-effect-toggle]').forEach(el=>el.addEventListener('change',()=>{const x=g.effects.find(e=>e.id===el.dataset.effectToggle);if(x)x.enabled=el.checked;save();renderResults();}));
+ list.querySelectorAll('[data-delete-effect]').forEach(el=>el.addEventListener('click',()=>{if(!confirm('Xóa hiệu ứng này?'))return;g.effects=g.effects.filter(e=>e.id!==el.dataset.deleteEffect);save();renderResults();}));}
+function renderGames(){const g=game();$('homeGame').textContent=g.name;$('analyzeGame').textContent=g.name;$('gameCount').textContent=state.games.length+' GAME';$('gameList').innerHTML=state.games.map(x=>`<div class="item"><div><strong>${esc(x.name)}</strong><small>${x.effects.length} hiệu ứng · ${x.observations.length} phép đo · ${x.notes.length} ghi nhớ</small></div><div class="row" style="gap:5px"><button class="btn ${x.id===g.id?'primary':'ghost'}" data-select-game="${esc(x.id)}">${x.id===g.id?'Đang chọn':'Chọn'}</button><button class="mini-button" data-delete-game="${esc(x.id)}" title="Xóa game" aria-label="Xóa game">×</button></div></div>`).join('');
+ document.querySelectorAll('[data-select-game]').forEach(b=>b.addEventListener('click',()=>{state.selectedId=b.dataset.selectGame;save();renderAll();toast('Đã chuyển game.');}));
+ document.querySelectorAll('[data-delete-game]').forEach(b=>b.addEventListener('click',()=>{if(state.games.length===1){toast('Giữ lại một game. Có thể xóa toàn bộ trong Riêng tư.');return;}if(!confirm('Xóa game và toàn bộ ghi nhớ của nó?'))return;state.games=state.games.filter(g=>g.id!==b.dataset.deleteGame);if(!state.games.some(g=>g.id===state.selectedId))state.selectedId=state.games[0].id;save();renderAll();}));}
+function renderNotes(){const notes=game().notes;$('notesList').innerHTML=notes.length?notes.slice().reverse().map(o=>`<div class="note"><div class="row between"><span class="chip">${esc(o.kind)}</span><button class="mini-button" aria-label="Xóa ghi nhớ" data-delete-note="${esc(o.id)}">×</button></div><div class="text" style="margin-top:6px">${esc(o.text)}</div><div class="sub" style="margin-top:4px">${esc(o.date)}</div></div>`).join(''):'<div class="empty">Chưa có kinh nghiệm nào được lưu.</div>';
+ document.querySelectorAll('[data-delete-note]').forEach(b=>b.addEventListener('click',()=>{const g=game();g.notes=g.notes.filter(x=>x.id!==b.dataset.deleteNote);save();renderNotes();}));}
+function renderEvidence(){const g=game(),result=E.analyzeEvidence(g.observations);
+ let msg=`<p>${esc(result.message)}</p>`;
+ if(result.count)msg+=`<div class="result-list"><div class="result-line"><span>Sai lệch trung bình · cộng</span><strong>${fmt(result.addError*100)}%</strong></div><div class="result-line"><span>Sai lệch trung bình · nhân</span><strong>${fmt(result.multiplyError*100)}%</strong></div><div class="result-line"><span>Mẫu đo</span><strong>${result.count}</strong></div></div>`;
+ if(result.status==='suggestion')msg+='<div class="hint">Gợi ý chưa tự đổi công thức. Hãy xem thêm phép đo và cơ chế ẩn trước khi áp dụng.</div>';
+ $('evidenceResult').innerHTML=msg;
+ $('observationList').innerHTML=g.observations.length?g.observations.slice().reverse().map(x=>`<div class="item" style="margin:6px 0"><div><strong>Thực tế: ${fmt(x.actual)}</strong><small>Cộng: ${fmt(x.addPrediction)} · Nhân: ${fmt(x.multiplyPrediction)}</small><small>${esc(x.context||x.date)}</small></div><button class="mini-button" data-del-test="${esc(x.id)}" aria-label="Xóa phép đo">×</button></div>`).join(''):'<div class="empty">Chưa có phép đo. Sau một trận đánh, thử ghi lại con số.</div>';
+ document.querySelectorAll('[data-del-test]').forEach(b=>b.addEventListener('click',()=>{const g=game();g.observations=g.observations.filter(x=>x.id!==b.dataset.delTest);save();renderEvidence();}));}
+function renderStorage(){const all=state.games;const effects=all.reduce((s,g)=>s+g.effects.length,0),obs=all.reduce((s,g)=>s+g.observations.length,0),notes=all.reduce((s,g)=>s+g.notes.length,0);
+ $('storageInfo').textContent=`${all.length} game · ${effects} hiệu ứng · ${obs} phép đo · ${notes} ghi nhớ. ${memoryOnly?'Trình duyệt đang không lưu được dữ liệu.':'Chỉ lưu cục bộ trong trình duyệt.'}`;}
+function resetVision(){lastVision=null;visionGameId=null;$('visionStatus').textContent='Chưa phân tích ảnh nào.';$('ocrText').value='';$('visionInsight').innerHTML='';$('visionQuestions').innerHTML='';$('saveOcrNote').classList.add('hidden');$('applyVisionFacts').classList.add('hidden');}
+function renderVision(v){
+ const f=v.facts||[];
+ $('visionInsight').innerHTML=`<div class="note"><div class="smallcaps">LINH NHẬN DIỆN ĐƯỢC · CHƯA XÁC MINH</div><div class="text" style="margin-top:6px">${v.tags.length?esc('Dấu hiệu: '+v.tags.map(t=>t.label).join(', ')):'Chưa xác định rõ cơ chế từ ảnh này.'}</div>${f.length?'<div class="result-list">'+f.map(x=>`<div class="result-line"><span>${esc(x.label)}</span><strong>${esc(x.value)}%</strong></div>`).join('')+'</div>':''}<div class="hint">Giá trị OCR có thể sai. Linh chỉ lưu số liệu khi Bệ hạ xác nhận.</div></div>`;
+ $('visionQuestions').innerHTML=`<div class="note"><div class="smallcaps">SUY LUẬN VÀ CÂU HỎI CỦA LINH</div>${v.hypotheses.map(x=>`<p class="sub">• ${esc(x)}</p>`).join('')}${v.questions.map(x=>`<p class="sub">❔ ${esc(x)}</p>`).join('')}</div>`;
+ $('applyVisionFacts').classList.toggle('hidden',!f.length);
+}
+function ensureTesseract(){if(window.Tesseract)return Promise.resolve(window.Tesseract);if(tesseractReady)return tesseractReady;tesseractReady=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./ocr/tesseract.min.js';s.onload=()=>window.Tesseract?resolve(window.Tesseract):reject(new Error('Thư viện OCR chưa sẵn sàng'));s.onerror=()=>reject(new Error('Không thể tải OCR. Hãy kết nối mạng khi dùng lần đầu.'));document.head.appendChild(s);}).catch(error=>{tesseractReady=null;throw error;});return tesseractReady;}
+async function scanCurrentPhoto(){const file=$('photoInput').files?.[0];if(!file){toast('Hãy chọn ảnh game trước.');return;}
+ $('scanPhoto').disabled=true;$('visionStatus').textContent='Linh đang tải mô-đun OCR của ứng dụng (lần đầu có thể mất một lúc)…';
+ let worker=null;
+ try{const T=await ensureTesseract();if(!file || $('photoInput').files?.[0]!==file) return;
+ const opts={workerPath:new URL('./ocr/worker.min.js',document.baseURI).href,corePath:new URL('./ocr',document.baseURI).href,langPath:new URL('./ocr/lang',document.baseURI).href,workerBlobURL:false,logger:m=>{if(m?.status&&$('photoInput').files?.[0]===file){$('visionStatus').textContent='Linh đang đọc ảnh: '+m.status+' '+Math.round((m.progress||0)*100)+'%';}}};
+ worker=await T.createWorker(['eng','vie'],1,opts);
+ const result=await worker.recognize(file);
+ if($('photoInput').files?.[0]!==file) return;
+ const raw=(result?.data?.text||'').trim();lastVision=window.LinhVision.observe(raw);visionGameId=game().id;
+ $('ocrText').value=raw;renderVision(lastVision);window.dispatchEvent(new Event('linh:vision'));
+ $('visionStatus').textContent=raw?'Đã đọc chữ trong ảnh. Linh mới đưa ra giả thuyết, chưa tự lưu.':'Linh chưa đọc rõ chữ. Hãy chọn ảnh có chữ lớn, rõ hơn.';
+ $('saveOcrNote').classList.toggle('hidden',!raw);
+ $('speech').textContent=lastVision.questions[0]||'Thần đã nhìn ảnh, Bệ hạ muốn tìm combo nào?';
+ }catch(error){if($('photoInput').files?.[0]===file){$('visionStatus').textContent='Chưa thể đọc chữ trên ảnh ở thiết bị này.';toast(error?.message||'OCR chưa khởi tạo được.');}}
+ finally{if(worker){try{await worker.terminate();}catch(_){}} $('scanPhoto').disabled=!$('photoInput').files?.length;}
+}
+function saveLearnedVision(){if(!lastVision?.text){toast('Chưa có chữ OCR để lưu.');return;}if(game().id!==visionGameId){toast('Ảnh đang thuộc game khác. Hãy chọn ảnh lại.');return;}
+ const g=game();const newNotes=[...lastVision.hypotheses.map(x=>'Giả thuyết từ ảnh (chưa kiểm chứng): '+x),...lastVision.questions.map(x=>'Cần tìm hiểu: '+x)];
+ const text='Trích chữ từ ảnh (OCR chưa xác minh):\n'+lastVision.text.slice(0,1100)+'\n'+newNotes.join('\n');
+ g.notes.push({id:uid(),date:now(),kind:'Giả thuyết',text:text.slice(0,1500)});g.notes=g.notes.slice(-150);save();renderNotes();renderGames();renderStorage();toast('Đã lưu giả thuyết; không lưu ảnh gốc.');
+}
+function applyExtractedStats(){if(!lastVision?.facts?.length || game().id!==visionGameId){toast('Không có chỉ số OCR của game này để xác nhận.');return;}
+ const g=game();if(!confirm('Linh đọc được '+lastVision.facts.length+' chỉ số từ ảnh. Bệ hạ đã kiểm tra và đồng ý cập nhật các chỉ số này vào hồ sơ game?'))return;
+ for(const f of lastVision.facts)if(Object.hasOwn(g.stats,f.key))g.stats[f.key]=f.value;
+ save();renderStatForm();renderResults();renderGames();renderStorage();toast('Đã cập nhật '+lastVision.facts.length+' chỉ số mà Bệ hạ xác nhận.');
+}
+function answerLinh(question){const g=game(),response=window.LinhVision.answer(question,{...g,slots:Number($('slots').value)||3},lastVision,E);
+ $('askLinhAnswer').innerHTML=`<div class="note"><div class="text">${esc(response.reply)}</div>${response.question?`<div class="hint">Linh muốn hỏi thêm: ${esc(response.question)}</div>`:''}</div>`;
+}
+function renderAll(){renderGames();renderStatForm();renderResults();renderNotes();renderEvidence();renderStorage();$('optimizeResult').innerHTML='';window.dispatchEvent(new Event('linh:game'));}
+$('addGame').addEventListener('click',()=>{const name=$('newGame').value.trim();if(!name){toast('Xin nhập tên game.');return;}if(state.games.length>=100){toast('Đã đạt giới hạn 100 game.');return;}const g={id:uid(),name:name.slice(0,60),createdAt:now(),stats:templateStats(),modes:{stacking:'multiply',armorMode:'softcap'},effects:[],observations:[],notes:[]};state.games.push(g);state.selectedId=g.id;$('newGame').value='';save();renderAll();toast('Đã tạo hồ sơ riêng cho '+g.name+'.');});
+$('newGame').addEventListener('keydown',e=>{if(e.key==='Enter')$('addGame').click();});
+$('stacking').addEventListener('change',e=>{game().modes.stacking=e.target.value;save();renderResults();});
+$('armorMode').addEventListener('change',e=>{game().modes.armorMode=e.target.value;save();renderResults();});
+$('effectType').innerHTML=Object.entries(E.types).map(([type,name])=>`<option value="${type}">${esc(name)}</option>`).join('');
+$('addEffect').addEventListener('click',()=>{const g=game(),name=$('effectName').value.trim(),type=$('effectType').value,value=Number($('effectValue').value);if(!name){toast('Cần đặt tên hiệu ứng.');return;}if(!Object.hasOwn(E.types,type)||!Number.isFinite(value)){toast('Giá trị hiệu ứng không hợp lệ.');return;}if(g.effects.length>=60){toast('Mỗi game tối đa 60 hiệu ứng.');return;}g.effects.push({id:uid(),name:name.slice(0,45),type,value,requires:$('effectRequires').value.slice(0,120),grants:$('effectGrants').value.slice(0,120),enabled:true});$('effectName').value='';$('effectRequires').value='';$('effectGrants').value='';save();renderResults();toast('Đã thêm hiệu ứng.');});
+$('runOptimize').addEventListener('click',()=>{const g=game(),slots=E.n($('slots').value,3);const best=E.optimize(g.stats,g.effects,g.modes,slots);const baseline=E.simulate(g.stats,[],g.modes);$('optimizeResult').innerHTML=`<div class="card" style="margin:0;background:#0c1e31"><div class="smallcaps">BỘ PHỐI ĐỀ XUẤT · ${best.tested} TỔ HỢP</div><div class="quick-stats" style="margin-top:12px;grid-template-columns:repeat(2,1fr)"><div class="stat"><small>Trung bình tốt nhất</small><strong class="mint">${fmt(best.result.expected)}</strong></div><div class="stat"><small>So với không hiệu ứng</small><strong class="accent">${baseline.expected?(((best.result.expected/baseline.expected-1)*100).toFixed(1)+'%'):'—'}</strong></div></div><p>${best.items.length?best.items.map(x=>`<span class="chip">${esc(x.name)}</span>`).join(''):'Không cần hiệu ứng theo mô hình hiện tại.'}</p><div class="hint">Kết quả chỉ đúng với các quy tắc, thẻ và chỉ số đã nhập. Không đánh giá mana, thời gian hồi, độ hiếm hay nhịp đánh.</div><button class="btn primary full" id="applyCombo">Dùng bộ phối này</button></div>`;
+ $('applyCombo').addEventListener('click',()=>{const ids=new Set(best.items.map(x=>x.id));g.effects.forEach(x=>x.enabled=ids.has(x.id));save();renderResults();toast('Đã chọn bộ phối tính toán.');});
+ if(g.effects.length>12)toast('Chỉ thử 12 hiệu ứng đầu tiên.');});
+$('saveObservation').addEventListener('click',()=>{const g=game(),actual=Number($('observedDamage').value);if(!Number.isFinite(actual)||actual<=0){toast('Nhập sát thương thực tế lớn hơn 0.');return;}
+ const a=E.simulate(g.stats,g.effects,{...g.modes,stacking:'add'}),m=E.simulate(g.stats,g.effects,{...g.modes,stacking:'multiply'});
+ g.observations.push({id:uid(),date:now(),context:$('observationContext').value.slice(0,120),actual,addPrediction:a.normal,multiplyPrediction:m.normal});g.observations=g.observations.slice(-80);$('observedDamage').value='';$('observationContext').value='';save();renderEvidence();renderGames();renderStorage();toast('Đã lưu phép đo của '+g.name+'.');});
+$('addNote').addEventListener('click',()=>{const g=game(),s=$('noteText').value.trim();if(!s){toast('Xin nhập nội dung ghi nhớ.');return;}g.notes.push({id:uid(),date:now(),kind:$('noteKind').value,text:s.slice(0,1500)});g.notes=g.notes.slice(-150);$('noteText').value='';save();renderNotes();renderGames();renderStorage();toast('Đã lưu vào trí nhớ của game.');});
+$('photoInput').addEventListener('change',e=>{if(photoURL){URL.revokeObjectURL(photoURL);photoURL=null;}const file=e.target.files?.[0];resetVision();$('scanPhoto').disabled=true;if(!file){$('photoPreview').classList.add('hidden');$('clearPhoto').classList.add('hidden');return;}if(!file.type.startsWith('image/')){toast('Chỉ chọn ảnh.');e.target.value='';return;}if(file.size>20*1024*1024){toast('Ảnh quá lớn (tối đa 20 MB).');e.target.value='';return;}
+ photoURL=URL.createObjectURL(file);$('photoPreview').src=photoURL;$('photoPreview').classList.remove('hidden');$('clearPhoto').classList.remove('hidden');$('scanPhoto').disabled=false;$('visionStatus').textContent='Linh đang bắt đầu đọc ảnh đã chọn…';toast('Ảnh chỉ hiển thị trong máy, không upload.');scanCurrentPhoto();});
+$('scanPhoto').addEventListener('click',scanCurrentPhoto);
+$('saveOcrNote').addEventListener('click',saveLearnedVision);
+$('applyVisionFacts').addEventListener('click',applyExtractedStats);
+$('askLinhBtn').addEventListener('click',()=>answerLinh($('askLinh').value));
+$('askLinh').addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')$('askLinhBtn').click();});
+$('clearPhoto').addEventListener('click',()=>{if(photoURL)URL.revokeObjectURL(photoURL);photoURL=null;$('photoInput').value='';$('photoPreview').removeAttribute('src');$('photoPreview').classList.add('hidden');$('clearPhoto').classList.add('hidden');$('scanPhoto').disabled=true;resetVision();$('askLinhAnswer').innerHTML='';});
+$('exportData').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='linh-game-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);toast('Đã tạo bản sao lưu.');});
+$('importData').addEventListener('change',async ev=>{const file=ev.target.files?.[0];if(!file)return;try{if(file.size>3e6)throw Error('Bản sao lưu lớn hơn 3 MB.');const next=validateState(JSON.parse(await file.text()));if(!confirm('Nhập dữ liệu này sẽ thay thế toàn bộ trí nhớ hiện tại. Tiếp tục?'))return;state=next;save();renderAll();toast('Đã nhập bản sao lưu.');}catch(err){toast(err.message||'Không đọc được tệp.');}finally{ev.target.value='';}});
+$('clearAll').addEventListener('click',()=>{if(!confirm('Xóa TOÀN BỘ game, hiệu ứng, phép đo và ghi nhớ trên thiết bị?'))return;state=newState();try{localStorage.removeItem(storageKey);}catch(e){}save();renderAll();$('clearPhoto').click();toast('Đã xóa dữ liệu cũ.');});
+const mascot=$('mascot'),habitat=$('habitat');let drag=null,moved=false;
+mascot.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,left:mascot.offsetLeft,top:mascot.offsetTop};moved=false;mascot.setPointerCapture(e.pointerId);});
+mascot.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>5)moved=true;const w=habitat.clientWidth,h=habitat.clientHeight;mascot.style.left=E.clamp(drag.left+dx,54,w-54)+'px';mascot.style.top=E.clamp(drag.top+dy,54,h-54)+'px';});
+mascot.addEventListener('pointerup',()=>{drag=null;if(!moved)greet();});mascot.addEventListener('pointercancel',()=>drag=null);
+mascot.addEventListener('click',e=>{if(e.detail===0)greet();});
+window.addEventListener('beforeunload',()=>{if(photoURL)URL.revokeObjectURL(photoURL);});
+window.LinhBridge={getGame:game,save:()=>{save();renderGames();renderStorage();},vision:()=>lastVision,visionGameId:()=>visionGameId,notify:toast};
+renderAll();save();
+$('offlineStatus').textContent=location.protocol==='https:'?'HTTPS · sẵn sàng lưu offline sau lần mở đầu':'Cần hosting HTTPS để cài PWA và offline đầy đủ';
+if('serviceWorker' in navigator && location.protocol==='https:')navigator.serviceWorker.register('./sw.js').then(()=>{$('offlineStatus').textContent='Bộ nhớ offline PWA đã đăng ký';}).catch(()=>{$('offlineStatus').textContent='Đang chạy online; bộ nhớ offline chưa kích hoạt';});
+})();
+</script><script>
+/* Linh 0.4 learning UI: requires LinhLearning + LinhBridge; no network requests. */
+(()=>{
+ 'use strict';
+ const L=window.LinhLearning, B=window.LinhBridge;
+ if(!L||!B)return;
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const root=document.createElement('div');
+ root.id='learningBox';root.className='card';
+ root.innerHTML=`<h2>Trí nhớ từ quan sát · beta</h2>
+ <p>Linh chỉ ghi nhớ <strong>dấu hiệu và giả thuyết rút ra từ OCR</strong> khi Bệ hạ bật quyền. Không tự lưu ảnh gốc hoặc toàn bộ chữ trong ảnh.</p>
+ <label style="display:flex;gap:10px;align-items:center;font-size:13px;color:#e8f2ff;margin:12px 0"><input type="checkbox" id="autoLearn" style="width:20px;height:20px;flex:none">Cho Linh ghi nhớ quan sát của game này</label>
+ <div class="row wrap" style="margin:8px 0"><button class="btn" id="learnCurrent">Ghi nhớ ảnh đang xem</button><button class="btn ghost" id="clearLearned">Xóa trí nhớ ảnh của game</button></div>
+ <div id="learningSummary" class="sub"></div><div id="learningEntries"></div>
+ <div class="hint">“OCR đúng” chỉ xác nhận chữ/số Linh đọc; không chứng minh cơ chế sát thương trong game. Những gì chưa rõ vẫn là giả thuyết.</div>`;
+ document.getElementById('visionQuestions').insertAdjacentElement('afterend',root);
+ const $=id=>document.getElementById(id);
+ const current=()=>{const g=B.getGame();if(!g.learning)g.learning=L.sanitize(null);return g;};
+ const save=()=>{B.save();render();};
+ const record=()=>{const g=current(),v=B.vision();if(!v||B.visionGameId()!==g.id){B.notify('Ảnh này không thuộc game đang chọn.');return;}
+  const result=L.addObservation(g.learning,v,new Date().toLocaleString('vi-VN'),'memo-'+Date.now()+'-'+Math.random().toString(36).slice(2,8));
+  if(result.added){save();B.notify('Linh đã ghi nhớ dấu hiệu từ ảnh, chưa kết luận công thức.');}
+  else if(result.reason==='duplicate') B.notify('Linh đã nhớ ảnh này rồi, không tính trùng.');
+  else B.notify('Cần bật quyền ghi nhớ và chọn ảnh có chữ.');
+ };
+ const render=()=>{const g=current(),m=g.learning,s=L.summary(m);
+  $('autoLearn').checked=m.enabled;
+  $('learningSummary').textContent=`${s.total} lần quan sát · ${s.accepted} kết quả OCR đã xác nhận · ${s.pending} cần kiểm tra.${s.signals.length?' Dấu hiệu lặp lại: '+s.signals.slice(0,3).map(t=>t.label+' ('+t.count+')').join(', ')+'.':''}`;
+  $('learningEntries').innerHTML=m.items.length?m.items.slice().reverse().slice(0,8).map(item=>{
+   const label=item.status==='accepted'?'Đã xác nhận OCR':item.status==='rejected'?'Đọc sai (đã loại)':'Chưa xác nhận';
+   const details=item.facts.length?item.facts.map(f=>esc(f.label)+' '+esc(f.value)+'%').join(', '):'Chưa có chỉ số rõ ràng';
+   return `<div class="note"><div class="row between"><span class="chip">${esc(label)}</span><span class="sub">${esc(item.date)}</span></div><div class="text" style="margin-top:7px">${details}</div>${item.hypothesis?`<p class="sub">Giả thuyết: ${esc(item.hypothesis)}</p>`:''}${item.question?`<p class="sub">Linh muốn hỏi: ${esc(item.question)}</p>`:''}<div class="row wrap" style="margin-top:8px"><button class="btn ghost" data-learn-id="${esc(item.id)}" data-decision="accepted">OCR đúng</button><button class="btn ghost" data-learn-id="${esc(item.id)}" data-decision="rejected">OCR sai</button></div></div>`;
+  }).join(''):'<div class="empty" style="margin-top:10px">Chưa ghi nhớ ảnh nào. Bật quyền trên và chọn ảnh game để Linh bắt đầu học.</div>';
+ };
+ $('autoLearn').addEventListener('change',e=>{const g=current();g.learning.enabled=e.target.checked;save();if(e.target.checked&&B.vision()?.text&&B.visionGameId()===g.id)record();else B.notify(e.target.checked?'Đã bật ghi nhớ cho game này.':'Đã tắt ghi nhớ tự động.');});
+ $('learnCurrent').addEventListener('click',record);
+ $('clearLearned').addEventListener('click',()=>{if(!confirm('Xóa toàn bộ trí nhớ quan sát từ ảnh của game này?'))return;const g=current();g.learning.items=[];save();B.notify('Đã xóa trí nhớ ảnh của game.');});
+ $('learningEntries').addEventListener('click',e=>{const btn=e.target.closest('button[data-learn-id]');if(!btn)return;const g=current();if(L.feedback(g.learning,btn.dataset.learnId,btn.dataset.decision)){save();B.notify(btn.dataset.decision==='accepted'?'Đã đánh dấu OCR đúng.':'Đã loại dữ kiện OCR sai.');}});
+ window.addEventListener('linh:vision',()=>{if(current().learning.enabled)record();else render();});
+ window.addEventListener('linh:game',render);
+ $('askLinhBtn').addEventListener('click',()=>{const memory=L.recall(current().learning,$('askLinh').value);if(!memory)return;const box=document.createElement('div');box.className='note';box.innerHTML=`<div class="smallcaps">TRÍ NHỚ CỦA LINH</div><div class="text" style="margin-top:7px">${esc(memory.reply)}</div>${memory.question?`<div class="hint">Điều Linh còn muốn biết: ${esc(memory.question)}</div>`:''}`;
+   $('askLinhAnswer').append(box);});
+ render();
+})();
+
+</script><script src="./assistant-engine.js"></script><script src="./assistant-ui.js"></script></body></html>

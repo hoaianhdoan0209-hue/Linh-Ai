@@ -27,9 +27,10 @@ function create(){
  function clear(){revision++;history=[];inFlight=false;}
  function status(){return {ready:!!(server&&token),endpoint:server,
    turns:history.length,mode:'external-model-opt-in'};}
- async function ask(question,{confirm,remoteFetch=fetch,image=null}={}){
+ async function ask(question,{confirm,remoteFetch=fetch,image=null,isValid=null}={}){
   const q=String(question||'').trim().slice(0,700);
   if(!q||!server||!token)return {ok:false,reason:'AI chưa được kết nối.'};
+  if(typeof isValid==='function'&&!isValid())return {ok:false,cancelled:true,reason:'Ảnh không còn được chọn.'};
   if(inFlight)return {ok:false,reason:'Đang xử lý yêu cầu trước.'};
   if(image&&!(image.mimeType==='image/jpeg'&&typeof image.data==='string'&&
       image.data.length>=100&&image.data.length<=1200000&&
@@ -46,6 +47,7 @@ function create(){
      imagePreview:image?{mimeType:image.mimeType,width:image.width,height:image.height,
        bytes:image.bytes??Math.floor(image.data.length*3/4)}:null})))
    return {ok:false,cancelled:true,reason:'Đã hủy gửi dữ liệu ra ngoài.'};
+  if(typeof isValid==='function'&&!isValid())return {ok:false,cancelled:true,reason:'Ảnh đã đóng trước khi gửi.'};
   inFlight=true;const startedAt=revision;
   try{
    const res=await remoteFetch(server,{
@@ -55,7 +57,7 @@ function create(){
    });
    if(!res.ok)return {ok:false,reason:res.status===429?'AI tạm giới hạn lượt gọi.':'Cổng AI chưa phản hồi ('+res.status+').'};
    const raw=await res.json();
-   if(startedAt!==revision)return {ok:false,cancelled:true,reason:'Phiên AI đã bị xóa hoặc ngắt.'};
+   if(startedAt!==revision||(typeof isValid==='function'&&!isValid()))return {ok:false,cancelled:true,reason:'Ảnh hoặc phiên AI đã thay đổi.'};
    const reply=typeof raw?.reply==='string'?raw.reply.trim().slice(0,3200):'';
    if(!reply)return {ok:false,reason:'AI không trả về văn bản hợp lệ.'};
    history.push({role:'user',text:q},{role:'assistant',text:reply.slice(0,420)});

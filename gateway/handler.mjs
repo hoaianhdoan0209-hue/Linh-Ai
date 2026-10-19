@@ -71,6 +71,16 @@ export function makeHandler(config, remoteFetch=fetch){
   const o=request.headers.get('origin')||'';
   const corsHeaders={'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Headers':'Content-Type,X-Linh-Access','Access-Control-Allow-Methods':'POST,OPTIONS','Cache-Control':'no-store','Content-Type':'application/json; charset=utf-8'};
   function response(code,obj){return new Response(JSON.stringify(obj),{status:code,headers:corsHeaders});}
+  // Public, read-only health check; never includes tokens, API keys,
+  // model IDs or player information, and never sends a model request.
+  // It must work when users paste /health in a browser without Origin.
+  const path=new URL(request.url).pathname;
+  if(path==='/health'&&request.method==='GET'){
+   const configured=!!(modelConfig?.model&&accessToken&&
+     (modelConfig.provider!=='gemini'||modelConfig.key));
+   return response(200,{service:'socrates-gateway',status:'online',
+    configured,providerTested:false});
+  }
   if(o!==origin)return response(403,{error:'Origin not allowed'});
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:corsHeaders});
   if(request.method!=='POST'||new URL(request.url).pathname!=='/chat')return response(404,{error:'Not found'});

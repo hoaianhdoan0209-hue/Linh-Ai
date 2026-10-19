@@ -5,21 +5,29 @@ const ui = readFileSync(new URL('./index.html',import.meta.url),'utf8');
 const legacy = readFileSync(new URL('./legacy-dashboard.html',import.meta.url),'utf8');
 
 assert.ok(ui.includes('id="linh"'),'Missing the single visible Linh character');
-assert.equal((ui.match(/<button\b/g)||[]).length,1,'Home must have one visible interaction');
-assert.ok(!/<(?:input|select|textarea|nav|section|h1|h2|h3)\b/i.test(ui),
+assert.equal((ui.match(/id="linh"/g)||[]).length,1,'Home must have one Linh character');
+assert.ok(ui.includes('id="chatDock" class="chat-dock" hidden'),'Conversation composer must be hidden until Linh is tapped');
+assert.ok(ui.includes('id="chatMessage"'),'Typing to Linh must be possible on all browsers');
+assert.ok(ui.includes('id="mic" type="button" hidden'),'Optional mic requires explicit consent');
+assert.ok(ui.includes("const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition"),
+ 'Voice input must be feature detected, not promised');
+assert.ok(ui.includes('chat.respond(message,dialogue,legacy)'),'Home must answer user questions, not only rotate canned quotes');
+assert.ok(!/<(?:select|textarea|nav|section|h1|h2|h3)\b/i.test(ui),
   'Home must not expose settings, explanations, forms or menus');
 assert.ok(ui.includes('Safari PWA cannot stream the screen'),
   'Do not promise web screen capture');
 assert.ok(!/getDisplayMedia\(/.test(ui),'Web must not pretend to capture other apps');
 assert.ok(ui.includes('serviceWorker'),'PWA service worker must be registered');
 assert.ok(ui.includes('web-companion.js'),'Local Web assistant engine must load');
+assert.ok(ui.includes('web-dialogue.js'),'Local two-way dialogue engine must load');
 assert.ok(ui.includes('aria-live="polite"'),'Linh hints must be screen-reader accessible');
 assert.ok(ui.includes('thought.textContent=text'),'Never use untrusted local game data as HTML');
+assert.ok(ui.includes('said.textContent='),'User text must never be injected as HTML');
 assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-only');
 assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
  'Web home must not overwrite existing game profiles');
 const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
-assert.ok(offline.includes("'./web-companion.js'"),
+assert.ok(offline.includes("'./web-dialogue.js'"),
  'Service worker must cache the new offline thought engine');
 
 for(const marker of [

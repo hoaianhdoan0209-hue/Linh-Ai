@@ -101,7 +101,9 @@ assert.ok(ui.includes("aiBridge.askImage(question,image,"), 'Vision model reques
 assert.ok(ui.includes("window.confirm(") && ui.includes("Thông tin tên người chơi"), 'Screenshot must require consent with visible personal-data warning');
 assert.ok(ui.includes('isValid:()=>scan===scanToken&&file===pendingVisionFile'),
  'AI image backend must not retain result for a dismissed screenshot');
-assert.ok(ui.includes('CHƯA XÁC NHẬN trong game'), 'AI vision is a hypothesis, never approved equipment data');
+const evidenceSource=readFileSync(new URL('./vision-evidence.js',import.meta.url),'utf8');
+assert.ok(evidenceSource.includes('CHƯA XÁC NHẬN')&&ui.includes('visionEvidence.summary(pendingVisionEvidence)'),
+ 'Unverified image results must be visibly marked before explicit label approval');
 assert.ok(ui.includes('if(scan!==scanToken||file!==pendingVisionFile)return;'),
   'AI vision results for dismissed images must be discarded');
 assert.ok(ui.includes("pendingVisionFile=null;"), 'Closing image must drop in-memory file reference');

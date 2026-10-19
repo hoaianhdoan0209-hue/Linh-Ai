@@ -113,7 +113,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 @media(max-height:570px){.world{min-height:0;padding-top:0}.stage{max-height:55dvh}.speech{min-height:54px;margin-top:-12px}.linh{max-height:52dvh;max-width:52dvh}.thought{font-size:12px;padding:9px 12px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
-<link rel="stylesheet" href="./fantasy-chat.css?v=2.11.1">
+<link rel="stylesheet" href="./fantasy-chat.css?v=2.11.2">
 </head>
 <body>
 <main>
@@ -184,26 +184,26 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./web-ai-bridge.js?v=2.11.1"></script>
-<script src="./web-vision-upload.js?v=2.11.1"></script>
-<script src="./vision-evidence.js?v=2.11.1"></script>
-<script src="./stat-schema.js?v=2.11.1"></script>
-<script src="./vision-engine.js?v=2.11.1"></script>
-<script src="./web-image-memory.js?v=2.11.1"></script>
-<script src="./season-knowledge.js?v=2.11.1"></script>
-<script src="./web-game-brain.js?v=2.11.1"></script>
-<script src="./web-game-experiments.js?v=2.11.1"></script>
-<script src="./build-systems.js?v=2.11.1"></script>
-<script src="./ss9-evidence-graph.js?v=2.11.1"></script>
-<script src="./class-catalog.js?v=2.11.1"></script>
-<script src="./ss9-class-roster.js?v=2.11.1"></script>
-<script src="./class-build-knowledge.js?v=2.11.1"></script>
-<script src="./rotation-lab.js?v=2.11.1"></script>
-<script src="./rotation-commands.js?v=2.11.1"></script>
-<script src="./thinking-guard.js?v=2.11.1"></script>
-<script src="./prompt-strategy.js?v=2.11.1"></script>
-<script src="./game-coach.js?v=2.11.1"></script>
-<script src="./fantasy-chat.js?v=2.11.1"></script>
+<script src="./web-ai-bridge.js?v=2.11.2"></script>
+<script src="./web-vision-upload.js?v=2.11.2"></script>
+<script src="./vision-evidence.js?v=2.11.2"></script>
+<script src="./stat-schema.js?v=2.11.2"></script>
+<script src="./vision-engine.js?v=2.11.2"></script>
+<script src="./web-image-memory.js?v=2.11.2"></script>
+<script src="./season-knowledge.js?v=2.11.2"></script>
+<script src="./web-game-brain.js?v=2.11.2"></script>
+<script src="./web-game-experiments.js?v=2.11.2"></script>
+<script src="./build-systems.js?v=2.11.2"></script>
+<script src="./ss9-evidence-graph.js?v=2.11.2"></script>
+<script src="./class-catalog.js?v=2.11.2"></script>
+<script src="./ss9-class-roster.js?v=2.11.2"></script>
+<script src="./class-build-knowledge.js?v=2.11.2"></script>
+<script src="./rotation-lab.js?v=2.11.2"></script>
+<script src="./rotation-commands.js?v=2.11.2"></script>
+<script src="./thinking-guard.js?v=2.11.2"></script>
+<script src="./prompt-strategy.js?v=2.11.2"></script>
+<script src="./game-coach.js?v=2.11.2"></script>
+<script src="./fantasy-chat.js?v=2.11.2"></script>
 <script>
 (()=>{
  'use strict';
@@ -349,6 +349,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const buildAcknowledgment=nextBuild&&/\b(?:toi|ta|minh)\s+(?:choi|dung|dang dung|mac|su dung)\b/.test(normalized)?
      {text:'Socrates ghi nhận thông tin build trong phiên này, chưa coi là đã kiểm chứng. Muốn phân tích đúng cần hiệu ứng đang kích hoạt, Fatestone và kỹ năng chủ lực.',kind:'memory',focus:'game'}:null;
    const promptAdvice=photoRequest||photoRecall?null:promptStrategy.answer(message,{context:buildContext});
+   const numericSuggestion=contextual?.kind==='suggestion'?{...contextual,
+     text:contextual.text+(promptAdvice?'\n\n'+promptAdvice.text:'')}:null;
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
    const sourcedMechanic=photoRequest||photoRecall?null:evidenceGraph.explain(message);
    const buildSkillAdvice=photoRequest||photoRecall?null:classBuildKnowledge.answer(message);
@@ -357,7 +359,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
        classRoster.answer(message)||classCatalog.answer(message));
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
-   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || sourcedMechanic || buildSkillAdvice || sourcedClass || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || sourcedMechanic || buildSkillAdvice || sourcedClass || numericSuggestion || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -402,7 +404,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    // Local arithmetic and rule-based explanations remain authoritative.
    // Online conversation is entirely optional, approved per message.
    const deterministic=clear||photoRequest||photoRecall||reply?.kind==='calculation'||
-     reply?.kind==='official-patch'||reply?.action;
+     reply?.kind==='official-patch'||reply===numericSuggestion||reply?.action;
    if(aiBridge.status().ready&&!deterministic){
      void aiBridge.ask(message,{
        confirm:({endpoint,body})=>window.confirm(

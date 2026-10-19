@@ -35,7 +35,7 @@ assert.ok(ui.includes("const Recognition=window.SpeechRecognition||window.webkit
 assert.ok(ui.includes('chat.respond(message,dialogue,legacy)'),'Home must answer user questions, not only rotate canned quotes');
 assert.ok(ui.includes('experiments.record(measurements,message)'),
  'The main chat must accept explicit game measurements');
-assert.ok(ui.includes('gameBrain.answer(message,savedImages,gameNotes,legacy)'),
+assert.ok(ui.includes('gameBrain.answer(message,savedImages,gameNotes,legacy,measurements)'),
  'Game arithmetic and confirmed OCR memory must be available from the same chat');
 assert.ok(ui.includes('id="learnStatus"'),'Home must show learned-data summary');
 assert.ok(ui.includes("gameBrain.nextStudyPrompt(savedImages,gameNotes)"),

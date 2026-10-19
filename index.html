@@ -237,10 +237,10 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
    const measurement=experiments.record(measurements,message);
    const measuredReply=measurement || experiments.answer(message,measurements);
-   const contextual=coach.reply(message,savedImages);
+   const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);
    const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy,measurements);
    const patchFollowup=gameBrain.followup(message,lastPatch);
-   let reply=measuredReply || (studied?.action?studied:null) || patchFollowup || (photoRecall?null:contextual) || studied || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -274,6 +274,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
    if(clear)lastPatch=null;
    else if(reply===studied&&studied?.kind==='official-patch')lastPatch=studied;
+   else if(!patchFollowup&&reply?.focus!=='game')lastPatch=null;
    dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};
    if(clear){said.hidden=true;said.textContent='';}
    else{said.hidden=false;said.textContent='Bệ hạ: '+message.slice(0,90);}

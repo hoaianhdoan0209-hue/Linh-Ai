@@ -1,3 +1,15 @@
+## Socrates 2.3 — AI riêng theo mô hình AIRI / xsAI
+
+**Đây là tính năng tùy chọn, không phải AI đang chạy sẵn.** [Sơ đồ và hướng dẫn đầy đủ](../research/socrates-owned-ai-architecture.md). Trên Socrates Web, chọn **Kết nối AI riêng**, nhập HTTPS URL `/chat` của gateway cùng mật khẩu `LINH_ACCESS_TOKEN` (không phải API key mô hình). Mỗi câu hỏi đều phải phê duyệt JSON trước khi gửi; mã chỉ giữ trong RAM.
+
+`gateway/providers.mjs` hỗ trợ hai giao thức, cấu hình **chỉ trên server**:
+
+- **Gemini:** `SOCRATES_AI_PROVIDER=gemini`, `GEMINI_MODEL`, `GEMINI_API_KEY`.
+- **Self-hosted/OpenAI-compatible:** `SOCRATES_AI_PROVIDER=openai-compatible`, `SOCRATES_AI_BASE_URL=https://trusted-model-host/v1/`, `SOCRATES_AI_MODEL=<your-model>`, và `SOCRATES_AI_API_KEY` nếu server yêu cầu. Loopback HTTP chỉ được dùng khi model chạy cùng host gateway.
+
+Luôn cần `LINH_ACCESS_TOKEN` và `LINH_ALLOWED_ORIGIN`. Chưa có tài khoản/model hay thông tin bí mật được cấu hình, gateway sẽ trả `503`; Web tiếp tục dùng bộ tính cục bộ. Không tự thêm thanh toán hay hứa hẹn free tier vô hạn. Không gửi ảnh, ảnh OCR thô hoặc bộ nhớ ẩn lên model. Mã được viết độc lập theo mô hình adapter và cá tính riêng, không phải copy toàn bộ AIRI.
+
+---
 # Triển khai Linh 0.6 bằng các gói miễn phí — KHÔNG bật thanh toán
 
 **Điều kiện của chủ ứng dụng: 0 đồng, không dùng dịch vụ trả phí.** Repository chỉ chứa mã nguồn, tuyệt đối không chứa khóa.

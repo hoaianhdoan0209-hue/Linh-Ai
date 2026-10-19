@@ -1,4 +1,4 @@
-/* Linh Web Image Memory 1.2: voluntary, bounded, structured OCR learning.
+/* Socrates Web Image Memory 1.2: voluntary, bounded, structured OCR learning.
  * No screenshots, base64 images or raw OCR text are persisted.
  * Facts represent user-confirmed OCR transcription, NOT proven game mechanics.
  */
@@ -84,7 +84,7 @@
   }
   const payload=items=>JSON.stringify({version:1,items:sanitize({version:1,items})});
   function describe(preview){
-    if(!preview)return 'Linh chưa đọc rõ chỉ số hoặc từ khóa. Chưa có gì để ghi nhớ.';
+    if(!preview)return 'Socrates chưa đọc rõ chỉ số hoặc từ khóa. Chưa có gì để ghi nhớ.';
     const v=[];
     for(const f of preview.facts||[]){
       if(Object.hasOwn(LABELS,f.key))v.push(LABELS[f.key]+': '+f.value+'%');
@@ -97,12 +97,12 @@
   }
   function recall(saved){
     const items=sanitize({version:1,items:saved});
-    if(!items.length)return 'Linh chưa lưu kiến thức từ ảnh nào được xác nhận.';
+    if(!items.length)return 'Socrates chưa lưu kiến thức từ ảnh nào được xác nhận.';
     const last=items.at(-1);
     const facts=last.facts.map(x=>LABELS[x.key]+' '+x.value+'%').slice(0,2);
     const tags=last.tags.map(x=>TOPICS[x]).slice(0,2);
     const line=[...facts,...tags].join(', ');
-    return 'Linh nhớ '+items.length+' ảnh đã xác nhận chữ. Gần nhất: '+
+    return 'Socrates nhớ '+items.length+' ảnh đã xác nhận chữ. Gần nhất: '+
       last.kind+(line?' ('+line+')':'')+'. Chưa chứng minh cơ chế game.';
   }
   return {KEY,LIMIT,LABELS,TOPICS,classify,candidate,sanitize,approve,payload,describe,recall};

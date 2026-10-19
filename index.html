@@ -378,6 +378,28 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    }).catch(error=>{ocrScriptPromise=null;throw error;});
    return ocrScriptPromise;
  }
+ // One bounded, optional OCR retry on low-confidence screenshots; no new storage.
+ async function enhancedOCRCanvas(file){
+   if(typeof createImageBitmap!=='function')return null;
+   const bitmap=await createImageBitmap(file);
+   try{
+     const scale=Math.min(2,2000/Math.max(bitmap.width,bitmap.height));
+     const canvas=document.createElement('canvas');
+     canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+     canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+     const ctx=canvas.getContext('2d',{willReadFrequently:true});
+     if(!ctx)return null;
+     ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+     const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+     for(let i=0;i<pixels.data.length;i+=4){
+       const gray=.299*pixels.data[i]+.587*pixels.data[i+1]+.114*pixels.data[i+2];
+       const crisp=Math.max(0,Math.min(255,(gray-128)*1.5+128));
+       pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=crisp;
+     }
+     ctx.putImageData(pixels,0,0);
+     return canvas;
+   }finally{bitmap.close?.();}
+ }
  async function readImage(file){
    if(!file)return;
    lastInteractionAt=Date.now();
@@ -409,8 +431,33 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      imageStatus.textContent='Socrates đang đọc chữ. Ảnh chỉ xử lý trong trình duyệt.';
      const result=await worker.recognize(file);
      if(myScan!==scanToken)return;
-     const raw=String(result?.data?.text||'').trim().slice(0,12000);
-     const observation=vision.observe(raw);
+     let raw=String(result?.data?.text||'').trim().slice(0,12000);
+     let observation=vision.observe(raw);
+     // Image names and numbers are useful even without generic OCR tags.
+     // Retry only when the first pass found no game evidence; never stitch
+     // separate OCR passes together into an invented equipment profile.
+     if(!imageMemory.candidate(raw,observation)&&
+        !(window.SocratesSeasonKnowledge?.lookup(raw)||[]).length&&raw.length<200){
+       let secondCanvas=null;
+       try{
+         imageStatus.textContent='Chữ chưa rõ, Socrates thử đọc ảnh nét hơn…';
+         secondCanvas=await enhancedOCRCanvas(file);
+         if(myScan!==scanToken)return;
+         if(secondCanvas){
+           const second=await worker.recognize(secondCanvas);
+           if(myScan!==scanToken)return;
+           const secondText=String(second?.data?.text||'').trim().slice(0,12000);
+           const secondObservation=vision.observe(secondText);
+           const useful=imageMemory.candidate(secondText,secondObservation)||
+             (window.SocratesSeasonKnowledge?.lookup(secondText)||[]).length;
+           if(useful){raw=secondText;observation=secondObservation;}
+         }
+       }catch(retryError){
+         console.warn('Optional OCR retry unavailable:',retryError?.name);
+       }finally{
+         if(secondCanvas){secondCanvas.width=0;secondCanvas.height=0;}
+       }
+     }
      pendingImage=imageMemory.candidate(raw,observation);
      approveImage.disabled=!pendingImage;
      imageStatus.textContent=imageMemory.describe(pendingImage);

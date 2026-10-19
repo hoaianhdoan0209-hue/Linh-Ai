@@ -1,3 +1,11 @@
+## Socrates 2.4 — Gateway có thể nhận ảnh nếu chủ ứng dụng chủ động bật AI
+
+Ở PWA, bấm nút **Hỏi AI xem ảnh (cần đồng ý)** sau khi kết nối gateway riêng. Ảnh JPEG đã được canvas thu nhỏ tối đa 1280 px, dung lượng ≤850 KB. Gateway chỉ nhận dữ liệu dưới quyền của mã `LINH_ACCESS_TOKEN`; mỗi ảnh cần được chủ máy phê duyệt trước khi gửi. Gemini nhận `inline_data`; OpenAI-compatible dùng `image_url`. **Model phải hỗ trợ vision**. Nếu model chỉ nhận văn bản, đừng kỳ vọng phân tích ảnh.
+
+Không gửi ảnh tới bất kỳ model nào khi chủ máy không chọn ảnh và bấm xác nhận. Gateway không có API key công khai, không lưu ảnh hoặc lịch sử OCR; tuy nhiên nhà cung cấp mô hình có thể xử lý/lưu dữ liệu. [Xem hướng dẫn vision chi tiết](../research/vision-upload-v2.4.md).
+
+---
+
 ## Socrates 2.3 — AI riêng theo mô hình AIRI / xsAI
 
 **Đây là tính năng tùy chọn, không phải AI đang chạy sẵn.** [Sơ đồ và hướng dẫn đầy đủ](../research/socrates-owned-ai-architecture.md). Trên Socrates Web, chọn **Kết nối AI riêng**, nhập HTTPS URL `/chat` của gateway cùng mật khẩu `LINH_ACCESS_TOKEN` (không phải API key mô hình). Mỗi câu hỏi đều phải phê duyệt JSON trước khi gửi; mã chỉ giữ trong RAM.

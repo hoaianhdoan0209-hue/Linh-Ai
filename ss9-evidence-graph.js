@@ -91,7 +91,7 @@ function find(input,{allowLegacy=false,includeCommunity=false}={}){
  const matched=relations.filter(r=>{
   if(r.source==='wiki'&&!allowLegacy)return false;
   if(r.source==='community'&&!includeCommunity)return false;
-  return mention(q,r.item)||mention(q,r.skill)||
+  return r.item.split(/\s+\/\s+/).some(name=>mention(q,name))||mention(q,r.skill)||
    // Avoid finding a whole class merely from class name; precision matters.
    (r.id==='artillerist-build-reference'&&mention(q,'Bomb Voyage! build'));
  });

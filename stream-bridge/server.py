@@ -213,6 +213,9 @@ class LiveState:
         time.sleep(0.8)
         cmd = [
             "ffmpeg", "-hide_banner", "-loglevel", "quiet", "-nostdin",
+            # Streaming needs low probing latency, not full-file buffering.
+            "-fflags", "nobuffer", "-flags", "low_delay",
+            "-analyzeduration", "100000", "-probesize", "32768",
             "-i", f"rtmp://127.0.0.1:1935/live/{STREAM_KEY}",
             "-an", "-sn", "-dn", "-vf",
             "fps=1/6,scale=960:540:force_original_aspect_ratio=decrease,"

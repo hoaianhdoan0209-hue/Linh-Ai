@@ -147,13 +147,14 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 <script src="./vision-engine.js"></script>
 <script src="./web-image-memory.js"></script>
 <script src="./web-game-brain.js"></script>
+<script src="./web-game-experiments.js"></script>
 <script>
 (()=>{
  'use strict';
  // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
  const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
- const gameBrain=window.SocratesGameBrain;
+ const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
  const linh=document.getElementById('linh');
  const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
@@ -170,7 +171,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -185,6 +186,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  let dialogue={focus:'general'},hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
  let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
  let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
+ let measurements=experiments.sanitize(get(experiments.KEY));
  let pendingImage=null,previewURL=null,scanToken=0,scanning=false,ocrScriptPromise=null;
  let lastInteractionAt=Date.now(),lastDisplayedAt=Date.now(),proactiveCount=0;
  let recognition=null,recognizing=false;
@@ -227,13 +229,27 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const normalized=chat.norm(message);
    const photoRecall=/(anh|hinh)/.test(normalized)&&/(nho|hoc|da luu|biet gi|ghi nho)/.test(normalized);
    const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
-   const studied=gameBrain.answer(message,savedImages,gameNotes,legacy);
-   let reply=studied || (photoRecall?
+   const measurement=experiments.record(measurements,message);
+   const measuredReply=measurement || experiments.answer(message,measurements);
+   const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy);
+   let reply=measuredReply || studied || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
      chat.respond(message,dialogue,legacy));
-   if(studied?.action==='save-note'){
+   if(measurement?.action==='save-measurement'){
+     if(set(experiments.KEY,{version:1,items:measurement.items})){
+       measurements=measurement.items;
+       refreshImageMemoryUI();
+     }else reply={text:'Safari không lưu được số đo; Socrates không coi đây là bằng chứng đã lưu.',kind:'question',focus:'game'};
+   }else if(measuredReply?.action==='confirm-clear-measurements'){
+     if(window.confirm('Xóa toàn bộ số đo game đã nhập? Trí nhớ ảnh và ghi chú vẫn giữ nguyên.')){
+       if(set(experiments.KEY,{version:1,items:[]})){
+         measurements=[];refreshImageMemoryUI();
+         reply={text:'Đã xóa các số đo game trên máy, giữ nguyên ảnh và ghi chú.',kind:'memory',focus:'game'};
+       }else reply={text:'Safari chưa xóa được số đo; Socrates chưa xác nhận đã xóa.',kind:'question',focus:'game'};
+     }else reply={text:'Socrates sẽ giữ các số đo đã ghi.',kind:'memory',focus:'game'};
+   }else if(studied?.action==='save-note'){
      if(set(gameBrain.KEY,{version:1,items:studied.notes})){
        gameNotes=studied.notes;
        refreshImageMemoryUI();
@@ -326,7 +342,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    eraseImages.hidden=savedImages.length===0;
    eraseImages.textContent='Quên '+savedImages.length+' ảnh đã học';
    learnStatus.textContent=savedImages.length+' ảnh OCR đã xác nhận · '+gameNotes.length+
-     ' ghi chú game · Hỏi "đã học gì" hoặc "tính chí mạng"';
+     ' ghi chú · '+measurements.length+' số đo';
  }
  function closeImage(){
    ++scanToken;
@@ -448,7 +464,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
       field.value.trim().length)return;
    let message=proactive[proactiveCount];
    if(proactiveCount===2)
-     message=gameBrain.nextStudyPrompt(savedImages,gameNotes) || message;
+     message=gameBrain.nextStudyPrompt(savedImages,gameNotes) ||
+       (measurements.length?'Socrates đã ghi '+measurements.length+
+       ' số đo. Hỏi “so sánh số đo” để kiểm tra nhé.':message);
    proactiveCount++;
    show(message,'question',12000);
    // iOS may deny speech playback without a fresh user gesture. Text remains.
@@ -459,6 +477,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(e.key===brain.LEGACY_KEY)legacy=brain.readLegacy(e.newValue);
    if(e.key===imageMemory.KEY){savedImages=imageMemory.sanitize(e.newValue);refreshImageMemoryUI();}
    if(e.key===gameBrain.KEY){gameNotes=gameBrain.sanitize(e.newValue);refreshImageMemoryUI();}
+   if(e.key===experiments.KEY){measurements=experiments.sanitize(e.newValue);refreshImageMemoryUI();}
    if(e.key===brain.STATE_KEY){
      try{session=brain.sanitizeState(JSON.parse(e.newValue||'null'))}catch(_){}
    }

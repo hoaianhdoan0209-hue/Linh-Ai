@@ -1,0 +1,88 @@
+# Safari-only setup: Apple Developer Program + Codemagic + TestFlight.
+# This workflow CANNOT sign until the repository owner configures Codemagic
+# App Store Connect integration and enables BOTH provisioning profiles.
+# Replace BOTH occurrences of com.replace.with.your.linh with your own
+# registered bundle identifier. No certificates/keys belong in this file.
+#
+# Codemagic: https://docs.codemagic.io/yaml-code-signing/signing-ios/
+workflows:
+  linh-testflight:
+    name: Linh iOS 18–27 / TestFlight (requires Apple signing)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      xcode: 27.1
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.replace.with.your.linh
+      vars:
+        LINH_BUNDLE_ID: "com.replace.with.your.linh"
+    scripts:
+      - name: Create unique Xcode project for owner Apple Team
+        script: |
+          set -euo pipefail
+          if ! command -v xcodegen >/dev/null 2>&1; then
+            brew install xcodegen
+          fi
+          python3 ios/LinhCompanion/prepare_cloud_signing.py \
+            --bundle-id "$LINH_BUNDLE_ID" \
+            --build-number "$PROJECT_BUILD_NUMBER" \
+            --output "$CM_BUILD_DIR/cloud-generated/LinhCompanion"
+          xcodegen generate \
+            --spec "$CM_BUILD_DIR/cloud-generated/LinhCompanion/project.yml" \
+            --project "$CM_BUILD_DIR/cloud-generated/LinhCompanion"
+      - name: Apply Apple-managed profiles to both targets
+        script: |
+          set -euo pipefail
+          xcode-project use-profiles \
+            --project "$CM_BUILD_DIR/cloud-generated/LinhCompanion/LinhCompanion.xcodeproj"
+      - name: Archive and export signed IPA
+        script: |
+          set -euo pipefail
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/cloud-generated/LinhCompanion/LinhCompanion.xcodeproj" \
+            --scheme LinhCompanion
+      - name: Verify real signature and App Group on host plus extension
+        script: |
+          set -euo pipefail
+          IPA=$(find "$CM_BUILD_DIR/build/ios/ipa" -maxdepth 1 -name '*.ipa' -type f | head -n 1)
+          test -n "$IPA"
+          mkdir -p /tmp/linh-verify-ipa
+          unzip -q "$IPA" -d /tmp/linh-verify-ipa
+          export LINH_SIGNED_APP="/tmp/linh-verify-ipa/Payload/LinhCompanion.app"
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import plistlib
+          import subprocess
+          app = pathlib.Path(os.environ["LINH_SIGNED_APP"])
+          bundle = os.environ["LINH_BUNDLE_ID"]
+          group = "group." + bundle
+          for package, identifier in [
+              (app, bundle),
+              (app / "PlugIns/LinhBroadcast.appex", bundle + ".broadcast"),
+          ]:
+              with (package / "Info.plist").open("rb") as file:
+                  info = plistlib.load(file)
+              if info.get("CFBundleIdentifier") != identifier:
+                  raise SystemExit("Wrong identifier in " + str(package))
+              subprocess.run(["codesign", "--verify", "--strict", str(package)], check=True)
+              signed = subprocess.run(
+                  ["codesign", "-d", "--entitlements", ":-", str(package)],
+                  capture_output=True, check=True,
+              )
+              entitlements = plistlib.loads(signed.stdout)
+              if group not in entitlements.get("com.apple.security.application-groups", []):
+                  raise SystemExit("Missing signed App Group entitlement in " + str(package))
+          print("PASS: Apple-signed Linh and ReplayKit extension share App Group.")
+          PY
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        submit_to_app_store: false

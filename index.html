@@ -503,7 +503,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 
  function refreshImageMemoryUI(){
    eraseImages.hidden=savedImages.length===0&&acceptedVision.length===0;
-   eraseImages.textContent='Quên '+savedImages.length+' ảnh đã học';
+   eraseImages.textContent='Quên '+(savedImages.length+acceptedVision.length)+' dữ kiện ảnh đã học';
    learnStatus.textContent=savedImages.length+' ảnh OCR, '+acceptedVision.length+' hồ sơ ảnh AI được xác nhận · '+gameNotes.length+
      ' ghi chú · '+measurements.length+' số đo';
  }

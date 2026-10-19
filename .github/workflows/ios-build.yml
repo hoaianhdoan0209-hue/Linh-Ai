@@ -73,6 +73,12 @@ jobs:
             -destination 'generic/platform=iOS' \
             -derivedDataPath /tmp/LinhBuild \
             CODE_SIGNING_ALLOWED=NO build
+      - name: Kiểm thử hội thoại giọng nói Socrates cục bộ
+        run: |
+          swiftc ios/LinhCompanion/Sources/SocratesVoiceDialog.swift \
+            ios/LinhCompanion/Tests/SocratesVoiceDialogTests.swift \
+            -o /tmp/SocratesVoiceTests
+          /tmp/SocratesVoiceTests
       - name: Kiểm tra ứng dụng và ReplayKit Extension trong gói iOS 18+
         run: |
           set -euo pipefail
@@ -87,6 +93,10 @@ jobs:
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist" | grep -Fx 'ai.linh.companion'
           /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$EXT/Info.plist" | grep -Fx 'ai.linh.companion.broadcast'
           /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$EXT/Info.plist" | grep -Fx 'com.apple.broadcast-services-upload'
+          /usr/libexec/PlistBuddy -c "Print :UIBackgroundModes:0" "$APP/Info.plist" | grep -Fx 'screen-capture'
+          /usr/libexec/PlistBuddy -c "Print :UIBackgroundModes:1" "$APP/Info.plist" | grep -Fx 'audio'
+          /usr/libexec/PlistBuddy -c "Print :NSMicrophoneUsageDescription" "$APP/Info.plist" | grep -F 'Socrates'
+          /usr/libexec/PlistBuddy -c "Print :NSSpeechRecognitionUsageDescription" "$APP/Info.plist" | grep -F 'Socrates'
           /usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$APP/Info.plist" | grep -Fx '18.0'
           /usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$EXT/Info.plist" | grep -Fx '18.0'
           /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPrincipalClass" "$EXT/Info.plist" | grep -Fx 'LinhBroadcast.SampleHandler'

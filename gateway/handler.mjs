@@ -27,11 +27,27 @@ export function sanitizeRequest(raw){
  if(Array.isArray(raw.history))out.history=raw.history.slice(-6).filter(x=>
    x&&['user','assistant'].includes(x.role)&&typeof x.text==='string'
  ).map(x=>({role:x.role,text:clip(x.text,420)}));
+ if(raw.image!==undefined){
+   const x=raw.image;
+   if(!x||typeof x!=='object'||x.mimeType!=='image/jpeg'||typeof x.data!=='string'||
+      x.data.length<100||x.data.length>1200000||
+      !/^[A-Za-z0-9+/]+={0,2}$/.test(x.data)||
+      !Number.isInteger(x.width)||x.width<40||x.width>1600||
+      !Number.isInteger(x.height)||x.height<40||x.height>1600)
+      throw Error('Ảnh AI không hợp lệ.');
+   const buffer=Buffer.from(x.data,'base64');
+   if(buffer.length>850000||buffer.toString('base64')!==x.data||
+      buffer[0]!==0xff||buffer[1]!==0xd8||
+      buffer[buffer.length-2]!==0xff||buffer[buffer.length-1]!==0xd9)
+      throw Error('Ảnh JPEG lỗi hoặc quá lớn.');
+   // No OCR is included; original client browser file is canvas-reencoded.
+   out.image={mimeType:'image/jpeg',data:x.data,width:x.width,height:x.height};
+ }
  return out;
 }
 export const systemPrompt=`Bạn là Socrates, trợ lý AI riêng của chủ ứng dụng, chuyên Soul Knight Prequel; trả lời tiếng Việt tự nhiên, có ngữ cảnh và tôn trọng sự thật.
 Người dùng muốn nghiên cứu hiệu ứng, tính chỉ số, đề xuất combo có bằng chứng. Chỉ nhận dữ kiện đã đồng ý chia sẻ.
-Không tự nhận đã xem màn hình/video hay biết cơ chế game ngoài những gì nhận được.
+Không tự nhận đã xem màn hình/video hay biết cơ chế game ngoài những gì nhận được. Nếu có image trong yêu cầu, hãy mô tả CHỈ thông tin nhìn thấy trong ảnh đã được chủ máy phê duyệt, phân biệt chữ mờ và icon chưa rõ; không suy ra món đang mặc từ Codex hay coi số trong ảnh là phép đo DPS.
 Chỉ số, công thức, trạng thái buff, giả thuyết không chắc chắn phải được ghi rõ. 
 Dữ liệu chưa xác minh không được nói như sự thật. Không bịa công thức, chỉ số, phép đo.
 Nếu chưa đủ dữ kiện hãy hỏi đúng một câu giúp xác minh qua phép thử. Nêu phép tính minh họa kèm giả định.
@@ -62,9 +78,9 @@ export function makeHandler(config, remoteFetch=fetch){
   if(recent.length>=8)return response(429,{error:'Rate limit'});
   recent.push(t);hits.set(ip,recent);
   if(hits.size>1000)hits.clear();
-  if(Number(request.headers.get('content-length')||0)>12500)return response(413,{error:'Payload too large'});
+  if(Number(request.headers.get('content-length')||0)>1500000)return response(413,{error:'Payload too large'});
   let raw;
-  try{const txt=await request.text();if(txt.length>12000)return response(413,{error:'Payload too large'});raw=sanitizeRequest(JSON.parse(txt));}
+  try{const txt=await request.text();if(txt.length>1500000)return response(413,{error:'Payload too large'});raw=sanitizeRequest(JSON.parse(txt));}
   catch(e){return response(400,{error:'Invalid payload'});}
   const officialPatch=seasonKnowledge.lookup(raw.question,raw.gameName);
   const prompt=JSON.stringify({...raw,...(officialPatch.length?{officialPatch}: {})});

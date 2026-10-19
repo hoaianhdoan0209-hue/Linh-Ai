@@ -1,4 +1,5 @@
 'use strict';
+(async()=>{
 const assert=require('node:assert/strict');
 const A=require('./web-ai-bridge.js');
 let agent=A.create();
@@ -59,3 +60,5 @@ assert.equal(stale.cancelled,true);
 assert.equal(agent.status().turns,0);
 assert.equal(agent.status().ready,false);
 console.log('PASS: AI external call requires per-request exact preview and never stores auth or private screenshots');
+
+})().catch(error=>{console.error(error);process.exitCode=1;});

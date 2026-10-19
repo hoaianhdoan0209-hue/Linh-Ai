@@ -254,7 +254,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const patchFollowup=gameBrain.followup(message,lastPatch);
    const clearCommand=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(normalized);
    const nextBuild=clearCommand||photoRequest?null:buildSystems.inspect(message,{source:'user-text'});
-   if(nextBuild)buildContext=buildSystems.merge(buildContext,nextBuild);
+   const alternativeTurn=/(?:phuong an|anh|bo|mon)\s+[ab](?:\s|$)/.test(normalized);
+   // A and B are independent hypothetical equipment sets, not equipped stats.
+   if(nextBuild&&!alternativeTurn)buildContext=buildSystems.merge(buildContext,nextBuild);
    if(!clearCommand&&!photoRequest){
      thinkingState=thinkingGuard.observe(thinkingState,message,{source:'user-text'});
      const check=thinkingGuard.audit(thinkingState);
@@ -440,7 +442,6 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    closeImage();
    lastPatch=null;
    buildContext=null;
-   thinkingState=thinkingGuard.empty();
    if(!/^image\/(png|jpeg|webp)$/.test(file.type)||file.size>10*1024*1024){
      show('Hãy chọn ảnh PNG, JPG hoặc WebP dưới 10 MB nhé.','question',12000);
      return;
@@ -502,7 +503,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];
      lastPatch=named[0]||null;
      buildContext=buildSystems.inspect(raw,{source:'image'});
-     thinkingState=thinkingGuard.observe(thinkingGuard.empty(),raw,{source:'unconfirmed-ocr'});
+     thinkingState=thinkingGuard.observePhoto(thinkingState,raw);
      if(pendingImage){
        const analysis=coach.image(pendingImage);
        const mechanics=buildContext?buildSystems.assess('phân tích cơ chế',{context:buildContext}):null;

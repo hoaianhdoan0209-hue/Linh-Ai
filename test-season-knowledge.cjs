@@ -32,4 +32,10 @@ assert.ok(page.includes("ảnh không được ghi nhớ."),
   'Name-only OCR must not be saved as a verified photo');
 assert.ok(page.includes("const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];"),
   'Season lookup must run independently from numeric OCR candidate');
+assert.ok(page.includes('const patchFollowup=gameBrain.followup(message,lastPatch);'),
+  'Image/patch conversation needs a contextual follow-up route');
+assert.ok(page.includes('lastPatch=named[0]||null;'),
+  'OCR patch fact should live in the current conversation only');
+assert.ok(page.includes('if(clear)lastPatch=null;'),
+  'Clearing chat must forget temporary SS9 conversation context');
 console.log('PASS: SS9 scoped knowledge, image-only named patch fallback, no UI/summary/automatic speech exposure');

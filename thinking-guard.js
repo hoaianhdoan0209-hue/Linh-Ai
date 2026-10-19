@@ -12,12 +12,16 @@
 'use strict';
 const B=typeof module!=='undefined'&&module.exports?require('./build-systems.js'):globalThis.SocratesBuildSystems;
 const norm=B.norm;
-function empty(){return {season:'SS9',mechanicId:null,claims:[],conflicts:[],revision:0};}
+function empty(){return {season:'SS9',mechanicId:null,claims:[],conflicts:[],variants:{},revision:0};}
 function bounded(state){
  if(!state||state.season!=='SS9')return empty();
  return {season:'SS9',mechanicId:state.mechanicId||null,
   claims:(state.claims||[]).slice(-8).map(c=>({mechanicId:c.mechanicId,value:c.value,source:c.source})),
   conflicts:(state.conflicts||[]).slice(-3).map(c=>({mechanicId:c.mechanicId,values:c.values.slice(0,3)})),
+  variants:Object.fromEntries(['A','B'].filter(k=>state.variants?.[k])
+    .map(k=>[k,{mechanicId:state.variants[k].mechanicId,
+      pieceCount:state.variants[k].pieceCount??null,
+      source:state.variants[k].source||'unconfirmed'}])),
   revision:Math.min(1000,Math.max(0,state.revision||0))};
 }
 function observe(state,input,options={}){
@@ -26,6 +30,21 @@ function observe(state,input,options={}){
  const detected=B.inspect(input,{source:options.source==='unconfirmed-ocr'?'image':'user-text'});
  const nextId=detected?.mechanicIds?.[0]||base.mechanicId;
  if(!nextId)return base;
+ const source=options.source==='unconfirmed-ocr'?'unconfirmed-ocr':'user-reported';
+ // Explicit A/B are ALTERNATIVES, not contradictory reports of one build.
+ const named=options.scenario||q.match(/(?:^|\s)(?:phuong an|phuong an so|anh|bo|mon)\s+([ab])(?:\s|$)/)?.[1]?.toUpperCase();
+ const label=typeof named==='string'?named.toUpperCase():null;
+ const selected=(label==='A'||label==='B')?label:null;
+ if(selected){
+  const value=B.pieceCount(input);
+  const old=base.variants[selected];
+  // A new named hypothesis supersedes that option alone; never mutates
+  // the other alternative or the active player build.
+  base.variants[selected]={mechanicId:nextId,pieceCount:value,
+    source};
+  if(!old||JSON.stringify(old)!==JSON.stringify(base.variants[selected]))base.revision++;
+  return base;
+ }
  // A change of named item starts a separate hypothesis. This is never
  // interpreted as the same equipment set being worn simultaneously.
  if(base.mechanicId&&base.mechanicId!==nextId){
@@ -36,7 +55,6 @@ function observe(state,input,options={}){
  const relevant=nextId==='tarta'&&rawCount!==null&&/(\bmon\b|\bpieces?\b)/.test(q);
  if(!relevant)return base;
  const correction=/\b(dinh chinh|sua lai|nham|thuc ra|noi lai)\b/.test(q);
- const source=options.source==='unconfirmed-ocr'?'unconfirmed-ocr':'user-reported';
  if(correction){base.claims=[];base.conflicts=[];}
  const previous=base.claims.filter(c=>c.mechanicId===nextId);
  if(!previous.some(c=>c.value===rawCount&&c.source===source)){
@@ -76,10 +94,39 @@ function audit(state){
  return {status:'unverified',blocking:['Chưa có điều kiện kích hoạt và phép đo đầy đủ.'],
   nextTest:'Giữ cùng mục tiêu, so riêng một thay đổi trong hai lượt đo.',pieceCount:null};
 }
+function auditAlternatives(state){
+ const s=bounded(state),a=s.variants.A,b=s.variants.B;
+ if(!a&&!b)return null;
+ if(!a||!b)return {status:'incomplete',nextTest:'Cần cả hai phương án A và B, có ghi rõ số món đang kích hoạt.',
+  items:{A:a||null,B:b||null}};
+ if(a.mechanicId!==b.mechanicId)return {status:'different-mechanics',
+  nextTest:'Hai phương án thuộc cơ chế khác nhau; so ảnh bộ kỹ năng, điều kiện kích hoạt và phép đo cùng mục tiêu.',
+  items:{A:a,B:b}};
+ const describe=(x,label)=>{
+  if(x.mechanicId==='tarta'){
+   if(x.pieceCount===null)return label+': chưa biết số món Tarta.';
+   if(x.pieceCount<4)return label+': '+x.pieceCount+'/4 Tarta, chưa đạt điều kiện 4 món.';
+   return label+': khai báo '+x.pieceCount+'/4 Tarta; còn phải xác minh Hellscream/Earthspike.';
+  }
+  return label+': có tên cơ chế nhưng chưa có đủ trạng thái kích hoạt.';
+ };
+ return {status:'separate-options',items:{A:a,B:b},
+  lines:[describe(a,'A'),describe(b,'B')],
+  nextTest:'Chỉ so hiệu quả sau khi giữ cùng mục tiêu, thời lượng, rotation và kiểm tra điều kiện từng bộ.'};
+}
 function answer(input,state){
  const s=bounded(state),q=norm(String(input??'').slice(0,400)),a=audit(s);
  const topical=/(so sanh|chon|nen|thay|test|thu|xac minh|tai sao|vi sao|loi|dung|tarta|karmic|build|boss|farm)/.test(q);
- if(!topical||a.status!=='conflict')return null;
+ if(!topical)return null;
+ const ab=auditAlternatives(s);
+ const compare=/(so sanh|chon|nen lay|nen dung|manh hon|tot hon|anh nao|mon nao|phuong an)/.test(q);
+ if(compare&&ab?.status==='separate-options')
+  return {kind:'suggestion',focus:'game',reason:'separate-builds',
+    text:'Hai phương án là hai build riêng, không phải số liệu mâu thuẫn. '+ab.lines.join(' ')+' '+ab.nextTest+' Chưa thể chọn món thắng chỉ từ số món.'};
+ if(compare&&ab?.status==='different-mechanics')
+  return {kind:'question',focus:'game',reason:'non-comparable-builds',
+    text:'Hai phương án dùng các cơ chế khác nhau. '+ab.nextTest};
+ if(a.status!=='conflict')return null;
  return {kind:'question',focus:'game',reason:'contradiction',
   text:'Dữ liệu build đang mâu thuẫn: '+a.blocking[0]+
     ' Thần chưa kết luận nên chọn món nào hoặc áp hệ số thưởng. '+a.nextTest};
@@ -92,6 +139,8 @@ function compareOptions(options,criteria){
  if(!Array.isArray(options)||options.length!==2||!Array.isArray(criteria)||!criteria.length||
     criteria.length>8)return {ok:false,reason:'Cần đúng hai phương án và tiêu chí có trọng số.'};
  if(!options.every(x=>x&&typeof x.id==='string'&&x.id.length<=50))return {ok:false,reason:'Phương án thiếu định danh.'};
+ if(new Set(criteria.map(x=>x.id)).size!==criteria.length)
+  return {ok:false,reason:'Tiêu chí trùng lặp; không được cộng trọng số hai lần.'};
  if(!criteria.every(x=>x&&typeof x.id==='string'&&Number.isFinite(x.weight)&&x.weight>0&&x.weight<=10))
   return {ok:false,reason:'Trọng số không hợp lệ.'};
  if(options[0].id===options[1].id)return {ok:false,reason:'Hai phương án phải khác nhau.'};
@@ -113,5 +162,5 @@ function compareOptions(options,criteria){
   tie:a===b,scope:'weighted-measurements-only',
   warning:'Chỉ là bảng so tiêu chí đã đo, không tự chứng minh hiệu quả tổng build hay quan hệ nhân quả.'};
 }
-return {empty,observe,audit,answer,compareOptions};
+return {empty,observe,audit,auditAlternatives,answer,compareOptions};
 });

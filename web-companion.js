@@ -1,4 +1,4 @@
-/* Linh Web Companion 1.0 — one expressive creature, grounded offline insight.
+/* Socrates Web Companion 1.0 — one expressive creature, grounded offline insight.
  * Pure logic module: no APIs, no cloud, no images, no cross-app screen access.
  * The existing 0.2 legacy localStorage data is READ ONLY and never migrated.
  */
@@ -39,13 +39,13 @@
     'Một thay đổi mỗi lần thử sẽ giúp ta biết điều gì có tác dụng.',
     'Đánh boss lâu cần xem cả hồi chiêu, không chỉ sát thương một đòn.',
     'Nếu sát thương dao động, so nhiều lần trên cùng mục tiêu nhé.',
-    'Linh chỉ tin điều đã đo. Cơ chế chưa rõ thì mình kiểm chứng!'
+    'Socrates chỉ tin điều đã đo. Cơ chế chưa rõ thì mình kiểm chứng!'
   ];
   const DESCRIPTORS=[
-    'Linh đang ở đây.',
+    'Socrates đang ở đây.',
     'Có điều gì thú vị để cùng tìm hiểu không?',
     'Một phép thử nhỏ có khi giải được câu hỏi lớn.',
-    'Linh sẵn sàng suy luận cùng Bệ hạ.'
+    'Socrates sẵn sàng suy luận cùng Bệ hạ.'
   ];
   const trimInsight=s=>String(s).slice(0,96);
 
@@ -124,9 +124,9 @@
   }
   function greeting(state,hour=12){
     const n=maxN(state?.visits,100000);
-    if(n>1)return n>=5?'Linh vẫn ở đây, mừng Bệ hạ quay lại.':'Bệ hạ quay lại rồi! Linh đây.';
-    return hour>=5&&hour<11?'Chào buổi sáng, Linh ở đây.':
-      hour>=18?'Linh chào buổi tối, Bệ hạ.':'Linh ở đây, chào Bệ hạ!';
+    if(n>1)return n>=5?'Socrates vẫn ở đây, mừng Bệ hạ quay lại.':'Bệ hạ quay lại rồi! Socrates đây.';
+    return hour>=5&&hour<11?'Chào buổi sáng, Socrates ở đây.':
+      hour>=18?'Socrates chào buổi tối, Bệ hạ.':'Socrates ở đây, chào Bệ hạ!';
   }
   function suggestions(legacy){
     const choices=[];
@@ -143,7 +143,7 @@
       if(legacy.observationCount>1)
         choices.push({key:'observations',kind:'memory',
           text:'Hồ sơ '+legacy.name+' có '+legacy.observationCount+
-            ' phép đo đã lưu. Linh không tự đọc game.'});
+            ' phép đo đã lưu. Socrates không tự đọc game.'});
       for(const t of legacy.tags)
         choices.push({key:'topic-'+t,kind:'question',text:PLANS[t]});
     }
@@ -161,9 +161,9 @@
     return all[k];
   }
   function status(legacy){
-    if(!legacy)return 'Linh chưa có quan sát đã lưu từ game thật.';
+    if(!legacy)return 'Socrates chưa có quan sát đã lưu từ game thật.';
     if(!legacy.hasData)return 'Hồ sơ '+legacy.name+' chưa có phép đo hay OCR xác nhận.';
-    return 'Linh có '+legacy.observationCount+' phép đo và '+
+    return 'Socrates có '+legacy.observationCount+' phép đo và '+
       legacy.verifiedOCR+' quan sát OCR đã xác nhận trong '+legacy.name+'.';
   }
   return {STATE_KEY,LEGACY_KEY,TAGS,GENERIC,DESCRIPTORS,

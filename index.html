@@ -5,68 +5,191 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b18">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Linh">
+<meta name="description" content="Linh: nhân vật bạn đồng hành, suy luận bằng quan sát đã lưu trên máy. Không tự xem màn hình game khác qua Safari.">
 <title>Linh</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <style>
-:root{color-scheme:dark}
+:root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:radial-gradient(ellipse 60% 45% at 50% 55%,#19274c 0%,#101b38 35%,transparent 80%),radial-gradient(ellipse at 75% 0%,#131d3d,#070b18 65%);display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-main{height:100dvh;width:100%;display:grid;place-items:center;overflow:hidden}
-.stage{position:relative;width:min(82vw,350px);aspect-ratio:1;display:grid;place-items:center}
-.stage:before{content:"";position:absolute;inset:2%;border-radius:50%;background:radial-gradient(circle,#3d70d040,#7b4bee18 40%,transparent 72%);filter:blur(21px);animation:breathe 5.2s ease-in-out infinite}
-.linh{appearance:none;border:0;background:transparent;display:block;position:relative;width:220px;height:220px;max-width:68vw;max-height:68vw;touch-action:manipulation;cursor:pointer;animation:bob 3.8s ease-in-out infinite;filter:drop-shadow(0 24px 34px #090f29)}
+html,body{width:100%;min-height:100%;margin:0;overflow:hidden}
+body{
+ min-height:100dvh;
+ background:
+ radial-gradient(ellipse 68% 48% at 49% 52%,#213f784f 0%,#17234f26 56%,transparent 84%),
+ radial-gradient(ellipse 48% 60% at 91% 10%,#231a4c 0%,transparent 72%),
+ #070b18;
+ color:#edf6ff;-webkit-tap-highlight-color:transparent
+}
+main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:center;padding:env(safe-area-inset-top) 16px calc(18px + env(safe-area-inset-bottom));overflow:hidden}
+.world{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;padding-top:clamp(0px,5vh,42px)}
+.stage{width:min(86vw,355px);height:min(86vw,355px);max-height:48dvh;min-height:224px;display:grid;place-items:center;position:relative}
+.stage::before{
+ content:"";position:absolute;inset:9%;border-radius:50%;
+ background:radial-gradient(circle,#527ee750 0%,#734cd922 37%,transparent 72%);
+ filter:blur(25px);animation:breathe 5.4s ease-in-out infinite
+}
+.ring{position:absolute;width:91%;aspect-ratio:1;border-radius:50%;border:1px solid #9bc9f617;box-shadow:0 0 26px #3567ff08;pointer-events:none}
+.ring::after{content:"";position:absolute;inset:13%;border-radius:50%;border:1px dashed #d4dbff12}
+.particle{position:absolute;width:5px;height:5px;border-radius:50%;background:#a7eeffb8;box-shadow:0 0 14px #9ee7ffbb;pointer-events:none;animation:twinkle 4.6s ease-in-out infinite}
+.p1{left:6%;top:31%}.p2{right:9%;top:24%;animation-delay:1.8s}.p3{right:16%;bottom:17%;animation-delay:3s}.p4{left:16%;bottom:26%;animation-delay:2.5s}
+.linh{appearance:none;border:0;background:transparent;display:block;position:relative;width:244px;height:244px;max-width:69vw;max-height:69vw;touch-action:manipulation;cursor:pointer;filter:drop-shadow(0 24px 34px #090f29);animation:bob 4s ease-in-out infinite}
 .linh:focus-visible{outline:3px solid #8ae9f8;outline-offset:10px;border-radius:50%}
-.linh .body{position:absolute;inset:10%;border-radius:49% 53% 49% 52%;background:radial-gradient(ellipse at 30% 18%,#f9ffff 0%,#aff6ff 19%,#74c5ff 37%,#706be0 79%,#a76df3 100%);box-shadow:inset 0 0 0 4px #ffffff54,inset -12px -18px 26px #4434a255,0 0 34px #7aa9ffa0;animation:wobble 4.1s ease-in-out infinite}
-.linh .body:before{content:"";position:absolute;top:13%;left:19%;width:27%;height:12%;border-radius:50%;background:#ffffffb0;transform:rotate(-27deg);filter:blur(3px)}
+.linh .body{position:absolute;inset:10%;border-radius:49% 53% 49% 52%;background:radial-gradient(ellipse at 30% 18%,#f9ffff 0%,#aff6ff 18%,#74c5ff 38%,#706be0 79%,#a76df3 100%);box-shadow:inset 0 0 0 4px #ffffff54,inset -12px -18px 26px #4434a255,0 0 34px #7aa9ffa0;animation:wobble 4.2s ease-in-out infinite;transition:box-shadow .35s,filter .35s}
+.linh .body::before{content:"";position:absolute;top:13%;left:19%;width:27%;height:12%;border-radius:50%;background:#ffffffb0;transform:rotate(-27deg);filter:blur(3px)}
 .face{position:absolute;inset:0;pointer-events:none}
-.eye{position:absolute;top:46%;width:12px;height:18px;border-radius:50%;background:#1d2c58;animation:blink 6.4s infinite}
+.eye{position:absolute;top:45%;width:12px;height:18px;border-radius:50%;background:#1d2c58;animation:blink 6.4s infinite}
 .eye.l{left:37%}.eye.r{right:37%}
-.cheek{position:absolute;top:58%;width:16px;height:10px;border-radius:50%;background:#ff9fc4a8}
+.cheek{position:absolute;top:57%;width:16px;height:10px;border-radius:50%;background:#ff9fc4a8}
 .cheek.l{left:28%}.cheek.r{right:28%}
-.mouth{position:absolute;top:59%;left:47%;width:15px;height:9px;border-bottom:3px solid #21315c;border-radius:0 0 50% 50%}
-.linh.talking .mouth{height:17px;width:13px;top:57%;left:47%;background:#27336c;border-radius:50%;border:0}
-.linh.talking .body{box-shadow:inset 0 0 0 4px #ffffff80,0 0 56px #81e8e3a0}
+.mouth{position:absolute;top:59%;left:47%;width:15px;height:9px;border-bottom:3px solid #21315c;border-radius:0 0 50% 50%;transition:all .18s}
+.linh.talking .mouth{height:16px;width:13px;top:57%;left:47%;background:#27336c;border-radius:50%;border:0}
+.linh.talking .body{box-shadow:inset 0 0 0 4px #ffffff80,0 0 58px #81e8e3b5;filter:saturate(1.17)}
+.linh.happy .mouth{width:22px;height:13px;left:45%;top:58%;border-bottom-width:4px}
+.linh.thinking .eye.r{transform:scaleY(.38)}
+.linh.is-holding .body{filter:brightness(1.18)}
+.linh.bloom{animation:reaction .5s ease-out,bob 4s ease-in-out infinite}
+.speech{width:min(86vw,330px);min-height:60px;display:grid;place-items:center;position:relative;margin-top:-6px}
+.thought{font-size:14px;font-weight:540;line-height:1.48;letter-spacing:.005em;max-width:310px;text-align:center;padding:12px 16px;border-radius:17px;color:#eff9ff;background:#152442dc;border:1px solid #79baf32f;box-shadow:0 13px 28px #050b1d44;opacity:0;transform:translateY(8px) scale(.98);transition:opacity .28s,transform .28s;pointer-events:none}
+.thought.show{opacity:1;transform:translateY(0) scale(1)}
+.thought[data-kind="calculation"]{border-color:#8de6bc6b}
+.thought[data-kind="memory"]{border-color:#b2a2ff68}
+.subtle{font-size:10px;line-height:1.45;letter-spacing:.05em;text-align:center;color:#92a7c8ab;margin:0;user-select:none}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 @keyframes bob{0%,100%{transform:translateY(4px)}50%{transform:translateY(-10px)}}
-@keyframes breathe{0%,100%{transform:scale(.95);opacity:.75}50%{transform:scale(1.12);opacity:1}}
+@keyframes breathe{0%,100%{transform:scale(.95);opacity:.72}50%{transform:scale(1.1);opacity:1}}
 @keyframes wobble{0%,100%{border-radius:49% 53% 49% 52%;rotate:-2deg}50%{border-radius:54% 46% 53% 45%;rotate:3deg}}
 @keyframes blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.08)}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important}}
+@keyframes twinkle{0%,100%{opacity:.25;scale:.8}50%{opacity:.9;scale:1.4}}
+@keyframes reaction{0%{scale:1}44%{scale:1.09}100%{scale:1}}
+@media(max-height:570px){.world{min-height:0;padding-top:0}.stage{max-height:55dvh}.speech{min-height:54px;margin-top:-12px}.linh{max-height:52dvh;max-width:52dvh}.thought{font-size:12px;padding:9px 12px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <main>
-  <div class="stage">
-    <button type="button" class="linh" id="linh" aria-label="Linh. Chạm để nghe trạng thái.">
-      <span class="body"></span>
-      <span class="face"><span class="eye l"></span><span class="eye r"></span><span class="cheek l"></span><span class="cheek r"></span><span class="mouth"></span></span>
-    </button>
+  <div class="world">
+    <div class="stage">
+      <span class="ring" aria-hidden="true"></span>
+      <i class="particle p1" aria-hidden="true"></i><i class="particle p2" aria-hidden="true"></i>
+      <i class="particle p3" aria-hidden="true"></i><i class="particle p4" aria-hidden="true"></i>
+      <button type="button" class="linh" id="linh" aria-label="Linh. Chạm để nghe một gợi ý. Giữ để bật hoặc tắt giọng nói.">
+        <span class="body"></span>
+        <span class="face"><span class="eye l"></span><span class="eye r"></span><span class="cheek l"></span><span class="cheek r"></span><span class="mouth"></span></span>
+      </button>
+    </div>
+    <div class="speech"><div id="thought" class="thought" aria-hidden="true"></div></div>
   </div>
-  <span class="sr-only" id="liveStatus" aria-live="polite"></span>
+  <p class="subtle">Linh Web · Trí nhớ trên máy · Không quan sát game khác</p>
+  <span class="sr-only" id="liveStatus" aria-live="polite" aria-atomic="true"></span>
 </main>
+<script src="./web-companion.js"></script>
 <script>
 (()=>{
  'use strict';
+ // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
+ const brain=window.LinhWebCompanion;
  const linh=document.getElementById('linh');
+ const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
- let timer;
+ if(!brain||!linh||!thought){if(live)live.textContent='Linh chưa tải được bộ suy luận cục bộ.';return;}
+ const get=k=>{try{return localStorage.getItem(k)}catch(_){return null}};
+ const set=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(_){return false}};
+ let session;
+ try{session=brain.sanitizeState(JSON.parse(get(brain.STATE_KEY)||'null'))}
+ catch(_){session=brain.freshState()}
+ session=brain.startVisit(session);
+ set(brain.STATE_KEY,session);
+ let legacy=brain.readLegacy(get(brain.LEGACY_KEY));
+ let hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
+ const clearReaction=()=>{linh.classList.remove('talking','thinking','happy','bloom')};
+ const silence=()=>{try{window.speechSynthesis?.cancel()}catch(_){}};
+ function show(message,kind='greeting',duration=5600){
+   const text=String(message||'').slice(0,96);
+   if(!text)return;
+   thought.textContent=text;
+   thought.dataset.kind=kind;
+   thought.classList.add('show');
+   thought.setAttribute('aria-hidden','false');
+   live.textContent=text;
+   clearReaction();
+   linh.classList.add(kind==='question'?'thinking':kind==='greeting'?'happy':'talking','bloom');
+   clearTimeout(hideTimer);clearTimeout(reactTimer);
+   reactTimer=setTimeout(clearReaction,850);
+   hideTimer=setTimeout(()=>{thought.classList.remove('show');thought.setAttribute('aria-hidden','true');},duration);
+ }
+ function speak(message){
+   if(!session.voice||!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window))return;
+   silence();
+   try{const u=new SpeechSynthesisUtterance(message);u.lang='vi-VN';u.rate=1.03;window.speechSynthesis.speak(u)}
+   catch(_){/* voice is optional; text is always shown */}
+ }
+ function chooseThought(){
+   session=brain.tap(session);
+   // Read-only bridge: legacy-dashboard remains independent, never overwritten.
+   legacy=brain.readLegacy(get(brain.LEGACY_KEY));
+   const next=brain.nextThought(session,legacy);
+   session.lastIdea=next.key;
+   set(brain.STATE_KEY,session);
+   show(next.text,next.kind);
+   speak(next.text);
+   if(navigator.vibrate)try{navigator.vibrate(10)}catch(_){}
+ }
+ function toggleVoice(){
+   if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){
+     show('Trình duyệt này chưa hỗ trợ giọng nói của Linh.','question');
+     return;
+   }
+   session.voice=!session.voice;
+   set(brain.STATE_KEY,session);
+   silence();
+   const msg=session.voice?'Linh sẽ đọc gợi ý khi Bệ hạ chạm.':'Linh sẽ nói bằng chữ để không làm phiền.';
+   show(msg,'greeting',3800);
+   if(session.voice)speak(msg);
+ }
+ linh.addEventListener('pointerdown',e=>{
+   if(e.button!==0)return;
+   holding=true;
+   linh.classList.add('is-holding');
+   clearTimeout(holdTimer);
+   holdTimer=setTimeout(()=>{
+     if(!holding)return;
+     suppressClick=true;
+     toggleVoice();
+   },780);
+ });
+ for(const ev of ['pointerup','pointercancel','pointerleave']){
+   linh.addEventListener(ev,()=>{
+     holding=false;
+     clearTimeout(holdTimer);
+     linh.classList.remove('is-holding');
+   });
+ }
  linh.addEventListener('click',()=>{
-   // Safari PWA cannot stream the screen of another app. Never claim to be observing.
-   const message='Linh chưa thể xem game khác qua Safari. Chế độ quan sát trực tiếp cần ứng dụng Linh trên iPhone và quyền chia sẻ màn hình của hệ thống.';
-   live.textContent=message;
-   linh.classList.add('talking');
-   clearTimeout(timer);timer=setTimeout(()=>linh.classList.remove('talking'),2600);
-   if('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window){
-     window.speechSynthesis.cancel();
-     const speech=new SpeechSynthesisUtterance(message);
-     speech.lang='vi-VN';speech.rate=1.05;
-     speech.onend=()=>linh.classList.remove('talking');
-     try{window.speechSynthesis.speak(speech)}catch(_){}
+   if(suppressClick){suppressClick=false;return}
+   chooseThought();
+ });
+ // Prevent the mobile long-press context menu while keeping keyboard click.
+ linh.addEventListener('contextmenu',e=>e.preventDefault());
+ window.addEventListener('storage',e=>{
+   if(e.key===brain.LEGACY_KEY)legacy=brain.readLegacy(e.newValue);
+   if(e.key===brain.STATE_KEY){
+     try{session=brain.sanitizeState(JSON.parse(e.newValue||'null'))}catch(_){}
    }
  });
+ document.addEventListener('visibilitychange',()=>{
+   if(document.hidden){
+     silence();
+     holding=false;
+     clearTimeout(holdTimer);
+     linh.classList.remove('is-holding');
+   }else{
+     legacy=brain.readLegacy(get(brain.LEGACY_KEY));
+   }
+ });
+ show(brain.greeting(session,new Date().getHours()),'greeting',4300);
  if('serviceWorker' in navigator&&location.protocol==='https:'){
    navigator.serviceWorker.register('./sw.js').catch(()=>{});
  }

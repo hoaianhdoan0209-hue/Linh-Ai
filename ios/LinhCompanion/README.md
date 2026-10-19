@@ -1,3 +1,24 @@
+# Socrates Audio 1.0 — hội thoại âm thanh iPhone (ưu tiên iOS 27)
+
+**Mục tiêu:** Socrates native có nút **Nghe lời chào** để thử giọng đọc khi chuyển sang game, và nút **Bật hội thoại** xin quyền micro/nhận dạng tiếng Việt trên máy. Không cần backend, Discord, tài khoản AI hay gói trả phí. Dùng chung một app hỗ trợ iOS 18+; thiết bị mục tiêu hiện tại là iPhone 14 Plus iOS 27 theo thông tin người dùng.
+
+**Trạng thái:** đây là **mã ứng dụng iPhone chưa ký và chưa cài trên thiết bị thật**. GitHub Actions chỉ có thể xác minh biên dịch và cấu hình. Dù Apple hỗ trợ background audio cho app native, **không cam kết** nhận dạng tiếng Việt hai chiều sẽ duy trì khi chạy Soul Knight Prequel: có thể thiếu mô hình nhận dạng offline hoặc bị iOS giới hạn. Chưa thể xem là chức năng đã được kiểm chứng trên máy.
+
+**Kỹ thuật thực tế:**
+- Target app có chế độ Background Audio. Giọng đọc dùng AVAudioSession playback, đối thoại micro dùng playAndRecord; mixWithOthers cho phép thử âm thanh cùng game, không cố phát im lặng để giữ ứng dụng sống.
+- AVSpeechSynthesizer đọc tiếng Việt nếu iPhone có giọng. Đọc xong và không bật micro thì session âm thanh đóng.
+- Micro chỉ hoạt động sau khi bấm Bật hội thoại và iOS cấp **hai quyền** micro + nhận dạng giọng nói. Chỉ dùng SFSpeechRecognizer vi-VN nếu supportsOnDeviceRecognition, với requiresOnDeviceRecognition=true; nếu không hỗ trợ thì không âm thầm tải hoặc gửi lời nói tới máy chủ.
+- Không ghi âm, không lưu bản chép lời, không gửi mạng. SocratesVoiceDialog là bộ quy tắc, không phải mô hình AI tạo sinh. Hết 20 lượt nói, Socrates tắt micro; cuộc gọi/ngắt âm thanh cũng tắt.
+- Nhánh phân tích màn hình vẫn độc lập, không tự bật quyền quay/chia sẻ khi bật hội thoại.
+
+**Khi có bản ký hợp lệ:** mở Socrates → Nghe lời chào → chuyển sang game giữa câu đọc; sau đó Bật hội thoại → cấp phép → nói câu ngắn → chuyển sang game để kiểm tra tiếp tục nghe/trả lời. Kiểm tra Dừng nghe, cuộc gọi, khóa màn hình và tai nghe Bluetooth. Biên dịch Xcode thành công **không đồng nghĩa chạy nền thành công trên iPhone**.
+
+Tài liệu Apple:
+- https://developer.apple.com/documentation/avfaudio/avaudiosession/category-swift.struct/playandrecord
+- https://developer.apple.com/documentation/speech/sfspeechrecognitionrequest/requiresondevicerecognition
+
+---
+
 # Linh 0.9 — một app tự thích nghi iOS 18–27
 
 **Trạng thái:** Mã nguồn đã có cả hai nhánh screen-sharing, thử biên dịch không ký bằng Xcode 27 trên GitHub Actions. **Chưa cài lên iPhone thật / chưa xác minh lấy màn hình Soul Knight Prequel ở nền.** Không có .ipa ký sẵn, không có nút nổi xuyên ứng dụng.

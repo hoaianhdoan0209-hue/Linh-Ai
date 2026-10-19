@@ -11,7 +11,7 @@
 'use strict';
 const RELEASE='SS9';
 const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
-const compact=s=>String(s??'').replace(/\s+/g,' ').trim().slice(0,230);
+const compact=s=>String(s??'').replace(/\s+/g,' ').trim().slice(0,800);
 const official={
  transition:'https://prequel.chillyroom.com/et/article/base/344',
  builds:'https://prequel.chillyroom.com/et/article/base/239',

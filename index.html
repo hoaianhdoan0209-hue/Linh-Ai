@@ -148,6 +148,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  'use strict';
  // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
  const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
+ const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
  const linh=document.getElementById('linh');
  const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
@@ -155,7 +156,15 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const field=document.getElementById('chatMessage');
  const said=document.getElementById('said');
  const mic=document.getElementById('mic');
- if(!brain||!chat||!linh||!thought){
+ const photo=document.getElementById('photo');
+ const imageInput=document.getElementById('imageInput');
+ const photoReview=document.getElementById('photoReview');
+ const imagePreview=document.getElementById('imagePreview');
+ const imageStatus=document.getElementById('imageStatus');
+ const approveImage=document.getElementById('approveImage');
+ const dismissImage=document.getElementById('dismissImage');
+ const eraseImages=document.getElementById('eraseImages');
+ if(!brain||!chat||!vision||!imageMemory||!linh||!thought){
    if(live)live.textContent='Linh chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -168,12 +177,16 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  set(brain.STATE_KEY,session);
  let legacy=brain.readLegacy(get(brain.LEGACY_KEY));
  let dialogue={focus:'general'},hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
+ let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
+ let pendingImage=null,previewURL=null,scanToken=0,scanning=false,ocrScriptPromise=null;
+ let lastInteractionAt=Date.now(),lastDisplayedAt=Date.now(),proactiveCount=0;
  let recognition=null,recognizing=false;
  const clearReaction=()=>linh.classList.remove('talking','thinking','happy','bloom');
  const silence=()=>{try{window.speechSynthesis?.cancel()}catch(_){}};
  function show(message,kind='dialogue',duration=11000){
    const text=String(message||'').slice(0,chat.MAX_REPLY);
    if(!text)return;
+   lastDisplayedAt=Date.now();
    thought.textContent=text;
    thought.dataset.kind=kind;
    thought.classList.add('show');
@@ -195,20 +208,23 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    }catch(_){/* Browser voice is optional; text always displays. */}
  }
  function openChat(){
-   if(dock.hidden){
-     dock.hidden=false;
-     document.body.classList.add('chatting');
-     show('Linh nghe đây! Bệ hạ muốn nói gì với Linh?','greeting',6500);
-   }
+   // Composer is already visible. Tapping Linh only focuses it.
    field.focus();
  }
  function send(raw){
    const message=String(raw||'').trim().slice(0,chat.MAX_INPUT);
    if(!message)return;
-   if(dock.hidden)openChat();
+   lastInteractionAt=Date.now();
    field.value='';
    // Session context only; raw conversation is NOT saved to localStorage.
-   const reply=chat.respond(message,dialogue,legacy);
+   const normalized=chat.norm(message);
+   const photoRecall=/(anh|hinh)/.test(normalized)&&/(nho|hoc|da luu|biet gi|ghi nho)/.test(normalized);
+   const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
+   const reply=photoRecall?
+     {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
+     photoRequest?
+     {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Linh sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
+     chat.respond(message,dialogue,legacy);
    const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
    dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};
    if(clear){said.hidden=true;said.textContent='';}
@@ -283,8 +299,141 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      }
    });
  }
+
+ function refreshImageMemoryUI(){
+   eraseImages.hidden=savedImages.length===0;
+   eraseImages.textContent='Quên '+savedImages.length+' ảnh đã học';
+ }
+ function closeImage(){
+   ++scanToken;
+   scanning=false;
+   pendingImage=null;
+   approveImage.disabled=true;
+   imageInput.value='';
+   photoReview.hidden=true;
+   imagePreview.hidden=true;
+   imagePreview.removeAttribute('src');
+   if(previewURL){URL.revokeObjectURL(previewURL);previewURL=null;}
+ }
+ function ensureTesseract(){
+   if(window.Tesseract)return Promise.resolve(window.Tesseract);
+   if(ocrScriptPromise)return ocrScriptPromise;
+   ocrScriptPromise=new Promise((resolve,reject)=>{
+     const script=document.createElement('script');
+     script.src='./ocr/tesseract.min.js';
+     script.onload=()=>window.Tesseract?resolve(window.Tesseract):reject(new Error('OCR chưa có sẵn'));
+     script.onerror=()=>reject(new Error('Không tải được OCR'));
+     document.head.appendChild(script);
+   }).catch(error=>{ocrScriptPromise=null;throw error;});
+   return ocrScriptPromise;
+ }
+ async function readImage(file){
+   if(!file)return;
+   lastInteractionAt=Date.now();
+   closeImage();
+   if(!/^image\/(png|jpeg|webp)$/.test(file.type)||file.size>10*1024*1024){
+     show('Hãy chọn ảnh PNG, JPG hoặc WebP dưới 10 MB nhé.','question',12000);
+     return;
+   }
+   const myScan=++scanToken;
+   photoReview.hidden=false;
+   previewURL=URL.createObjectURL(file);
+   imagePreview.src=previewURL;
+   imagePreview.hidden=false;
+   imageStatus.textContent='Linh đang chuẩn bị đọc chữ trong ảnh…';
+   scanning=true;
+   let worker=null;
+   try{
+     const T=await ensureTesseract();
+     if(myScan!==scanToken)return;
+     const opts={
+       workerPath:new URL('./ocr/worker.min.js',document.baseURI).href,
+       corePath:new URL('./ocr',document.baseURI).href,
+       langPath:new URL('./ocr/lang',document.baseURI).href,
+       workerBlobURL:false
+     };
+     worker=await T.createWorker(['eng','vie'],1,opts);
+     if(myScan!==scanToken)return;
+     imageStatus.textContent='Linh đang đọc chữ. Ảnh chỉ xử lý trong trình duyệt.';
+     const result=await worker.recognize(file);
+     if(myScan!==scanToken)return;
+     const raw=String(result?.data?.text||'').trim().slice(0,12000);
+     const observation=vision.observe(raw);
+     pendingImage=imageMemory.candidate(raw,observation);
+     approveImage.disabled=!pendingImage;
+     imageStatus.textContent=imageMemory.describe(pendingImage);
+     show(pendingImage?
+       'Linh đọc được vài dấu hiệu. Bệ hạ xem và bấm Ghi nhớ nếu OCR đúng nhé.':
+       'Linh chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.',
+       pendingImage?'question':'dialogue',14000);
+   }catch(_){
+     if(myScan===scanToken){
+       imageStatus.textContent='OCR chưa chạy được. Thử lại khi có mạng để tải bộ chữ từ Linh.';
+       show('Ảnh vẫn ở trên máy. Linh chưa đọc được chữ, và chưa lưu gì.','question');
+     }
+   }finally{
+     if(worker)try{await worker.terminate()}catch(_){}
+     if(myScan===scanToken)scanning=false;
+   }
+ }
+ photo.addEventListener('click',()=>{lastInteractionAt=Date.now();imageInput.click()});
+ imageInput.addEventListener('change',()=>readImage(imageInput.files?.[0]));
+ approveImage.addEventListener('click',()=>{
+   if(!pendingImage||scanning)return;
+   lastInteractionAt=Date.now();
+   const change=imageMemory.approve(savedImages,pendingImage);
+   if(!change.added){
+     imageStatus.textContent='Linh đã nhớ các dấu hiệu này rồi, không lưu trùng.';
+     return;
+   }
+   // Only user-confirmed numeric facts/tags, not raw OCR/images, are persisted.
+   if(!set(imageMemory.KEY,{version:1,items:change.items})){
+     imageStatus.textContent='Safari không lưu được trí nhớ. Linh chưa xác nhận đã lưu.';
+     return;
+   }
+   savedImages=change.items;
+   refreshImageMemoryUI();
+   pendingImage=null;
+   approveImage.disabled=true;
+   imageStatus.textContent='Đã nhớ chữ/chỉ số Bệ hạ xác nhận. Chưa khẳng định cơ chế game.';
+   show('Linh đã nhớ những dấu hiệu được xác nhận. Cảm ơn Bệ hạ!','memory');
+ });
+ dismissImage.addEventListener('click',()=>{lastInteractionAt=Date.now();closeImage()});
+ eraseImages.addEventListener('click',()=>{
+   lastInteractionAt=Date.now();
+   if(!window.confirm('Xóa toàn bộ trí nhớ học từ ảnh trên máy này?'))return;
+   if(!set(imageMemory.KEY,{version:1,items:[]})){
+     show('Safari không xóa được dữ liệu ảnh; vui lòng kiểm tra lại.','question');return;
+   }
+   savedImages=[];
+   closeImage();
+   refreshImageMemoryUI();
+   show('Linh đã xóa các dấu hiệu học từ ảnh trên máy này.','memory');
+ });
+ const proactive=[
+   'Linh ở đây. Bệ hạ muốn kể chuyện hay gửi ảnh cho Linh xem?',
+   'Nếu có ảnh kỹ năng, chạm ▧; Linh có thể thử đọc chữ và hỏi trước khi nhớ.',
+   'Hôm nay Bệ hạ có điều gì muốn kể với Linh không?',
+   'Linh sẽ chờ. Khi muốn trò chuyện, chỉ cần gõ vào ô dưới nhé.'
+ ];
+ function autonomousThought(){
+   const now=Date.now();
+   if(document.hidden||scanning||!photoReview.hidden||recognizing)return;
+   if(proactiveCount>=4||now-lastInteractionAt<30000||
+      now-lastDisplayedAt<(proactiveCount===0?28000:85000)||
+      field.value.trim().length)return;
+   let message=proactive[proactiveCount];
+   if(proactiveCount===2&&savedImages.length)
+     message=imageMemory.recall(savedImages);
+   proactiveCount++;
+   show(message,'question',12000);
+   // iOS may deny speech playback without a fresh user gesture. Text remains.
+   speak(message);
+ }
+
  window.addEventListener('storage',e=>{
    if(e.key===brain.LEGACY_KEY)legacy=brain.readLegacy(e.newValue);
+   if(e.key===imageMemory.KEY){savedImages=imageMemory.sanitize(e.newValue);refreshImageMemoryUI();}
    if(e.key===brain.STATE_KEY){
      try{session=brain.sanitizeState(JSON.parse(e.newValue||'null'))}catch(_){}
    }
@@ -296,9 +445,15 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      if(recognizing)try{recognition?.stop()}catch(_){}
    }else{
      legacy=brain.readLegacy(get(brain.LEGACY_KEY));
+     lastDisplayedAt=Date.now(); // Do not flood the user when Safari resumes.
    }
  });
- show(brain.greeting(session,new Date().getHours()),'greeting',4800);
+ dock.hidden=false;
+ document.body.classList.add('chatting');
+ refreshImageMemoryUI();
+ show(brain.greeting(session,new Date().getHours()),'greeting',8500);
+ // iOS may pause the page in the background; these prompts only run while visible.
+ setInterval(autonomousThought,8000);
  if('serviceWorker' in navigator&&location.protocol==='https:'){
    navigator.serviceWorker.register('./sw.js').catch(()=>{});
  }

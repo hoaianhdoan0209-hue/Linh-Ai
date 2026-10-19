@@ -74,4 +74,13 @@ assert.equal(B.sanitize({version:1,items:[{text:'Game trạng thái cũ',at:now-
 assert.equal(B.parseDamageBase('Tính 1000 với 20% 30%'),1000);
 assert.equal(B.parseDamageBase('Tính 20% 30%'),null);
 assert.ok(B.answer('Tính sát thương 1000 với 20% và 30%',images).text.length<=230);
+const patch={text:'Karmic Cinderpult: mục tiêu bị cokerize nhận thêm 480% từ Adhesive Gunpowder, không áp cho mọi kỹ năng.'};
+const recommendation=B.followup('Nên dùng không?',patch);
+assert.equal(recommendation.focus,'game');
+assert.match(recommendation.text,/Karmic Cinderpult/);
+assert.match(recommendation.text,/điều kiện kích hoạt/);
+assert.equal(B.followup('nên dùng không?',null),null,'Do not invent context when no patch was discussed');
+assert.equal(B.followup('Tôi buồn',patch),null,'Ordinary conversation must not be hijacked by patch context');
+assert.equal(B.followup('Tính 20% và 30%',patch),null,'Unrelated math must remain independent');
+assert.match(B.followup('Có hợp boss?',patch).text,/đánh boss/);
 console.log('PASS: local Socrates math, conservative critical calculations, approved OCR + unverified bounded notes');

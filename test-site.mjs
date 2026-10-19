@@ -3,6 +3,15 @@ import {readFileSync} from 'node:fs';
 
 const ui = readFileSync(new URL('./index.html',import.meta.url),'utf8');
 const legacy = readFileSync(new URL('./legacy-dashboard.html',import.meta.url),'utf8');
+const manifest=JSON.parse(readFileSync(new URL('./manifest.webmanifest',import.meta.url),'utf8'));
+assert.equal(manifest.name,'Socrates','PWA installed title must use the renamed sage');
+assert.equal(manifest.short_name,'Socrates');
+assert.ok(ui.includes('<title>Socrates'), 'Web browser title must use the renamed sage');
+assert.ok(ui.includes('SOCRATES'),'Sage name must be shown next to the character');
+assert.ok(ui.includes('aria-label="Nhắn cho Socrates"'),
+ 'Web chat must show the renamed sage');
+assert.ok(!ui.includes('Nói với Linh'),'Outdated public assistant name must not appear');
+
 
 assert.ok(ui.includes('id="linh"'),'Missing the single visible Linh character');
 assert.equal((ui.match(/id="linh"/g)||[]).length,1,'Home must have one Linh character');
@@ -58,7 +67,6 @@ for(const page of [ui,legacy]){
 }
 assert.ok(!legacy.includes('<script src="./cloud-ui.js">'),
   'Paid AI integration must remain disabled');
-const manifest=JSON.parse(readFileSync(new URL('./manifest.webmanifest',import.meta.url),'utf8'));
 assert.equal(manifest.start_url,'./');
 assert.equal(manifest.display,'standalone');
 console.log('PASS: Linh-only UI, preserved analysis engine, no fake screen capture, PWA');

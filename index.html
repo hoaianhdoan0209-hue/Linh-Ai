@@ -78,6 +78,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 .photo-editor{padding:10px 0}
 .photo-editor [contenteditable]{display:block;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;min-height:72px;max-height:32dvh;overflow-y:auto;background:#07162b;color:#fff;border:1px solid #83b3e880;border-radius:12px;padding:12px;font:400 15px/1.5 system-ui;user-select:text;-webkit-user-select:text;outline:none}
 .photo-editor [contenteditable]:focus{border-color:#adefff;box-shadow:0 0 0 2px #79bffc50}
+#photoReview:focus-within{top:max(6px,env(safe-area-inset-top));bottom:auto;max-height:min(80dvh,650px)}
+@supports (height:100svh){#photoReview:focus-within{max-height:min(80svh,650px)}}
 .photo-editor label{display:block;font-size:13px;font-weight:650;color:#d9f2ff;margin:0 0 7px}
 .photo-editor p{font-size:12px;line-height:1.4;color:#adc3df}
 @media(max-height:570px){#photoReview{max-height:89dvh;bottom:4px}}

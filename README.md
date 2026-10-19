@@ -1,3 +1,13 @@
+# Linh Web 1.1 — Trò chuyện với Linh, chưa cần xem game
+
+**Chạm nhân vật Linh** trên [trang Web](https://hoaianhdoan0209-hue.github.io/Linh-Ai/) để mở ô nhắn tin nhỏ; có thể chào hỏi, tâm sự, kể chuyện hoặc hỏi về cơ chế game. Linh nhớ mạch hội thoại **trong phiên đang mở** (như “có”, “không”, “tiếp đi”), hiển thị lời đáp ngắn ngay bên nhân vật. **Giữ Linh** để bật/tắt giọng đọc; mặc định im lặng. Nút micro chỉ hiện nếu Safari có hỗ trợ nhận dạng giọng nói — dịch vụ nhận dạng tùy trình duyệt/hệ điều hành và có thể cần mạng, không được cam kết hoạt động cục bộ.
+
+Không cần ký iOS, tài khoản Apple Developer, Discord, máy chủ hoặc kết nối AI trả phí. Phần **hội thoại là bộ quy tắc cục bộ**, không phải GPT/AI tạo sinh tự do; Linh sẽ thừa nhận khi không hiểu câu hỏi. Văn bản trao đổi và lịch sử chat không được lưu hay gửi đi bởi trang Linh (ngữ cảnh chỉ tồn tại trong tab). Từ khóa **“xóa hội thoại”** để xóa mạch đang trao đổi. Bộ nhớ tương tác giản lược và hồ sơ game cũ trong localStorage được giữ nguyên. Nếu dùng nút micro, xử lý nhận dạng giọng nói của trình duyệt có thể dùng dịch vụ của nhà cung cấp trình duyệt.
+
+**Phần xem Soul Knight Prequel đã hoãn:** Safari không quan sát được ứng dụng game khác. Linh chỉ trao đổi về game dựa trên quy tắc và các quan sát cũ được người dùng xác nhận.
+
+---
+
 # Linh Web 1.0 — Một nhân vật có trí nhớ, không yêu cầu nhập liệu
 
 Trang Web chính `index.html` nay có **Linh tự phản ứng với mỗi lần chạm**, gợi ý hoặc câu hỏi thật ngắn (tối đa 96 ký tự), ánh mắt/biểu cảm và nhắc lại quan sát đã xác nhận từ bản phân tích cũ — **chỉ đọc cục bộ**, không thay đổi `linh-web-local-v02`. Một lần giữ nhân vật trên màn hình có thể bật/tắt giọng đọc; mặc định im lặng. Trí nhớ riêng của Linh dùng key `linh-companion-web-v1`, chỉ lưu số lượt ghé, số lần chạm, bật/tắt giọng và mã câu gợi ý trước; không lưu ảnh, OCR hay tài khoản.

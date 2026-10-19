@@ -27,16 +27,24 @@ function create(){
  function clear(){revision++;history=[];inFlight=false;}
  function status(){return {ready:!!(server&&token),endpoint:server,
    turns:history.length,mode:'external-model-opt-in'};}
- async function ask(question,{confirm,remoteFetch=fetch}={}){
+ async function ask(question,{confirm,remoteFetch=fetch,image=null}={}){
   const q=String(question||'').trim().slice(0,700);
   if(!q||!server||!token)return {ok:false,reason:'AI chưa được kết nối.'};
   if(inFlight)return {ok:false,reason:'Đang xử lý yêu cầu trước.'};
+  if(image&&!(image.mimeType==='image/jpeg'&&typeof image.data==='string'&&
+      image.data.length>=100&&image.data.length<=1200000&&
+      Number.isInteger(image.width)&&image.width>=40&&image.width<=1600&&
+      Number.isInteger(image.height)&&image.height>=40&&image.height<=1600))
+    return {ok:false,reason:'Ảnh AI không hợp lệ hoặc quá lớn.'};
   const body={version:1,gameName:'Soul Knight Prequel',question:q,
-   history:history.slice(-6).map(x=>({role:x.role,text:x.text}))};
+   history:history.slice(-6).map(x=>({role:x.role,text:x.text})),
+   ...(image?{image:{mimeType:image.mimeType,data:image.data,width:image.width,height:image.height}}:{})};
   const payload=JSON.stringify(body);
   // A preview of this EXACT JSON is shown before EVERY request.
   // The authorization token is in a separate header, never in the preview.
-  if(typeof confirm!=='function'||!(await confirm({endpoint:server,body:payload})))
+  if(typeof confirm!=='function'||!(await confirm({endpoint:server,body:payload,
+     imagePreview:image?{mimeType:image.mimeType,width:image.width,height:image.height,
+       bytes:image.bytes??Math.floor(image.data.length*3/4)}:null})))
    return {ok:false,cancelled:true,reason:'Đã hủy gửi dữ liệu ra ngoài.'};
   inFlight=true;const startedAt=revision;
   try{
@@ -58,7 +66,11 @@ function create(){
    return {ok:false,reason:'Không kết nối được gateway AI. Có thể máy chủ đang tắt.'};
   }finally{if(startedAt===revision)inFlight=false;}
  }
- return {configure,disconnect,clear,status,ask};
+ function askImage(question,image,options={}){
+  if(!image)return Promise.resolve({ok:false,reason:'Chưa có ảnh để gửi.'});
+  return ask(question,{...options,image});
+ }
+ return {configure,disconnect,clear,status,ask,askImage};
 }
 return {create,endpoint};
 });

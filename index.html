@@ -144,17 +144,18 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./stat-schema.js?v=1.9.0"></script>
-<script src="./vision-engine.js?v=1.9.0"></script>
-<script src="./web-image-memory.js?v=1.9.0"></script>
-<script src="./season-knowledge.js?v=1.9.0"></script>
-<script src="./web-game-brain.js?v=1.9.0"></script>
-<script src="./web-game-experiments.js?v=1.9.0"></script>
-<script src="./build-systems.js?v=1.9.0"></script>
-<script src="./rotation-lab.js?v=1.9.0"></script>
-<script src="./rotation-commands.js?v=1.9.0"></script>
-<script src="./prompt-strategy.js?v=1.9.0"></script>
-<script src="./game-coach.js?v=1.9.0"></script>
+<script src="./stat-schema.js?v=2.0.0"></script>
+<script src="./vision-engine.js?v=2.0.0"></script>
+<script src="./web-image-memory.js?v=2.0.0"></script>
+<script src="./season-knowledge.js?v=2.0.0"></script>
+<script src="./web-game-brain.js?v=2.0.0"></script>
+<script src="./web-game-experiments.js?v=2.0.0"></script>
+<script src="./build-systems.js?v=2.0.0"></script>
+<script src="./rotation-lab.js?v=2.0.0"></script>
+<script src="./rotation-commands.js?v=2.0.0"></script>
+<script src="./thinking-guard.js?v=2.0.0"></script>
+<script src="./prompt-strategy.js?v=2.0.0"></script>
+<script src="./game-coach.js?v=2.0.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -166,6 +167,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const buildSystems=window.SocratesBuildSystems;
  const rotations=window.SocratesRotationCommands;
  const promptStrategy=window.SocratesPromptStrategy;
+ const thinkingGuard=window.SocratesThinkingGuard;
  const linh=document.getElementById('linh');
  const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
@@ -182,7 +184,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!rotations||!promptStrategy||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!rotations||!promptStrategy||!thinkingGuard||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -194,7 +196,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  session=brain.startVisit(session);
  set(brain.STATE_KEY,session);
  let legacy=brain.readLegacy(get(brain.LEGACY_KEY));
- let dialogue={focus:'general'},lastPatch=null,buildContext=null,hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
+ let dialogue={focus:'general'},lastPatch=null,buildContext=null,thinkingState=thinkingGuard.empty(),hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
  let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
  let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
  let measurements=experiments.sanitize(get(experiments.KEY));
@@ -253,13 +255,23 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const clearCommand=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(normalized);
    const nextBuild=clearCommand||photoRequest?null:buildSystems.inspect(message,{source:'user-text'});
    if(nextBuild)buildContext=buildSystems.merge(buildContext,nextBuild);
+   if(!clearCommand&&!photoRequest){
+     thinkingState=thinkingGuard.observe(thinkingState,message,{source:'user-text'});
+     const check=thinkingGuard.audit(thinkingState);
+     // A conflicting equipment report cannot become a trusted build input.
+     if(buildContext&&thinkingState.mechanicId===buildContext.mechanicIds?.[0]){
+       if(check.status==='conflict')buildContext={...buildContext,pieceCount:null};
+       else if(check.pieceCount!==null)buildContext={...buildContext,pieceCount:check.pieceCount};
+     }
+   }
+   const thinkingAdvice=photoRequest||photoRecall?null:thinkingGuard.answer(message,thinkingState);
    const buildAcknowledgment=nextBuild&&/\b(?:toi|ta|minh)\s+(?:choi|dung|dang dung|mac|su dung)\b/.test(normalized)?
      {text:'Socrates ghi nhận thông tin build trong phiên này, chưa coi là đã kiểm chứng. Muốn phân tích đúng cần hiệu ứng đang kích hoạt, Fatestone và kỹ năng chủ lực.',kind:'memory',focus:'game'}:null;
    const promptAdvice=photoRequest||photoRecall?null:promptStrategy.answer(message,{context:buildContext});
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
-   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -291,7 +303,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      }else reply={text:'Socrates sẽ giữ nguyên những ghi chú game đã lưu.',kind:'memory',focus:'game'};
    }
    const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
-   if(clear){lastPatch=null;buildContext=null;}
+   if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();}
    else if(reply===groundedPatch){
      lastPatch=studied;
      buildContext=buildSystems.merge(buildContext,buildSystems.inspect(message,{source:'user-text'}));
@@ -428,6 +440,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    closeImage();
    lastPatch=null;
    buildContext=null;
+   thinkingState=thinkingGuard.empty();
    if(!/^image\/(png|jpeg|webp)$/.test(file.type)||file.size>10*1024*1024){
      show('Hãy chọn ảnh PNG, JPG hoặc WebP dưới 10 MB nhé.','question',12000);
      return;
@@ -489,6 +502,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];
      lastPatch=named[0]||null;
      buildContext=buildSystems.inspect(raw,{source:'image'});
+     thinkingState=thinkingGuard.observe(thinkingGuard.empty(),raw,{source:'unconfirmed-ocr'});
      if(pendingImage){
        const analysis=coach.image(pendingImage);
        const mechanics=buildContext?buildSystems.assess('phân tích cơ chế',{context:buildContext}):null;

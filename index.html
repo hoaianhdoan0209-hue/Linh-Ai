@@ -138,6 +138,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
     </div>
   </div>
   <button id="eraseImages" class="erase-memory" type="button" hidden>Quên các ảnh đã học</button>
+  <p class="subtle" id="learnStatus">Đang tải trí nhớ cục bộ…</p>
   <p class="subtle">Trò chuyện cục bộ · Giữ Socrates để bật giọng đọc</p>
   <span class="sr-only" id="liveStatus" aria-live="polite" aria-atomic="true"></span>
 </main>
@@ -145,12 +146,14 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 <script src="./web-dialogue.js"></script>
 <script src="./vision-engine.js"></script>
 <script src="./web-image-memory.js"></script>
+<script src="./web-game-brain.js"></script>
 <script>
 (()=>{
  'use strict';
  // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
  const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
+ const gameBrain=window.SocratesGameBrain;
  const linh=document.getElementById('linh');
  const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
@@ -166,7 +169,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const approveImage=document.getElementById('approveImage');
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
- if(!brain||!chat||!vision||!imageMemory||!linh||!thought){
+ const learnStatus=document.getElementById('learnStatus');
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -180,6 +184,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  let legacy=brain.readLegacy(get(brain.LEGACY_KEY));
  let dialogue={focus:'general'},hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
  let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
+ let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
  let pendingImage=null,previewURL=null,scanToken=0,scanning=false,ocrScriptPromise=null;
  let lastInteractionAt=Date.now(),lastDisplayedAt=Date.now(),proactiveCount=0;
  let recognition=null,recognizing=false;
@@ -222,11 +227,26 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const normalized=chat.norm(message);
    const photoRecall=/(anh|hinh)/.test(normalized)&&/(nho|hoc|da luu|biet gi|ghi nho)/.test(normalized);
    const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
-   const reply=photoRecall?
+   const studied=gameBrain.answer(message,savedImages,gameNotes,legacy);
+   let reply=studied || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
-     chat.respond(message,dialogue,legacy);
+     chat.respond(message,dialogue,legacy));
+   if(studied?.action==='save-note'){
+     if(set(gameBrain.KEY,{version:1,items:studied.notes})){
+       gameNotes=studied.notes;
+       refreshImageMemoryUI();
+     }else reply={text:'Safari chưa lưu được ghi chú. Socrates sẽ không nhận là đã học.',kind:'question',focus:'game'};
+   }else if(studied?.action==='confirm-clear-notes'){
+     const approved=window.confirm('Bệ hạ muốn xóa toàn bộ ghi chú game đã tự nhập? Trí nhớ ảnh sẽ giữ nguyên.');
+     if(approved){
+       if(set(gameBrain.KEY,{version:1,items:[]})){
+         gameNotes=[];refreshImageMemoryUI();
+         reply={text:'Đã xóa ghi chú game do Bệ hạ nhập. Trí nhớ ảnh được giữ nguyên.',kind:'memory',focus:'game'};
+       }else reply={text:'Safari chưa xóa được ghi chú, nên Socrates không xác nhận đã xóa.',kind:'question',focus:'game'};
+     }else reply={text:'Socrates sẽ giữ nguyên những ghi chú game đã lưu.',kind:'memory',focus:'game'};
+   }
    const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
    dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};
    if(clear){said.hidden=true;said.textContent='';}
@@ -305,6 +325,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  function refreshImageMemoryUI(){
    eraseImages.hidden=savedImages.length===0;
    eraseImages.textContent='Quên '+savedImages.length+' ảnh đã học';
+   learnStatus.textContent=savedImages.length+' ảnh OCR đã xác nhận · '+gameNotes.length+
+     ' ghi chú game · Hỏi "đã học gì" hoặc "tính chí mạng"';
  }
  function closeImage(){
    ++scanToken;
@@ -425,8 +447,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
       now-lastDisplayedAt<(proactiveCount===0?28000:85000)||
       field.value.trim().length)return;
    let message=proactive[proactiveCount];
-   if(proactiveCount===2&&savedImages.length)
-     message=imageMemory.recall(savedImages);
+   if(proactiveCount===2)
+     message=gameBrain.nextStudyPrompt(savedImages,gameNotes) || message;
    proactiveCount++;
    show(message,'question',12000);
    // iOS may deny speech playback without a fresh user gesture. Text remains.
@@ -436,6 +458,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  window.addEventListener('storage',e=>{
    if(e.key===brain.LEGACY_KEY)legacy=brain.readLegacy(e.newValue);
    if(e.key===imageMemory.KEY){savedImages=imageMemory.sanitize(e.newValue);refreshImageMemoryUI();}
+   if(e.key===gameBrain.KEY){gameNotes=gameBrain.sanitize(e.newValue);refreshImageMemoryUI();}
    if(e.key===brain.STATE_KEY){
      try{session=brain.sanitizeState(JSON.parse(e.newValue||'null'))}catch(_){}
    }
@@ -451,6 +474,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    }
  });
  dock.hidden=false;
+ field.placeholder='Hỏi, tính toán, ghi nhớ…';
  document.body.classList.add('chatting');
  refreshImageMemoryUI();
  show(brain.greeting(session,new Date().getHours()),'greeting',8500);

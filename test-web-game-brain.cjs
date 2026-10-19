@@ -80,6 +80,8 @@ assert.equal(recommendation.focus,'game');
 assert.match(recommendation.text,/Karmic Cinderpult/);
 assert.match(recommendation.text,/điều kiện kích hoạt/);
 assert.equal(B.followup('nên dùng không?',null),null,'Do not invent context when no patch was discussed');
+assert.match(B.followup('boss',patch).text,/đánh boss/);
+assert.match(B.followup('farm',patch).text,/farm|dọn/);
 assert.equal(B.followup('Tôi buồn',patch),null,'Ordinary conversation must not be hijacked by patch context');
 assert.equal(B.followup('Tính 20% và 30%',patch),null,'Unrelated math must remain independent');
 assert.match(B.followup('Có hợp boss?',patch).text,/đánh boss/);

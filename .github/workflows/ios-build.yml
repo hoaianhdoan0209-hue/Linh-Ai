@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'ios/LinhCompanion/Sources/**'
+      - 'ios/LinhCompanion/sign_on_mac.py'
       - 'ios/LinhCompanion/Tests/**'
       - 'ios/LinhCompanion/project.yml'
       - 'ios/LinhCompanion/BroadcastExtension/**'
@@ -19,6 +20,13 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - name: Kiểm thử chuẩn bị ký (không dùng chứng chỉ thật)
+        run: |
+          python3 -m py_compile ios/LinhCompanion/sign_on_mac.py
+          python3 ios/LinhCompanion/sign_on_mac.py \
+            --team ABCDE12345 \
+            --device 00008020-001111122223000A \
+            --check-only
       - name: Kiểm tra bộ SDK Apple
         run: |
           xcodebuild -version

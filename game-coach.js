@@ -60,7 +60,7 @@ function compareImages(first,second,{critMode=null,goal=null,unconfirmed=false}=
  const changed=shared.filter(k=>av[k]!==bv[k]);
  const lines=['So sánh riêng hai ảnh (A: trước, B: mới):'];
  if(changed.length)for(const key of changed.slice(0,7)){
-  lines.push(S.labels[key]+': A '+fmt(av[key])+' → B '+fmt(bv[key])+'.');
+  lines.push(S.labels[key]+': '+fmt(av[key])+' → '+fmt(bv[key])+' (A → B).');
  }else if(shared.length)lines.push('Các chỉ số trùng nhãn đang bằng nhau.');
  else lines.push('Hai ảnh chưa có chỉ số cùng nhãn để đối chiếu.');
  const ma=metrics(a,critMode),mb=metrics(b,critMode);

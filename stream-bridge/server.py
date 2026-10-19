@@ -23,6 +23,9 @@ PORT = int(os.environ.get("PORT", "8080"))
 COOLDOWN_SECONDS = 90
 FRAME_SECONDS = 6
 MAX_PNG_BYTES = 3 * 1024 * 1024
+FRAME_WIDTH = 960
+FRAME_HEIGHT = 540
+RAW_FRAME_BYTES = FRAME_WIDTH * FRAME_HEIGHT * 3
 MAX_OCR_CHARS = 5000
 
 DISCORD_ALLOWED_HOSTS = {"discord.com", "discordapp.com"}
@@ -112,11 +115,15 @@ def next_png(pipe) -> bytes:
     raise ValueError("frame too large")
 
 
-def ocr_png(frame: bytes) -> str:
-    # Tesseract stdin/stdout only, no temp screenshot file.
+def ocr_raw(frame: bytes) -> str:
+    # Streaming raw RGB avoids image2pipe buffering on live RTMP feeds.
+    # Tesseract reads an in-memory PPM directly from stdin; no frame files.
+    if len(frame) != RAW_FRAME_BYTES:
+        return ""
+    header = f"P6\n{FRAME_WIDTH} {FRAME_HEIGHT}\n255\n".encode("ascii")
     proc = subprocess.run(
         ["tesseract", "stdin", "stdout", "-l", "eng+vie", "--psm", "11"],
-        input=frame, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+        input=header + frame, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
         timeout=12, check=False,
     )
     if proc.returncode != 0:
@@ -220,7 +227,8 @@ class LiveState:
             "-an", "-sn", "-dn", "-vf",
             "fps=1/6,scale=960:540:force_original_aspect_ratio=decrease,"
             "pad=960:540:(ow-iw)/2:(oh-ih)/2:color=black",
-            "-f", "image2pipe", "-vcodec", "png", "pipe:1",
+            "-pix_fmt", "rgb24", "-f", "rawvideo",
+            "-flush_packets", "1", "pipe:1",
         ]
         try:
             proc = subprocess.Popen(
@@ -242,13 +250,13 @@ class LiveState:
                 with self.lock:
                     if not self.active or self.generation != gen:
                         break
-                frame = next_png(proc.stdout)
+                frame = read_n(proc.stdout, RAW_FRAME_BYTES)
                 with self.lock:
                     if self.generation == gen:
                         self.frames_seen += 1
                         self.last_frame = time.time()
                         self.phase = 'ocr-running'
-                text = ocr_png(frame)
+                text = ocr_raw(frame)
                 # Release the frame bytes before storing or notifying anything.
                 del frame
                 current = recognize_idea(text)

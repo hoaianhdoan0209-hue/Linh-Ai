@@ -14,7 +14,7 @@
 <style>
 :root{color-scheme:dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 *{box-sizing:border-box}
-html,body{width:100%;min-height:100%;margin:0;overflow:hidden}
+html,body{width:100%;min-height:100%;margin:0;overflow-x:hidden;overflow-y:auto}
 body{
  min-height:100dvh;
  background:
@@ -23,8 +23,8 @@ body{
  #070b18;
  color:#edf6ff;-webkit-tap-highlight-color:transparent
 }
-main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:center;padding:env(safe-area-inset-top) 16px calc(18px + env(safe-area-inset-bottom));overflow:hidden}
-.world{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;padding-top:clamp(0px,5vh,42px)}
+main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:env(safe-area-inset-top) 12px calc(12px + env(safe-area-inset-bottom));gap:10px}
+.world{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding-top:clamp(0px,3vh,24px)}
 .stage{width:min(86vw,355px);height:min(86vw,355px);max-height:48dvh;min-height:224px;display:grid;place-items:center;position:relative}
 .stage::before{
  content:"";position:absolute;inset:9%;border-radius:50%;
@@ -66,6 +66,21 @@ main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:cent
 .chat-dock #mic{background:#273c63}
 .chat-dock #mic[hidden]{display:none!important}
 .chat-dock #mic.listening{background:#9c476f}
+.chat-dock #photo{background:#273c63}
+.chat-dock input[type=file]{display:none}
+.chat-dock:focus-within{border-color:#b4f1ff88}
+.photo-review{width:min(91vw,385px);max-height:min(38dvh,310px);overflow-y:auto;padding:11px 12px;background:#101b33;border:1px solid #75b0e350;border-radius:18px;margin:10px auto 0;box-shadow:0 10px 32px #05091763}
+.photo-review[hidden],.photo-review [hidden]{display:none!important}
+.photo-top{display:flex;align-items:center;gap:11px}
+.photo-top img{width:66px;height:66px;object-fit:cover;border-radius:11px;border:1px solid #86b5e85a}
+.photo-top p{font-size:12px;line-height:1.45;margin:0;flex:1;color:#e5f5ff;overflow-wrap:anywhere}
+.photo-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.photo-actions button,.erase-memory{appearance:none;border:1px solid #6687b659;background:#273c63;border-radius:11px;color:#e9f7ff;padding:8px 12px;font-size:12px;cursor:pointer}
+.photo-actions button.primary{background:#4165a0;border-color:#8ed2fd75;font-weight:650}
+.photo-actions button:disabled{opacity:.4;cursor:not-allowed}
+.erase-memory{margin-top:6px;font-size:11px;opacity:.77;background:transparent;border-color:transparent}
+.erase-memory[hidden]{display:none!important}
+.subtle{max-width:380px}
 .chatting .world{min-height:0;padding-top:0}
 .chatting .stage{height:min(45dvh,275px);min-height:145px}
 .chatting .linh{width:190px;height:190px;max-width:49vw;max-height:49vw}
@@ -102,17 +117,32 @@ main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:cent
         <div id="thought" class="thought" aria-hidden="true"></div>
       </div>
     </div>
-    <form id="chatDock" class="chat-dock" hidden autocomplete="off">
+    <form id="chatDock" class="chat-dock" autocomplete="off">
       <input id="chatMessage" type="text" maxlength="300" autocomplete="off" aria-label="Nhắn cho Linh" placeholder="Nói với Linh…" enterkeyhint="send">
+      <button id="photo" type="button" aria-label="Gửi ảnh cho Linh" title="Chọn ảnh">▧</button>
+      <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Chọn ảnh để Linh đọc">
       <button id="mic" type="button" hidden aria-label="Nói bằng giọng nói" title="Dùng mic nếu Safari hỗ trợ">🎙</button>
       <button id="send" type="submit" aria-label="Gửi cho Linh">➤</button>
     </form>
+    <div class="photo-review" id="photoReview" hidden>
+      <div class="photo-top">
+        <img id="imagePreview" alt="Ảnh Bệ hạ vừa chọn" hidden>
+        <p id="imageStatus" role="status" aria-live="polite">Linh chờ ảnh của Bệ hạ.</p>
+      </div>
+      <div class="photo-actions">
+        <button type="button" id="approveImage" class="primary" disabled>Ghi nhớ điều đã đọc</button>
+        <button type="button" id="dismissImage">Bỏ qua</button>
+      </div>
+    </div>
   </div>
+  <button id="eraseImages" class="erase-memory" type="button" hidden>Quên các ảnh đã học</button>
   <p class="subtle">Trò chuyện cục bộ · Giữ Linh để bật giọng đọc</p>
   <span class="sr-only" id="liveStatus" aria-live="polite" aria-atomic="true"></span>
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
+<script src="./vision-engine.js"></script>
+<script src="./web-image-memory.js"></script>
 <script>
 (()=>{
  'use strict';

@@ -10,8 +10,9 @@
  const api=factory(r);
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
  if(root)root.SocratesClassBuildKnowledge=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function({roster,classes,graph}){
+})(typeof globalThis!=='undefined'?globalThis:this,function(deps){
 'use strict';
+const {roster,classes,graph}=deps;
 if(!roster||!classes||!graph)throw Error('Missing Socrates source catalog');
 const src=Object.freeze({
  spec:{url:'https://prequel.chillyroom.com/et/article/base/133',date:'2024-11-07',grade:'official-historical-specialization'},

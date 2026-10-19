@@ -496,6 +496,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      if(result.ok){
        const structured=visionEvidence.parse(result.reply);
        pendingVisionEvidence=structured?visionEvidence.annotate(structured,evidenceGraph):null;
+       visionEditorPanel.hidden=!pendingVisionEvidence?.observations.length;
+       visionEditor.textContent=pendingVisionEvidence?.observations.map(x=>x.name).join('\n')||'';
+       photoReview.scrollTop=0;
        approveVision.hidden=!pendingVisionEvidence?.observations.length;
        approveVision.disabled=!pendingVisionEvidence?.observations.length;
        field.value='';
@@ -677,6 +680,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      pendingImage=imageMemory.candidate(raw,observation);
      approveImage.disabled=!pendingImage;
      imageStatus.textContent=imageMemory.describe(pendingImage);
+     // User can correct the OCR even when no automatic numeric candidate exists.
+     // Never auto-store raw recognized text.
      // A named SS9 mechanic can be recognized even when OCR finds no numeric
      // stats or generic tags. Answer the relevant question without saving OCR.
      const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];
@@ -711,9 +716,29 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  }
  approveVision.addEventListener('click',()=>{
    if(!pendingVisionEvidence?.observations.length||scanning||!pendingVisionFile)return;
-   const text=visionEvidence.summary(pendingVisionEvidence);
+   // Re-validate every edited label; deleted lines are ignored, newly invented
+   // data and old OCR tiers are never trusted merely because the model supplied them.
+   const labels=String(visionEditor.innerText||visionEditor.textContent||'')
+     .split(/\r?\n/).map(s=>s.trim()).filter(Boolean).slice(0,8);
+   const observations=labels.map((name,i)=>{
+     const original=pendingVisionEvidence.observations[i];
+     if(!original)return null;
+     return name===original.name?original:
+       {kind:original.kind,name,confidence:'medium'};
+   }).filter(Boolean);
+   const edited=visionEvidence.parse(JSON.stringify({
+     schema:'socrates-vision-v1',panel:pendingVisionEvidence.panel,
+     equipState:pendingVisionEvidence.equipState,
+     observations,unclear:[]
+   }));
+   if(!edited?.observations.length){
+     show('Không còn nhãn hợp lệ để xác nhận. Hãy sửa lại các tên trong bảng ảnh.','question',0);
+     return;
+   }
+   const reviewed=visionEvidence.annotate(edited,evidenceGraph);
+   const text=visionEvidence.summary(reviewed);
    if(!window.confirm('Xác nhận chỉ các TÊN, tier và số món AI đã đọc đúng?\n\n'+text))return;
-   let verified={...pendingVisionEvidence};
+   let verified={...reviewed};
    if(verified.panel==='equipped'&&verified.equipState==='equipped'&&
       !window.confirm('Xác nhận ảnh này thực sự là TRANG BỊ ĐANG MẶC, không phải Codex, đồ trong túi hay preview?')){
      verified={...verified,equipState:'unknown'};
@@ -732,15 +757,25 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    }
    refreshImageMemoryUI();
    pendingVisionEvidence=null;approveVision.hidden=true;approveVision.disabled=true;
+   visionEditor.textContent='';visionEditorPanel.hidden=true;
    show('Đã lưu '+latest.observations.length+' nhãn ảnh do Bệ hạ xác nhận. '+
     (chosen.length?'Chỉ các tên từ trang bị được xác nhận mới góp vào ngữ cảnh build. ':
       'Chưa coi ảnh là trang bị đang mặc. ')+
     'Điều này chưa chứng minh cơ chế hoặc DPS.','memory',0);
  });
+ ocrEditor.addEventListener('input',()=>{
+   if(scanning||photoReview.hidden)return;
+   const text=String(ocrEditor.innerText||ocrEditor.textContent||'').slice(0,1800);
+   pendingImage=imageMemory.candidate(text,vision.observe(text));
+   approveImage.disabled=!pendingImage;
+   imageStatus.textContent=pendingImage?
+     'Có chỉ số/từ khóa sau khi sửa. Xem lại chữ trước khi bấm Ghi nhớ.':
+     'Chưa tìm được chỉ số/từ khóa hợp lệ. Bệ hạ có thể sửa chữ tại đây.';
+ });
  photo.addEventListener('click',()=>{lastInteractionAt=Date.now();imageInput.click()});
  imageInput.addEventListener('change',()=>readImage(imageInput.files?.[0]));
  approveImage.addEventListener('click',()=>{
-   if(!pendingImage||scanning)return;
+   if(scanning)return;
    const corrected=String(ocrEditor.innerText||ocrEditor.textContent||'').trim().slice(0,1800);
    const manual=imageMemory.candidate(corrected,vision.observe(corrected));
    if(!manual){imageStatus.textContent='Chữ sửa chưa có chỉ số/từ khóa hợp lệ; chưa lưu.';return;}

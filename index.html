@@ -195,6 +195,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 <script src="./ss9-evidence-graph.js?v=2.9.0"></script>
 <script src="./class-catalog.js?v=2.9.0"></script>
 <script src="./ss9-class-roster.js?v=2.9.0"></script>
+<script src="./class-build-knowledge.js?v=2.9.0"></script>
 <script src="./rotation-lab.js?v=2.9.0"></script>
 <script src="./rotation-commands.js?v=2.9.0"></script>
 <script src="./thinking-guard.js?v=2.9.0"></script>
@@ -215,6 +216,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const evidenceGraph=window.SocratesEvidenceGraph;
  const classCatalog=window.SocratesClassCatalog;
  const classRoster=window.SocratesClassRoster;
+ const classBuildKnowledge=window.SocratesClassBuildKnowledge;
  const rotations=window.SocratesRotationCommands;
  const promptStrategy=window.SocratesPromptStrategy;
  const thinkingGuard=window.SocratesThinkingGuard;
@@ -244,7 +246,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const aiStatus=document.getElementById('aiStatus');
  const aiCheck=document.getElementById('aiCheck');
  let gatewayProbeToken=0;
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!classCatalog||!classRoster||!ocrEditor||!visionEditor||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!aiCheck||!visionUpload||!visionEvidence||!visionAnalyze||!approveVision||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!classCatalog||!classRoster||!classBuildKnowledge||!ocrEditor||!visionEditor||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!aiCheck||!visionUpload||!visionEvidence||!visionAnalyze||!approveVision||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -344,12 +346,13 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const promptAdvice=photoRequest||photoRecall?null:promptStrategy.answer(message,{context:buildContext});
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
    const sourcedMechanic=photoRequest||photoRecall?null:evidenceGraph.explain(message);
+   const buildSkillAdvice=photoRequest||photoRecall?null:classBuildKnowledge.answer(message);
    const sourcedClass=photoRequest||photoRecall?null:
      (classCatalog.find(message).length?classCatalog.answer(message):
        classRoster.answer(message)||classCatalog.answer(message));
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
-   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || sourcedMechanic || sourcedClass || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || sourcedMechanic || buildSkillAdvice || sourcedClass || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -573,6 +576,11 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      for(const sk of [...c.active,...c.passive]){
        if(includesName(sk))observations.push({kind:'skill',name:sk,confidence:'medium'});
      }
+   }
+   for(const spec of classBuildKnowledge.specs){
+     if(includesName(spec.skill))observations.push({kind:'skill',name:spec.skill,confidence:'medium'});
+     if(spec.name.length>=6&&includesName(spec.name))
+       observations.push({kind:'specialization',name:spec.name,confidence:'medium'});
    }
    for(const edge of evidenceGraph.find(text)){
      if(includesName(edge.item))observations.push({kind:'equipment',name:edge.item,confidence:'medium'});

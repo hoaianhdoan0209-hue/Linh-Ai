@@ -21,7 +21,9 @@ targets:
         LSRequiresIPhoneOS: true
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
-        UIBackgroundModes: [screen-capture]
+        UIBackgroundModes: [screen-capture, audio]
+        NSMicrophoneUsageDescription: "Socrates chỉ nghe khi bạn bật hội thoại. Âm thanh không được lưu hay gửi lên mạng."
+        NSSpeechRecognitionUsageDescription: "Socrates nhận dạng tiếng nói trên thiết bị khi bạn cho phép."
     entitlements:
       path: Sources/Linh.entitlements
       properties:

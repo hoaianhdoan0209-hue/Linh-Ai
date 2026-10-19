@@ -72,6 +72,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 .chat-dock:focus-within{border-color:#b4f1ff88}
 .photo-review{width:min(91vw,385px);max-height:min(38dvh,310px);overflow-y:auto;padding:11px 12px;background:#101b33;border:1px solid #75b0e350;border-radius:18px;margin:10px auto 0;box-shadow:0 10px 32px #05091763}
 .photo-review[hidden],.photo-review [hidden]{display:none!important}
+.ai-setup label{display:block;font-size:11px;color:#e0efff;margin:6px 0 3px}
+.ai-setup input{width:100%;box-sizing:border-box;border:1px solid #7295c380;border-radius:8px;background:#111f38;color:#f3f8ff;padding:9px;font-size:13px}
 .photo-top{display:flex;align-items:center;gap:11px}
 .photo-top img{width:66px;height:66px;object-fit:cover;border-radius:11px;border:1px solid #86b5e85a}
 .photo-top p{font-size:12px;line-height:1.45;margin:0;flex:1;color:#e5f5ff;overflow-wrap:anywhere}
@@ -137,13 +139,25 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
       </div>
     </div>
   </div>
+  <div class="photo-review ai-setup" id="aiSetup" hidden>
+    <label for="aiEndpoint">URL HTTPS của cổng AI riêng, kết thúc bằng /chat</label>
+    <input id="aiEndpoint" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://ten-may-chu.example/chat">
+    <label for="aiAccess">Mã truy cập gateway (không phải khóa API Gemini/OpenAI)</label>
+    <input id="aiAccess" type="password" autocomplete="off" maxlength="256" placeholder="Mã truy cập chỉ giữ trong phiên">
+    <div class="photo-actions">
+      <button id="aiConnect" class="primary" type="button">Kết nối AI</button>
+      <button id="aiDismiss" type="button">Đóng</button>
+    </div>
+  </div>
   <button id="eraseImages" class="erase-memory" type="button" hidden>Quên các ảnh đã học</button>
   <p class="subtle" id="learnStatus">Đang tải trí nhớ cục bộ…</p>
-  <p class="subtle">Phân tích trên máy · Chưa kết nối AI trò chuyện tự do</p>
+  <p class="subtle" id="aiStatus">Đang dùng trí tuệ cục bộ · AI riêng chưa kết nối</p>
+  <button id="aiSettings" class="erase-memory" type="button">Kết nối AI riêng (tùy chọn)</button>
   <span class="sr-only" id="liveStatus" aria-live="polite" aria-atomic="true"></span>
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
+<script src="./web-ai-bridge.js?v=2.3.0"></script>
 <script src="./stat-schema.js?v=2.2.0"></script>
 <script src="./vision-engine.js?v=2.2.0"></script>
 <script src="./web-image-memory.js?v=2.2.0"></script>
@@ -162,6 +176,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  'use strict';
  // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
  const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
+ const aiBridge=window.SocratesAIBridge?.create();
  const coach=window.SocratesCoach.create();
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
  const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
@@ -186,7 +201,11 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!linh||!thought){
+ const aiSetup=document.getElementById('aiSetup'),aiSettings=document.getElementById('aiSettings');
+ const aiEndpoint=document.getElementById('aiEndpoint'),aiAccess=document.getElementById('aiAccess');
+ const aiConnect=document.getElementById('aiConnect'),aiDismiss=document.getElementById('aiDismiss');
+ const aiStatus=document.getElementById('aiStatus');
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -246,6 +265,16 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    field.value='';
    // Session context only; raw conversation is NOT saved to localStorage.
    const normalized=chat.norm(message);
+   if(/^(bat ai rieng|ket noi ai rieng|cau hinh ai rieng)$/.test(normalized)){
+     aiSetup.hidden=false;aiEndpoint.focus();
+     show('Nhập URL gateway HTTPS và mã truy cập RIÊNG. Không nhập khóa API mô hình vào trình duyệt.','question',0);
+     return;
+   }
+   if(/^(tat ai rieng|ngat ai rieng)$/.test(normalized)){
+     aiBridge.disconnect();aiSetup.hidden=true;aiStatus.textContent='Đang dùng trí tuệ cục bộ · AI riêng chưa kết nối';
+     aiSettings.textContent='Kết nối AI riêng (tùy chọn)';
+     show('Đã ngắt AI riêng và xóa lịch sử hội thoại AI trong RAM.', 'memory',0);return;
+   }
    const photoRecall=/(anh|hinh)/.test(normalized)&&/(nho|hoc|da luu|biet gi|ghi nho)/.test(normalized);
    const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
    const measurement=experiments.record(measurements,message);
@@ -308,7 +337,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      }else reply={text:'Socrates sẽ giữ nguyên những ghi chú game đã lưu.',kind:'memory',focus:'game'};
    }
    const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
-   if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();}
+   if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();aiBridge.clear();}
    else if(reply===groundedPatch){
      lastPatch=studied;
      buildContext=buildSystems.merge(buildContext,buildSystems.inspect(message,{source:'user-text'}));
@@ -318,7 +347,20 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(clear){said.hidden=true;said.textContent='';}
    else{said.hidden=false;said.textContent='Bệ hạ: '+message.slice(0,90);}
    show(reply.text,reply.kind,0);
-   speak(reply.text);
+   // Local arithmetic and rule-based explanations remain authoritative.
+   // Online conversation is entirely optional, approved per message.
+   const deterministic=clear||photoRequest||photoRecall||reply?.kind==='calculation'||
+     reply?.kind==='official-patch'||reply?.action;
+   if(aiBridge.status().ready&&!deterministic){
+     void aiBridge.ask(message,{
+       confirm:({endpoint,body})=>window.confirm(
+         'Cho phép Socrates gửi đúng JSON sau tới gateway riêng?\n'+endpoint+
+         '\n\n'+body+'\n\nDữ liệu có thể được nhà cung cấp mô hình xử lý.'),
+     }).then(result=>{
+       if(result.ok){show(result.reply,'dialogue',0);speak(result.reply);}
+       else if(!result.cancelled)show('AI riêng: '+result.reason+'\nSocrates đã giữ câu trả lời cục bộ phía trước.','question',0);
+     });
+   }else speak(reply.text);
  }
  function toggleVoice(){
    if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){
@@ -352,6 +394,20 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    openChat();
  });
  linh.addEventListener('contextmenu',e=>e.preventDefault());
+ aiSettings.addEventListener('click',()=>{
+   aiSetup.hidden=!aiSetup.hidden;
+   if(!aiSetup.hidden)aiEndpoint.focus();
+ });
+ aiDismiss.addEventListener('click',()=>{aiSetup.hidden=true;aiAccess.value='';});
+ aiConnect.addEventListener('click',()=>{
+   try{
+     aiBridge.configure(aiEndpoint.value,aiAccess.value);
+     aiAccess.value='';aiEndpoint.value='';aiSetup.hidden=true;
+     aiStatus.textContent='AI riêng đã bật · Mỗi câu gửi đều cần phê duyệt';
+     aiSettings.textContent='Cổng AI riêng đã kết nối';
+     show('Cổng AI được cấu hình trong RAM của tab, chưa gửi tin nào. Bệ hạ có thể hỏi tự nhiên; mỗi lần chuyển dữ liệu ra ngoài đều phải duyệt. Gõ “tắt AI riêng” để ngắt.','memory',0);
+   }catch(error){aiAccess.value='';show(error.message,'question',0);}
+ });
  dock.addEventListener('submit',e=>{
    e.preventDefault();
    send(field.value);

@@ -1,3 +1,13 @@
+# Socrates — người bạn thông thái trên iPhone
+
+**Tên mới: Socrates (Sô-crát).** Đây là tên hiển thị trên Web, PWA, bảng phân tích cũ và bản iOS đang phát triển. Đường dẫn GitHub cũ, mã nội bộ `Linh*`, bundle identifiers và khóa dữ liệu `linh-*` được giữ nguyên để không làm mất hồ sơ game, trí nhớ và quyền App Group đã cấu hình.
+
+**Socrates Web 1.3:** ô nhắn luôn sẵn ngay dưới nhân vật, tự chào rồi thỉnh thoảng mở lời **khi trang còn hiện trên màn hình** (không chạy ngầm khi chuyển ứng dụng trên iOS), giọng đọc tùy bật bằng cách giữ nhân vật; chọn ảnh bằng biểu tượng ▧. OCR xử lý ảnh trong trình duyệt bằng bộ thư viện đóng gói cùng ứng dụng, nhận biết một số chỉ số và từ khóa tiếng Việt/Anh. **Chỉ khi chủ máy bấm “Ghi nhớ điều đã đọc”** Socrates mới lưu dữ kiện dạng chỉ số và nhãn ngắn vào bộ nhớ cục bộ; không lưu ảnh gốc, ảnh đã xem hoặc toàn bộ OCR. Có nút xóa trí nhớ học từ ảnh.
+
+**Giới hạn:** bộ trò chuyện vẫn là máy quy tắc, OCR chỉ đọc chữ trong ảnh chứ không hiểu được mọi đồ họa/vật thể; phán đoán cơ chế game cần kiểm chứng. Trình duyệt iPhone không cho Web tiếp tục chủ động giao tiếp khi rời sang ứng dụng khác, và không cho Web đọc game trực tiếp. Không yêu cầu tài khoản, máy chủ hay thanh toán mới; sử dụng giọng nhận dạng bằng micro (nếu Safari hỗ trợ) có thể tùy thuộc dịch vụ trình duyệt và kết nối.
+
+---
+
 # Linh Web 1.1 — Trò chuyện với Linh, chưa cần xem game
 
 **Chạm nhân vật Linh** trên [trang Web](https://hoaianhdoan0209-hue.github.io/Linh-Ai/) để mở ô nhắn tin nhỏ; có thể chào hỏi, tâm sự, kể chuyện hoặc hỏi về cơ chế game. Linh nhớ mạch hội thoại **trong phiên đang mở** (như “có”, “không”, “tiếp đi”), hiển thị lời đáp ngắn ngay bên nhân vật. **Giữ Linh** để bật/tắt giọng đọc; mặc định im lặng. Nút micro chỉ hiện nếu Safari có hỗ trợ nhận dạng giọng nói — dịch vụ nhận dạng tùy trình duyệt/hệ điều hành và có thể cần mạng, không được cam kết hoạt động cục bộ.

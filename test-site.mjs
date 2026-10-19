@@ -52,8 +52,8 @@ assert.ok(ui.includes('secondCanvas.width=0;secondCanvas.height=0;'),
  'Temporary enhanced screenshots must be discarded');
 assert.ok(ui.includes('const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);'),
  'Upload instructions must not be overridden by a stale build');
-assert.ok(ui.includes('build-systems.js?v=1.9.0'), 'Load SS9 prerequisite engine');
-assert.ok(ui.includes('rotation-lab.js?v=1.9.0') && ui.includes('rotation-commands.js?v=1.9.0'),
+assert.ok(ui.includes('build-systems.js?v=2.0.0'), 'Load SS9 prerequisite engine');
+assert.ok(ui.includes('rotation-lab.js?v=2.0.0') && ui.includes('rotation-commands.js?v=2.0.0'),
  'Ship discrete event rotation modules in the page');
 assert.ok(ui.includes('const rotationReply=rotations.answer(message);'),
  'Main chat must pass explicit player experiment text to the simulator');
@@ -61,7 +61,11 @@ assert.ok(ui.includes('buildSystems.assess(message,{context:buildContext})'), 'G
 assert.ok(ui.includes('buildContext=buildSystems.merge(buildContext,nextBuild)'),
  'Explicit build clues should accumulate in conversation only');
 assert.ok(ui.includes("buildContext=buildSystems.inspect(raw,{source:'image'});"), 'OCR extracts dependency context');
-assert.ok(ui.includes('prompt-strategy.js?v=1.9.0'),
+assert.ok(ui.includes('thinking-guard.js?v=2.0.0'), 'Thinking guard loaded before prompt strategy');
+assert.ok(ui.includes('thinkingGuard.observe(thinkingState,message,{source:'), 'Thinking guard observes only relevant messages');
+assert.ok(ui.includes("if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();}"),
+ 'Clear dialogue must remove session-only hypotheses');
+assert.ok(ui.includes('prompt-strategy.js?v=2.0.0'),
  'Prompt planning must be loaded from same-origin JavaScript');
 assert.ok(ui.includes('promptStrategy.answer(message,{context:buildContext})'),
  'Game chat must use context-aware prompt planning before generic fallback');
@@ -85,6 +89,8 @@ assert.ok(offlineRaw.includes("const CACHE='linh-site-"+assetsVersion+"'"),
 assert.ok(offlineRaw.includes("'./rotation-lab.js?v="+assetsVersion+"'") &&
  offlineRaw.includes("'./rotation-commands.js?v="+assetsVersion+"'"),
  'PWA must cache the event-driven rotation tools');
+assert.ok(offlineRaw.includes("'./thinking-guard.js?v="+assetsVersion+"'"),
+ 'Thinking guard must be bundled for offline PWA');
 assert.ok(offlineRaw.includes("'./prompt-strategy.js?v="+assetsVersion+"'"),
  'Offline planner version must match the active game assistant');
 assert.ok(offlineRaw.includes("'./build-systems.js?v="+assetsVersion+"'"),

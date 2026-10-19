@@ -173,13 +173,13 @@
     const topic=detail.split(/[:.;]/,1)[0].trim().slice(0,48);
     const boss=/boss/.test(q),farm=/farm/.test(q);
     const caution=/adhesive gunpowder/i.test(detail)?
-      'Hiệu ứng 480% chỉ gắn với Adhesive Gunpowder, không áp sang mọi kỹ năng.':
+      'Điều kiện kích hoạt: 480% chỉ gắn với Adhesive Gunpowder, không áp mọi kỹ năng.':
       /4 mon|4 món/i.test(detail)?
       'Cần đủ 4 món để kích hoạt, không nên suy hệ số cho 2–3 món.':
       /Wolong/i.test(detail)?
       'Wolong là Eidolon nhận qua sự kiện; chưa có số liệu so sức mạnh với đội hiện tại.':
       'Thay đồ chỉ từ một dòng bản vá có thể sai do điều kiện kích hoạt.';
-    const metric=boss?'Đo trên cùng boss và cùng thời gian.':farm?'So thời gian dọn cùng nhóm quái.':'So với món đang dùng trong cùng điều kiện.';
+    const metric=boss?'Khi đánh boss, đo trên cùng mục tiêu và cùng thời gian.':farm?'So thời gian dọn cùng nhóm quái.':'So với món đang dùng trong cùng điều kiện.';
     return reply('Về '+topic+': '+caution+' '+metric+' Gửi ảnh chỉ số hai phương án để thần tính tiếp.','suggestion');
   }
   function nextStudyPrompt(images,notes){

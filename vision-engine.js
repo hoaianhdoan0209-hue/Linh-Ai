@@ -1,4 +1,4 @@
-/* Linh Vision v0.3: local, deterministic OCR-text interpretation. Not a generative AI. */
+/* Socrates Vision v0.3: local, deterministic OCR-text interpretation. Not a generative AI. */
 (function(root,factory){const api=factory();if(typeof module!=='undefined'&&module.exports)module.exports=api;root.LinhVision=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
 const patterns=[
@@ -35,14 +35,14 @@ if(!q)return{reply:'Bệ hạ muốn hỏi gì về game ạ?',question:null};
 if(vision?.facts?.length)parts.push('Từ ảnh đã chọn: '+vision.facts.map(f=>f.label+' '+f.value+'%').join(', ')+'. OCR có thể sai; cần kiểm tra.');
 if(/combo|build|trang bị|kết hợp|phối|tối ưu|ưu tiên/.test(q)){
 if(effects.length){const slots=Math.max(1,Math.min(12,Number(g.slots)||3)),best=math.optimize(g.stats,effects,g.modes,slots);parts.push('Theo mô hình giả định, combo '+slots+' ô: '+(best.items.map(x=>x.name).join(', ')||'không dùng hiệu ứng')+'. Sát thương kỳ vọng: '+Math.round(best.result.expected).toLocaleString('vi-VN')+'.');}
-else parts.push('Chưa có dữ kiện kỹ năng rõ để so combo. Bệ hạ cho Linh xem ảnh trang bị nhé.');
+else parts.push('Chưa có dữ kiện kỹ năng rõ để so combo. Bệ hạ cho Socrates xem ảnh trang bị nhé.');
 }
 if(/chí mạng|crit|bạo kích/.test(q))parts.push('Hồ sơ có chí mạng '+(g.stats?.critChance||0)+'% và ST chí mạng cộng thêm '+(g.stats?.critDamage||0)+'%; công thức thực còn cần kiểm chứng.');
 if(/cộng|nhân|công thức|xác minh/.test(q))parts.push(math.analyzeEvidence(g.observations||[]).message);
-if(/ảnh|đọc|nhìn/.test(q)&&!vision)parts.push('Linh chưa được Bệ hạ chọn ảnh game để xem.');
+if(/ảnh|đọc|nhìn/.test(q)&&!vision)parts.push('Socrates chưa được Bệ hạ chọn ảnh game để xem.');
 if(/ghi nhớ|kinh nghiệm|đã học/.test(q))parts.push('Đang lưu '+(g.notes||[]).length+' ghi nhớ và '+(g.observations||[]).length+' phép đo cho game '+g.name+'.');
-if(!parts.length)parts.push(vision?.hypotheses?.[0]||'Chưa đủ bằng chứng để kết luận. Linh cần thêm ảnh mô tả hoặc sát thương thực tế.');
-return{reply:parts.join('\n\n'),question:vision?.questions?.[0]||((g.observations||[]).length<2?'Bệ hạ có thể cho Linh xem đòn đánh không chí mạng để kiểm tra không?':null)};
+if(!parts.length)parts.push(vision?.hypotheses?.[0]||'Chưa đủ bằng chứng để kết luận. Socrates cần thêm ảnh mô tả hoặc sát thương thực tế.');
+return{reply:parts.join('\n\n'),question:vision?.questions?.[0]||((g.observations||[]).length<2?'Bệ hạ có thể cho Socrates xem đòn đánh không chí mạng để kiểm tra không?':null)};
 }
 return{extractStats,observe,answer};
 });

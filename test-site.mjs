@@ -52,6 +52,9 @@ assert.ok(ui.includes('secondCanvas.width=0;secondCanvas.height=0;'),
  'Temporary enhanced screenshots must be discarded');
 assert.ok(ui.includes('const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);'),
  'Upload instructions must not be overridden by a stale build');
+assert.ok(ui.includes('build-systems.js?v=1.7.0'), 'Load SS9 prerequisite engine');
+assert.ok(ui.includes('buildSystems.assess(message,{context:buildContext})'), 'Game chat uses SS9 dependency reasoning');
+assert.ok(ui.includes('buildContext=buildSystems.inspect(raw,{source:'image'});'), 'OCR extracts dependency context');
 assert.ok(ui.includes('serviceWorker'),'PWA service worker must be registered');
 assert.ok(ui.includes('web-companion.js'),'Local Web assistant engine must load');
 assert.ok(ui.includes('web-dialogue.js'),'Local two-way dialogue engine must load');
@@ -69,6 +72,8 @@ assert.ok(offlineRaw.includes("'./game-coach.js?v="+assetsVersion+"'"),
  'PWA must precache the same coach version as the page');
 assert.ok(offlineRaw.includes("const CACHE='linh-site-"+assetsVersion+"'"),
  'Updating the assistant must rotate PWA cache version');
+assert.ok(offlineRaw.includes("'./build-systems.js?v="+assetsVersion+"'"),
+ 'PWA cache must include SS9 engine at the same version');
 assert.ok(offline.includes("'./web-game-experiments.js'"),
  'Service worker must cache the offline measurement ledger');
 assert.ok(offline.includes("'./web-game-brain.js'"),

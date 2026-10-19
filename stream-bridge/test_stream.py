@@ -75,6 +75,17 @@ class LinhStreamProbeTests(unittest.TestCase):
         with self.assertRaises(EOFError):
             server.next_png(io.BytesIO(p[:30]))
 
+    def test_raw_rgb_streaming_is_bounded_and_no_image_file_is_used(self):
+        self.assertEqual(server.RAW_FRAME_BYTES, 960 * 540 * 3)
+        self.assertEqual(server.read_n(io.BytesIO(b"abcxyz"), 3), b"abc")
+        with self.assertRaises(EOFError):
+            server.read_n(io.BytesIO(b"abc"), 4)
+        self.assertEqual(server.ocr_raw(b"wrong frame size"), "")
+        source = pathlib.Path("server.py").read_text()
+        self.assertIn('"-f", "rawvideo"', source)
+        self.assertIn('"P6', source)
+        self.assertNotIn('frame.jpg', source)
+
     def test_real_ocr_text_required_for_advice(self):
         self.assertIsNone(server.recognize_idea(""))
         self.assertIsNone(server.recognize_idea("64,324 18,920"))

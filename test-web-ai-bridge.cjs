@@ -44,4 +44,18 @@ agent.clear();assert.equal(agent.status().turns,0);
 agent.disconnect();assert.equal(agent.status().ready,false);
 assert.equal(agent.status().turns,0);
 assert.equal((await agent.ask('Hello',{confirm:()=>true,remoteFetch:post})).ok,false);
+// A late upstream response cannot restore history after a user disconnects.
+agent.configure('https://own.example/chat','session-only-access-token');
+let finish;
+const waiting=agent.ask('Tarta và Karmic khác nhau?',{
+ confirm:()=>true,
+ remoteFetch:()=>new Promise(resolve=>{finish=resolve;})
+});
+await Promise.resolve();
+agent.disconnect();
+finish({ok:true,json:async()=>({reply:'This stale response must be discarded'})});
+const stale=await waiting;
+assert.equal(stale.cancelled,true);
+assert.equal(agent.status().turns,0);
+assert.equal(agent.status().ready,false);
 console.log('PASS: AI external call requires per-request exact preview and never stores auth or private screenshots');

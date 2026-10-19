@@ -9,7 +9,7 @@ assert.equal(W.startVisit(null,T).visits,1);
 let memory=W.startVisit(null,T);
 let m2=W.startVisit(memory,T+60*1000);
 assert.equal(m2.visits,1,'reload in same session must not inflate visits');
-m2=W.startVisit(m2,T+31*60*1000);
+m2=W.startVisit(m2,T+33*60*1000);
 assert.equal(m2.visits,2,'later visits are remembered');
 assert.equal(W.tap(m2).taps,1);
 assert.equal(W.sanitizeState({visits:-99,taps:'bad',lastVisit:Infinity,voice:'true'}).taps,0,

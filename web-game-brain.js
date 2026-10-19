@@ -95,16 +95,18 @@
     return {...pair,multiplier,...(base===null?{}:{average:base*multiplier,normal:base,
       critical:base*(1+pair.bonus/100)})};
   }
-  function summary(images,notes,legacy){
+  function summary(images,notes,legacy,measurements=[]){
     const numImages=asItems(images).length, clean=sanitize({version:VERSION,items:notes});
     const measured=legacy?.observationCount||0,oldOCR=legacy?.verifiedOCR||0;
+    const typed=Array.isArray(measurements)?measurements.slice(-40).filter(x=>x&&x.source==='user-measured').length:0;
     const intro='Trên máy: '+numImages+' ảnh OCR đã xác nhận, '+clean.length+
-      ' ghi chú Bệ hạ cung cấp, '+measured+' phép đo cũ, '+oldOCR+' OCR từ hồ sơ cũ.';
+      ' ghi chú Bệ hạ cung cấp, '+typed+' số đo nhập tại đây, '+measured+
+      ' phép đo cũ, '+oldOCR+' OCR từ hồ sơ cũ.';
     const recent=clean.at(-1)?.text;
     const detail=recent?' Ghi chú gần nhất: '+recent+' (chưa kiểm chứng).':'';
     return reply(intro+detail,'memory');
   }
-  function answer(original,images=[],notes=[],legacy=null){
+  function answer(original,images=[],notes=[],legacy=null,measurements=[]){
     const raw=String(original??'').trim().slice(0,300),q=norm(raw);
     if(!raw)return null;
     const parsedSave=raw.match(/^\s*(?:ghi\s*nhớ|ghi\s*nho|lưu\s*ghi\s*chú|luu\s*ghi\s*chu|nhớ\s*giúp|nho\s*giup)\s*(?:game)?\s*[:：-]\s*(.{1,220})$/iu);
@@ -117,7 +119,7 @@
         action:'confirm-clear-notes'};
     if(/^(ghi chu game|ghi chu da luu|xem ghi chu|nho gi ve game|da hoc gi|hoc duoc gi|nho duoc gi|tri nho game|bo nho game)$/.test(q) ||
        (/^(socrates )?(da hoc|nho) (duoc )?gi/.test(q)))
-      return summary(images,notes,legacy);
+      return summary(images,notes,legacy,measurements);
     if(/(so sanh|chenh lech|thay doi|phep do)/.test(q)&&/sat thuong|do|phep do|damage/.test(q)&&legacy?.comparison)
       return reply('Hai phép đo cùng ngữ cảnh đã lưu: '+legacy.comparison+
         ' Đây là chênh lệch, chưa chứng minh nguyên nhân.','calculation');
@@ -153,7 +155,7 @@
       }
     }
     if(/(nho|hoc|ghi nho|du lieu|da luu)/.test(q) && /(game|anh|hinh|chi so|combo|hieu ung)/.test(q))
-      return summary(images,notes,legacy);
+      return summary(images,notes,legacy,measurements);
     return null;
   }
   function nextStudyPrompt(images,notes){

@@ -28,11 +28,13 @@ assert.ok(ui.includes('id="eraseImages"'),
 assert.ok(ui.includes('autonomousThought()') && ui.includes('document.hidden||scanning'),
   'Proactive speech must be limited to visible pages and stop during OCR');
 assert.ok(ui.includes('web-image-memory.js') && ui.includes('vision-engine.js') &&
-          ui.includes('web-game-brain.js'),
+          ui.includes('web-game-brain.js') && ui.includes('web-game-experiments.js'),
   'Image memory and OCR interpretation modules are required');
 assert.ok(ui.includes("const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition"),
  'Voice input must be feature detected, not promised');
 assert.ok(ui.includes('chat.respond(message,dialogue,legacy)'),'Home must answer user questions, not only rotate canned quotes');
+assert.ok(ui.includes('experiments.record(measurements,message)'),
+ 'The main chat must accept explicit game measurements');
 assert.ok(ui.includes('gameBrain.answer(message,savedImages,gameNotes,legacy)'),
  'Game arithmetic and confirmed OCR memory must be available from the same chat');
 assert.ok(ui.includes('id="learnStatus"'),'Home must show learned-data summary');
@@ -55,6 +57,8 @@ assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-onl
 assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
  'Web home must not overwrite existing game profiles');
 const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
+assert.ok(offline.includes("'./web-game-experiments.js'"),
+ 'Service worker must cache the offline measurement ledger');
 assert.ok(offline.includes("'./web-game-brain.js'"),
  'Service worker must cache the offline calculator');
 assert.ok(offline.includes("'./web-image-memory.js'") &&

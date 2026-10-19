@@ -62,6 +62,19 @@ function pieceCount(input){
  for(const re of patterns){const m=q.match(re);if(m)return +m[1];}
  return null;
 }
+// Only keep normalized, limited mechanic identifiers, not the original chat/OCR.
+function merge(previous,next){
+ if(!next||next.season!==RELEASE)return previous?.season===RELEASE?previous:null;
+ if(!previous||previous.season!==RELEASE)return next;
+ const ids=[...new Set([...(previous.systemIds||[]),...(next.systemIds||[])])].slice(0,11);
+ // A new named mechanic becomes current focus. Do not pretend two items
+ // pictured separately are simultaneously equipped.
+ const mechanicsNow=(next.mechanicIds?.length?next.mechanicIds:previous.mechanicIds)||[];
+ return {season:RELEASE,source:previous.source==='unconfirmed-ocr'||next.source==='unconfirmed-ocr'?
+    'unconfirmed-ocr':'user-text',verified:false,
+    systemIds:ids,mechanicIds:mechanicsNow.slice(0,3),
+    pieceCount:next.pieceCount??previous.pieceCount??null};
+}
 function inspect(raw,opts={}){
  const text=String(raw??'').slice(0,12000);
  const found=pickMechanics(text),dimensions=pickSystems(text);
@@ -119,5 +132,5 @@ function assess(input,opts={}){
    season:RELEASE,mechanic:selected[0]?.id||null,missing:unknown,
    systemIds:ids,confidence:'needs-build-evidence',source:official.transition};
 }
-return {RELEASE,official,systems,mechanics,norm,inspect,assess,pickMechanics,pickSystems,pieceCount};
+return {RELEASE,official,systems,mechanics,norm,inspect,merge,assess,pickMechanics,pickSystems,pieceCount};
 });

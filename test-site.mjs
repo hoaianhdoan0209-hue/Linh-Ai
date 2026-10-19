@@ -54,6 +54,8 @@ assert.ok(ui.includes('const contextual=photoRequest?null:coach.reply(message,la
  'Upload instructions must not be overridden by a stale build');
 assert.ok(ui.includes('build-systems.js?v=1.7.0'), 'Load SS9 prerequisite engine');
 assert.ok(ui.includes('buildSystems.assess(message,{context:buildContext})'), 'Game chat uses SS9 dependency reasoning');
+assert.ok(ui.includes('buildContext=buildSystems.merge(buildContext,nextBuild)'),
+ 'Explicit build clues should accumulate in conversation only');
 assert.ok(ui.includes("buildContext=buildSystems.inspect(raw,{source:'image'});"), 'OCR extracts dependency context');
 assert.ok(ui.includes('serviceWorker'),'PWA service worker must be registered');
 assert.ok(ui.includes('web-companion.js'),'Local Web assistant engine must load');

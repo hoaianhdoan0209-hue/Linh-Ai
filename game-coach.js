@@ -133,12 +133,6 @@ function create(){
    if(!previous)return result('Thần mới có một phương án. Bệ hạ gửi ảnh món thứ hai để so sánh và cho biết đánh boss hay farm.','question');
    return compareImages(previous,current,{critMode,goal,unconfirmed});
   }
-  if(false){ // Unreachable legacy comparator retained for compatibility review.
-   if(!previous)return result('Hiện chỉ có một bảng chỉ số trong phiên. Bệ hạ gửi thêm ảnh của phương án còn lại để so sánh; thần sẽ giữ từng bộ riêng.','question');
-   const a=values(previous),b=values(current),lines=[];
-   for(const key of Object.keys(b))if(a[key]!==undefined&&a[key]!==b[key])lines.push(S.labels[key]+': '+fmt(a[key])+' → '+fmt(b[key])+' ('+(b[key]>a[key]?'+':'')+fmt(b[key]-a[key])+').');
-   return result((lines.length?lines.join('\n'):'Chưa thấy khác biệt ở những chỉ số đọc được.')+'\n\nĐây là so sánh hai bảng, chưa khẳng định món nào mạnh hơn nếu khác kỹ năng hoặc mục tiêu.');
-  }
   if(/goi y|toi uu|nen tang|uu tien|manh hon/.test(q)){
    const f=values(current),lines=[];
    if(f.critChance!==undefined&&f.critDamage!==undefined&&critMode){

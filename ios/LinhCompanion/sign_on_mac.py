@@ -48,8 +48,11 @@ def replace_required(path, source, replacement, expected=1):
 def prepare(source_dir, destination, app_id, group_id):
     shutil.copytree(
         source_dir, destination,
-        ignore=shutil.ignore_patterns("*.xcodeproj", "*.xcworkspace",
-                                     ".DS_Store", "build", "DerivedData"),
+        ignore=shutil.ignore_patterns(
+            "*.xcodeproj", "*.xcworkspace", ".DS_Store", "build", "DerivedData",
+            "signed-output", "*.ipa", "*.p12", "*.mobileprovision", "*.p8",
+            "*.cer", "*.key"
+        ),
     )
     project = destination / "project.yml"
     replace_required(

@@ -73,4 +73,17 @@ assert.equal(approved.ok,true);assert.equal(sent,1);
 assert.equal(bridge.status().turns,2);
 bridge.clear();assert.equal(bridge.status().turns,0);
 bridge.disconnect();assert.equal(bridge.status().ready,false);
+// Closing an image during a remote request must not restore stale image context.
+bridge.configure('https://gateway.example/chat','private-gateway-access');
+let finishUpload,stillSelected=true;
+const pending=bridge.askImage('Đọc trang bị',image,{
+ isValid:()=>stillSelected,confirm:()=>true,
+ remoteFetch:()=>new Promise(resolve=>{finishUpload=resolve;})
+});
+await Promise.resolve();
+stillSelected=false;
+finishUpload({ok:true,json:async()=>({reply:'Do not retain this former screenshot'})});
+const dismissed=await pending;
+assert.equal(dismissed.cancelled,true);
+assert.equal(bridge.status().turns,0);
 console.log('PASS: explicit vision consent, local canvas downscale, server JPEG validation, Gemini and OpenAI image payloads');

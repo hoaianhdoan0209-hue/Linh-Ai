@@ -27,11 +27,19 @@ assert.ok(ui.includes('id="eraseImages"'),
   'User must be able to delete confirmed photo memory');
 assert.ok(ui.includes('autonomousThought()') && ui.includes('document.hidden||scanning'),
   'Proactive speech must be limited to visible pages and stop during OCR');
-assert.ok(ui.includes('web-image-memory.js') && ui.includes('vision-engine.js'),
+assert.ok(ui.includes('web-image-memory.js') && ui.includes('vision-engine.js') &&
+          ui.includes('web-game-brain.js'),
   'Image memory and OCR interpretation modules are required');
 assert.ok(ui.includes("const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition"),
  'Voice input must be feature detected, not promised');
 assert.ok(ui.includes('chat.respond(message,dialogue,legacy)'),'Home must answer user questions, not only rotate canned quotes');
+assert.ok(ui.includes('gameBrain.answer(message,savedImages,gameNotes,legacy)'),
+ 'Game arithmetic and confirmed OCR memory must be available from the same chat');
+assert.ok(ui.includes('id="learnStatus"'),'Home must show learned-data summary');
+assert.ok(ui.includes("gameBrain.nextStudyPrompt(savedImages,gameNotes)"),
+ 'Learning must affect grounded proactive questions');
+assert.ok(ui.includes("if(set(gameBrain.KEY,{version:1,items:studied.notes}))"),
+ 'Explicit saved game notes must only be considered learned after local storage succeeds');
 assert.ok(!/<(?:select|textarea|nav|section|h1|h2|h3)\b/i.test(ui),
   'Home must not expose settings, explanations, forms or menus');
 assert.ok(ui.includes('Safari PWA cannot stream the screen'),
@@ -47,6 +55,8 @@ assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-onl
 assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
  'Web home must not overwrite existing game profiles');
 const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
+assert.ok(offline.includes("'./web-game-brain.js'"),
+ 'Service worker must cache the offline calculator');
 assert.ok(offline.includes("'./web-image-memory.js'") &&
           offline.includes("'./vision-engine.js'"),
  'Offline service worker must cache the image learning modules');

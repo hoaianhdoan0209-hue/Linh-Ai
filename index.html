@@ -257,7 +257,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  let dialogue={focus:'general'},lastPatch=null,buildContext=null,thinkingState=thinkingGuard.empty(),hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
  let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
  let acceptedVision=visionEvidence.sanitize(get(visionEvidence.KEY));
- let pendingVisionEvidence=null;
+ let pendingVisionEvidence=null,pendingOCRLabels=null;
  let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
  let measurements=experiments.sanitize(get(experiments.KEY));
  let analysisVisible=false;
@@ -554,6 +554,28 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    });
  }
 
+ function collectOCRLabels(raw){
+   const text=String(raw||'').slice(0,1800),norm=classCatalog.norm(text);
+   const includesName=name=>{
+     const n=classCatalog.norm(name);
+     return n.length>3&&(' '+norm+' ').includes(' '+n+' ');
+   };
+   const observations=[];
+   for(const c of classCatalog.find(text)){
+     if(includesName(c.name))observations.push({kind:'other',name:c.name,confidence:'medium'});
+     for(const sk of [...c.active,...c.passive]){
+       if(includesName(sk))observations.push({kind:'skill',name:sk,confidence:'medium'});
+     }
+   }
+   for(const edge of evidenceGraph.find(text)){
+     if(includesName(edge.item))observations.push({kind:'equipment',name:edge.item,confidence:'medium'});
+     if(includesName(edge.skill))observations.push({kind:'skill',name:edge.skill,confidence:'medium'});
+   }
+   return visionEvidence.parse(JSON.stringify({
+     schema:'socrates-vision-v1',panel:'unknown',equipState:'unknown',
+     observations:observations.slice(0,8),unclear:[]
+   }));
+ }
  function refreshImageMemoryUI(){
    eraseImages.hidden=savedImages.length===0&&acceptedVision.length===0;
    eraseImages.textContent='Quên '+(savedImages.length+acceptedVision.length)+' dữ kiện ảnh đã học';
@@ -564,6 +586,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    ++scanToken;
    scanning=false;
    pendingImage=null;
+   pendingOCRLabels=null;
    pendingVisionEvidence=null;
    ocrEditor.textContent='';ocrEditorPanel.hidden=true;
    visionEditor.textContent='';visionEditorPanel.hidden=true;
@@ -680,8 +703,12 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      }
      ocrEditor.textContent=raw.slice(0,1800);
      pendingImage=imageMemory.candidate(raw,observation);
-     approveImage.disabled=!pendingImage;
-     imageStatus.textContent=imageMemory.describe(pendingImage);
+     pendingOCRLabels=collectOCRLabels(raw);
+     approveImage.disabled=!pendingImage&&!pendingOCRLabels?.observations.length;
+     imageStatus.textContent=pendingImage?imageMemory.describe(pendingImage):
+       pendingOCRLabels?.observations.length?
+         'Đã nhận thấy tên class/kỹ năng. Hãy sửa chữ rồi bấm Ghi nhớ để xác nhận.':
+         'Chưa nhận được chỉ số/tên. Có thể nhập chữ đúng trong ô sửa OCR.';
      // User can correct the OCR even when no automatic numeric candidate exists.
      // Never auto-store raw recognized text.
      // A named SS9 mechanic can be recognized even when OCR finds no numeric
@@ -769,10 +796,13 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(scanning||photoReview.hidden)return;
    const text=String(ocrEditor.innerText||ocrEditor.textContent||'').slice(0,1800);
    pendingImage=imageMemory.candidate(text,vision.observe(text));
-   approveImage.disabled=!pendingImage;
+   pendingOCRLabels=collectOCRLabels(text);
+   approveImage.disabled=!pendingImage&&!pendingOCRLabels?.observations.length;
    imageStatus.textContent=pendingImage?
      'Có chỉ số/từ khóa sau khi sửa. Xem lại chữ trước khi bấm Ghi nhớ.':
-     'Chưa tìm được chỉ số/từ khóa hợp lệ. Bệ hạ có thể sửa chữ tại đây.';
+     pendingOCRLabels?.observations.length?
+       'Đã nhận diện tên class/kỹ năng sau khi sửa. Xem lại chữ rồi Ghi nhớ.':
+       'Chưa tìm được chỉ số hoặc tên có nguồn hợp lệ. Hãy sửa chữ tại đây.';
  });
  photo.addEventListener('click',()=>{lastInteractionAt=Date.now();imageInput.click()});
  imageInput.addEventListener('change',()=>readImage(imageInput.files?.[0]));
@@ -780,8 +810,11 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(scanning)return;
    const corrected=String(ocrEditor.innerText||ocrEditor.textContent||'').trim().slice(0,1800);
    const manual=imageMemory.candidate(corrected,vision.observe(corrected));
-   if(!manual){imageStatus.textContent='Chữ sửa chưa có chỉ số/từ khóa hợp lệ; chưa lưu.';return;}
    pendingImage=manual;
+   pendingOCRLabels=collectOCRLabels(corrected);
+   if(!pendingImage&&!pendingOCRLabels?.observations.length){
+     imageStatus.textContent='Chưa có chỉ số hoặc tên class/kỹ năng có nguồn hợp lệ để xác nhận.';return;
+   }
    lastInteractionAt=Date.now();
    const change=imageMemory.approve(savedImages,pendingImage);
    if(!change.added){

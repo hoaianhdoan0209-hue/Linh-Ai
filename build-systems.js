@@ -92,7 +92,8 @@ function assess(input,opts={}){
  const ids=[...new Set([...(context?.systemIds||[]),...pickSystems(raw)])];
  const q=norm(raw);
  const asksBuild=/(build|phoi do|phoi bo|phoi skill|chieu nao|set nao|mon nao|chon gi|co manh|toi uu|nen dung|nen chon|nen thay|tuong tac|co che|tai sao|vi sao|phan tich|so sanh|huong dan|fatebound|fatestone|forged|celesturgic|sacred soul|eidolon|concordance|thiet lap)/.test(q);
- if(!asksBuild&&!selected.length)return null;
+ const topicalFollowup=/^(boss|boss lau|farm|farm quai|nen|nen khong|dung duoc khong|co hop khong|co nen dung|co nen dung khong|vi sao|tai sao|tiep|tiep di)$/.test(q);
+ if(!asksBuild&&!found.length&&!(selected.length&&topicalFollowup))return null;
  const n=pieceCount(raw)??context?.pieceCount??null;
  const lines=[],unknown=[],checks=[];
  if(selected.length){

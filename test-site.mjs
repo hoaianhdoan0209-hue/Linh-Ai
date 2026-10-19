@@ -56,7 +56,7 @@ assert.ok(ui.includes('said.textContent='),'User text must never be injected as 
 assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-only');
 assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
  'Web home must not overwrite existing game profiles');
-const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
+const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8').replace(/\?v=[0-9.]+/g,'');
 assert.ok(offline.includes("'./web-game-experiments.js'"),
  'Service worker must cache the offline measurement ledger');
 assert.ok(offline.includes("'./web-game-brain.js'"),

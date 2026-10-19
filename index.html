@@ -144,13 +144,13 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./stat-schema.js"></script>
-<script src="./vision-engine.js"></script>
-<script src="./web-image-memory.js"></script>
-<script src="./season-knowledge.js"></script>
-<script src="./web-game-brain.js"></script>
-<script src="./web-game-experiments.js"></script>
-<script src="./game-coach.js"></script>
+<script src="./stat-schema.js?v=1.6.1"></script>
+<script src="./vision-engine.js?v=1.6.1"></script>
+<script src="./web-image-memory.js?v=1.6.1"></script>
+<script src="./season-knowledge.js?v=1.6.1"></script>
+<script src="./web-game-brain.js?v=1.6.1"></script>
+<script src="./web-game-experiments.js?v=1.6.1"></script>
+<script src="./game-coach.js?v=1.6.1"></script>
 <script>
 (()=>{
  'use strict';
@@ -419,7 +419,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
        'Socrates đọc được vài dấu hiệu. Bệ hạ xem và bấm Ghi nhớ nếu OCR đúng nhé.':
        'Socrates chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.',
        pendingImage?'question':'dialogue',14000);
-   }catch(_){
+   }catch(error){
+     console.warn('Socrates OCR failed:',error?.name,error?.message);
      if(myScan===scanToken){
        imageStatus.textContent='OCR chưa chạy được. Thử lại khi có mạng để tải bộ chữ từ Socrates.';
        show('Ảnh vẫn ở trên máy. Socrates chưa đọc được chữ, và chưa lưu gì.','question');

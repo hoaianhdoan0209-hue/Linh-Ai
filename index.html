@@ -144,16 +144,17 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./stat-schema.js?v=1.8.0"></script>
-<script src="./vision-engine.js?v=1.8.0"></script>
-<script src="./web-image-memory.js?v=1.8.0"></script>
-<script src="./season-knowledge.js?v=1.8.0"></script>
-<script src="./web-game-brain.js?v=1.8.0"></script>
-<script src="./web-game-experiments.js?v=1.8.0"></script>
-<script src="./build-systems.js?v=1.8.0"></script>
-<script src="./rotation-lab.js?v=1.8.0"></script>
-<script src="./rotation-commands.js?v=1.8.0"></script>
-<script src="./game-coach.js?v=1.8.0"></script>
+<script src="./stat-schema.js?v=1.9.0"></script>
+<script src="./vision-engine.js?v=1.9.0"></script>
+<script src="./web-image-memory.js?v=1.9.0"></script>
+<script src="./season-knowledge.js?v=1.9.0"></script>
+<script src="./web-game-brain.js?v=1.9.0"></script>
+<script src="./web-game-experiments.js?v=1.9.0"></script>
+<script src="./build-systems.js?v=1.9.0"></script>
+<script src="./rotation-lab.js?v=1.9.0"></script>
+<script src="./rotation-commands.js?v=1.9.0"></script>
+<script src="./prompt-strategy.js?v=1.9.0"></script>
+<script src="./game-coach.js?v=1.9.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -164,6 +165,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
  const buildSystems=window.SocratesBuildSystems;
  const rotations=window.SocratesRotationCommands;
+ const promptStrategy=window.SocratesPromptStrategy;
  const linh=document.getElementById('linh');
  const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
@@ -180,7 +182,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!rotations||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!rotations||!promptStrategy||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -253,10 +255,11 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(nextBuild)buildContext=buildSystems.merge(buildContext,nextBuild);
    const buildAcknowledgment=nextBuild&&/\b(?:toi|ta|minh)\s+(?:choi|dung|dang dung|mac|su dung)\b/.test(normalized)?
      {text:'Socrates ghi nhận thông tin build trong phiên này, chưa coi là đã kiểm chứng. Muốn phân tích đúng cần hiệu ứng đang kích hoạt, Fatestone và kỹ năng chủ lực.',kind:'memory',focus:'game'}:null;
+   const promptAdvice=photoRequest||photoRecall?null:promptStrategy.answer(message,{context:buildContext});
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
-   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || groundedPatch || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:

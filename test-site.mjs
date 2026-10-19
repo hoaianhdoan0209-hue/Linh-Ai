@@ -52,11 +52,11 @@ assert.ok(ui.includes('secondCanvas.width=0;secondCanvas.height=0;'),
  'Temporary enhanced screenshots must be discarded');
 assert.ok(ui.includes('const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);'),
  'Upload instructions must not be overridden by a stale build');
-assert.ok(ui.includes('build-systems.js?v=2.3.0'), 'Load SS9 prerequisite engine');
-assert.ok(ui.includes('ss9-evidence-graph.js?v=2.3.0'), 'Load curated official relationship graph');
+assert.ok(ui.includes('build-systems.js?v=2.4.0'), 'Load SS9 prerequisite engine');
+assert.ok(ui.includes('ss9-evidence-graph.js?v=2.4.0'), 'Load curated official relationship graph');
 assert.ok(ui.includes('evidenceGraph.explain(message)'), 'Graph must contribute to conversational skill details');
 assert.ok(ui.includes('const sourcedOCR=evidenceGraph.explain(raw);'), 'OCR must identify sourced named mechanics');
-assert.ok(ui.includes('rotation-lab.js?v=2.3.0') && ui.includes('rotation-commands.js?v=2.3.0'),
+assert.ok(ui.includes('rotation-lab.js?v=2.4.0') && ui.includes('rotation-commands.js?v=2.4.0'),
  'Ship discrete event rotation modules in the page');
 assert.ok(ui.includes('const rotationReply=rotations.answer(message);'),
  'Main chat must pass explicit player experiment text to the simulator');
@@ -64,7 +64,7 @@ assert.ok(ui.includes('buildSystems.assess(message,{context:buildContext})'), 'G
 assert.ok(ui.includes('buildContext=buildSystems.merge(buildContext,nextBuild)'),
  'Explicit build clues should accumulate in conversation only');
 assert.ok(ui.includes("buildContext=buildSystems.inspect(raw,{source:'image'});"), 'OCR extracts dependency context');
-assert.ok(ui.includes('thinking-guard.js?v=2.3.0'), 'Thinking guard loaded before prompt strategy');
+assert.ok(ui.includes('thinking-guard.js?v=2.4.0'), 'Thinking guard loaded before prompt strategy');
 assert.ok(ui.includes('thinkingGuard.observe(thinkingState,message,{source:'), 'Thinking guard observes only relevant messages');
 assert.ok(ui.includes("thinkingState=thinkingGuard.observePhoto(thinkingState,raw);"),
  'Two recent screenshots must be tracked as separate hypotheses');
@@ -72,11 +72,19 @@ assert.ok(ui.includes('if(nextBuild&&!alternativeTurn)buildContext=buildSystems.
  'An A/B hypothetical comparison must not become the active equipment');
 assert.ok(ui.includes("if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();aiBridge.clear();}"),
  'Clear dialogue must remove session-only hypotheses');
-assert.ok(ui.includes('prompt-strategy.js?v=2.3.0'),
+assert.ok(ui.includes('prompt-strategy.js?v=2.4.0'),
  'Prompt planning must be loaded from same-origin JavaScript');
 assert.ok(ui.includes('promptStrategy.answer(message,{context:buildContext})'),
  'Game chat must use context-aware prompt planning before generic fallback');
-assert.ok(ui.includes('web-ai-bridge.js?v=2.3.0'), 'Optional own-model bridge must load');
+assert.ok(ui.includes('web-ai-bridge.js?v=2.4.0'), 'Optional own-model bridge must load');
+assert.ok(ui.includes('web-vision-upload.js?v=2.4.0'), 'Optional image downsizing module must load');
+assert.ok(ui.includes('id="visionAnalyze" hidden disabled'), 'Image upload control must start hidden');
+assert.ok(ui.includes("visionUpload.encode(file)"), 'Image bytes must be reduced via canvas before model upload');
+assert.ok(ui.includes("aiBridge.askImage(question,image,"), 'Vision model requests are separate from text chat');
+assert.ok(ui.includes("window.confirm(") && ui.includes("Thông tin tên người chơi"), 'Screenshot must require consent with visible personal-data warning');
+assert.ok(ui.includes('if(scan!==scanToken||file!==pendingVisionFile)return;'),
+  'AI vision results for dismissed images must be discarded');
+assert.ok(ui.includes("pendingVisionFile=null;"), 'Closing image must drop in-memory file reference');
 assert.ok(ui.includes('aiBridge.ask(message,'), 'Chat must route through explicit optional AI bridge');
 assert.ok(ui.includes('confirm:({endpoint,body})=>window.confirm('), 'Every remote request needs a visible preview and approval');
 assert.ok(ui.includes('type="password" autocomplete="off"'), 'Gateway access token must be entered as a password');
@@ -96,6 +104,8 @@ const offlineRaw=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
 const offline=offlineRaw.replace(/\?v=[0-9.]+/g,'');
 const assetsVersion=ui.match(/game-coach\.js\?v=([0-9.]+)/)?.[1];
 assert.ok(assetsVersion,'Game coach must have a deployed asset version');
+assert.ok(offlineRaw.includes("'./web-vision-upload.js?v="+assetsVersion+"'"),
+ 'Screenshot encoding module must be in offline PWA cache');
 assert.ok(offlineRaw.includes("'./web-ai-bridge.js?v="+assetsVersion+"'"),
  'Offline PWA must cache opt-in AI connector without any provider key');
 assert.ok(offlineRaw.includes("'./game-coach.js?v="+assetsVersion+"'"),

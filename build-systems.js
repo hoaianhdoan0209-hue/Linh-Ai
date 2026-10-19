@@ -91,7 +91,8 @@ function assess(input,opts={}){
  const selected=found.length?found:(context?.mechanicIds||[]).map(getMechanic).filter(Boolean);
  const ids=[...new Set([...(context?.systemIds||[]),...pickSystems(raw)])];
  const q=norm(raw);
- const asksBuild=/(build|phoi do|phoi bo|phoi skill|chieu nao|set nao|mon nao|chon gi|co manh|toi uu|nen dung|nen chon|nen thay|tuong tac|co che|tai sao|vi sao|phan tich|so sanh|huong dan|fatebound|fatestone|forged|celesturgic|sacred soul|eidolon|concordance|thiet lap)/.test(q);
+ const legacySystems=/(arcane scroll|equipment leaderboard|ss8 echo|echo system|ss8 forge|forge system|forge cu|he forge cu)/.test(q);
+ const asksBuild=legacySystems||/(build|phoi do|phoi bo|phoi skill|chieu nao|set nao|mon nao|chon gi|co manh|toi uu|nen dung|nen chon|nen thay|tuong tac|co che|tai sao|vi sao|phan tich|so sanh|huong dan|fatebound|fatestone|forged|celesturgic|sacred soul|eidolon|concordance|thiet lap)/.test(q);
  const topicalFollowup=/^(boss|boss lau|farm|farm quai|nen|nen khong|dung duoc khong|co hop khong|co nen dung|co nen dung khong|vi sao|tai sao|tiep|tiep di)$/.test(q);
  if(!asksBuild&&!found.length&&!(selected.length&&topicalFollowup))return null;
  const n=pieceCount(raw)??context?.pieceCount??null;
@@ -107,7 +108,9 @@ function assess(input,opts={}){
   }else lines.push(m.limitation);
  }else{
   lines.push('Không thể xếp hạng build chỉ từ công kích, chí mạng hoặc điểm trang bị.');
-  if(/fatestone|fatebound/.test(q))
+  if(legacySystems)
+   lines.push('Lưu ý chuyển mùa SS9: Arcane Scroll, Echo/Forge cũ và Equipment Leaderboard đã được gỡ trong hệ thống trang bị mới. Không áp dụng hướng dẫn cũ; Forged Affix mới không đồng nghĩa Forge cũ.');
+  else if(/fatestone|fatebound/.test(q))
    lines.push('SS8 chuyển sang Fatestone; SS9 còn thay cân bằng Fatebound. Phải kiểm tra hệ thống và cấp hiệu ứng đúng mùa, không lấy bảng 2/3 món cũ áp thẳng.');
   else if(/forged|celesturgic|affix/.test(q))
    lines.push('Forged và Celesturgic là những lớp affix khác nhau; phải đối chiếu từng dòng, cấp và khả năng chuyển/thay trước khi tối ưu.');

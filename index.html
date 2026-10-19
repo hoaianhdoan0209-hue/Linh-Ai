@@ -731,7 +731,10 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
        show(named[0].text+(sourcedOCR?'\n\n'+sourcedOCR.text:'')+(mechanics?'\n\n'+mechanics.text:''),'question',0);
        return;
      }
-     show('Socrates chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.','question',14000);
+     show(pendingOCRLabels?.observations.length?
+       'Đã thấy tên class/kỹ năng. Bệ hạ sửa chữ trong bảng ảnh, sau đó bấm Ghi nhớ nếu đúng.':
+       'Chưa đọc được dữ kiện hợp lệ. Bệ hạ có thể sửa hoặc nhập chữ thấy rõ ở bảng ảnh trước khi Ghi nhớ.',
+       'question',0);
    }catch(error){
      console.warn('Socrates OCR failed:',error?.name,error?.message);
      if(myScan===scanToken){
@@ -816,23 +819,37 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      imageStatus.textContent='Chưa có chỉ số hoặc tên class/kỹ năng có nguồn hợp lệ để xác nhận.';return;
    }
    lastInteractionAt=Date.now();
-   const change=imageMemory.approve(savedImages,pendingImage);
-   if(!change.added){
-     imageStatus.textContent='Socrates đã nhớ các dấu hiệu này rồi, không lưu trùng.';
-     return;
+   const verifiedNames=pendingOCRLabels?.observations?.map(x=>x.name).join(', ')||'';
+   const explanation=[
+     pendingImage?imageMemory.describe(pendingImage):'',
+     verifiedNames?'Tên được xác nhận: '+verifiedNames:'',
+   ].filter(Boolean).join('\n');
+   if(!window.confirm('Đã sửa đúng chữ trong ảnh và đồng ý lưu các dữ kiện đã kiểm tra?\n\n'+
+     explanation.slice(0,750)+'\n\nKhông lưu ảnh hoặc toàn bộ văn bản OCR.'))return;
+   let storedFacts=false,storedLabels=false;
+   if(pendingImage){
+     const change=imageMemory.approve(savedImages,pendingImage);
+     if(change.added&&set(imageMemory.KEY,{version:1,items:change.items})){
+       savedImages=change.items;storedFacts=true;
+     }
    }
-   // Only user-confirmed numeric facts/tags, not raw OCR/images, are persisted.
-   if(!set(imageMemory.KEY,{version:1,items:change.items})){
-     imageStatus.textContent='Safari không lưu được trí nhớ. Socrates chưa xác nhận đã lưu.';
-     return;
+   if(pendingOCRLabels?.observations?.length){
+     const next=visionEvidence.approve(acceptedVision,pendingOCRLabels);
+     if(next.added&&set(visionEvidence.KEY,{version:1,items:next.items})){
+       acceptedVision=next.items;storedLabels=true;
+     }
    }
-   savedImages=change.items;
    refreshImageMemoryUI();
-   pendingImage=null;
+   if(!storedFacts&&!storedLabels){
+     imageStatus.textContent='Không có dữ kiện mới hoặc Safari từ chối lưu. Chưa xác nhận đã ghi nhớ.';
+     return;
+   }
+   pendingImage=null;pendingOCRLabels=null;
    approveImage.disabled=true;
-   imageStatus.textContent='Đã nhớ chữ/chỉ số Bệ hạ xác nhận. Chưa khẳng định cơ chế game.';
-   const analysis=coach.image(savedImages.at(-1),true);
-   show('Đã lưu chỉ số Bệ hạ xác nhận.\n\n'+analysis.text,analysis.kind,0);
+   imageStatus.textContent='Đã lưu dữ kiện OCR do Bệ hạ sửa và xác nhận. Không khẳng định đây là đồ đang mặc.';
+   show('Đã ghi nhớ '+(storedLabels?'tên class/kỹ năng':'')+
+     (storedFacts&&storedLabels?' và ':'')+(storedFacts?'chỉ số/từ khóa':'')+
+     ' từ chữ đã sửa; chưa suy ra DPS hay trang bị đang mặc.','memory',0);
  });
  dismissImage.addEventListener('click',()=>{lastInteractionAt=Date.now();closeImage()});
  eraseImages.addEventListener('click',()=>{

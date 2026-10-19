@@ -126,7 +126,10 @@ function create(){
    }
   }
   const patch=K.lookup(raw);if(patch.length)return null;
-  if(/^(tong|tong he so|la tong|chi mang la tong|cong them|phan cong them|la cong them|thuong chi mang)$/.test(q)&&current)return analyze(current,{critMode,goal,unconfirmed});
+  if(/^(tong|tong he so|la tong|chi mang la tong|cong them|phan cong them|la cong them|thuong chi mang)$/.test(q)&&current)
+   return previous?compareImages(previous,current,{critMode,goal,unconfirmed}):analyze(current,{critMode,goal,unconfirmed});
+  if(previous&&/^(boss|boss lau|danh boss|farm|farm quai|don quai)$/.test(q))
+   return compareImages(previous,current,{critMode,goal,unconfirmed});
   if(!/(anh|hinh|chi so|tinh|phan tich|sat thuong|dps|build|goi y|toi uu|nen|tang|doi|manh|yeu|boss|farm|trang bi|ky nang|tiep|vi sao|tai sao|so sanh|cong kich|chi mang|crit|hoi chieu)/.test(q))return null;
   if(!current)return result('Thần chưa có chỉ số để tính. Bệ hạ gửi ảnh bảng chỉ số; thần sẽ đọc số, lập phép tính và hỏi đúng phần còn thiếu. Ảnh được phân tích ngay, chỉ lưu khi ngài chọn ghi nhớ.','question');
   if(/so sanh|anh truoc|mon truoc|chon (mon|cai|anh) nao|cai nao (manh|tot)|mon nao (manh|tot)|anh (1|2) (hay|voi) anh (1|2)|nen giu (mon|anh) nao|nen lay (mon|anh) nao/.test(q)){

@@ -1,0 +1,43 @@
+'use strict';
+const assert=require('node:assert/strict');
+const E=require('./web-game-experiments.js');
+const now=Date.now()-1000;
+assert.equal(E.parse('đo sát thương boss rắn: 1000',now).damage,1000);
+assert.equal(E.parse('đo sát thương boss rắn: 1.250',now).damage,1250);
+assert.equal(E.parse('đo sát thương boss rắn: 1,250',now).damage,1250);
+assert.equal(E.parse('tôi đo 1250',now),null);
+assert.equal(E.parse('đo sát thương người lạ: 1000',now),null);
+assert.equal(E.parse('đo sát thương boss mật khẩu: 1000',now),null);
+assert.equal(E.parse('đo sát thương boss a@example.com: 1000',now),null);
+assert.equal(E.parse('đo sát thương boss rắn: 0',now),null);
+assert.equal(E.parse('đo sát thương boss rắn: 999999999',now),null);
+assert.equal(E.parse('đo sát thương boss rắn: 100.5',now),null);
+let s=E.record([],'đo sát thương boss rắn: 1000',now);
+assert.equal(s.added,true);
+assert.equal(s.items.length,1);
+assert.equal(E.compare(s.items),null);
+assert.match(s.text,/Đã lưu/);
+s=E.record(s.items,'đo sát thương boss rắn: 1250',now+1);
+assert.equal(s.items.length,2);
+assert.equal(E.compare(s.items).percent,25);
+assert.equal(E.compare(s.items).context,'boss rắn');
+assert.match(s.text,/\+25%/);
+assert.match(s.text,/Chưa rõ nguyên nhân/);
+assert.equal(E.compare([
+ {context:'boss rắn',damage:1000,at:now},
+ {context:'boss sói',damage:1250,at:now+1}
+]),null,'no comparison between different targets');
+assert.equal(E.answer('so sánh số đo',s.items).kind,'calculation');
+assert.equal(E.answer('quên số đo',s.items).action,'confirm-clear-measurements');
+assert.equal(E.answer('chào Socrates',s.items),null);
+const reloaded=E.sanitize(E.payload(s.items),now+100);
+assert.equal(reloaded.length,2);
+assert.ok(reloaded.every(x=>x.source==='user-measured'));
+assert.ok(reloaded.every(x=>!('image'in x)&&!('ocr'in x)));
+assert.equal(E.sanitize('{broken').length,0);
+assert.equal(E.sanitize({version:12,items:s.items}).length,0);
+assert.equal(E.sanitize({version:1,items:[{context:'boss sói',damage:100,at:now-366*24*3600*1000}]}).length,0);
+let many=[];
+for(let i=1;i<=50;i++)many=E.record(many,'đo sát thương boss rắn: '+(1000+i),now+i).items;
+assert.equal(many.length,E.MAX);
+console.log('PASS: measurements, same-target comparisons, privacy, bounded local damage history');

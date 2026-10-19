@@ -52,8 +52,8 @@ assert.ok(ui.includes('secondCanvas.width=0;secondCanvas.height=0;'),
  'Temporary enhanced screenshots must be discarded');
 assert.ok(ui.includes('const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);'),
  'Upload instructions must not be overridden by a stale build');
-assert.ok(ui.includes('build-systems.js?v=2.0.0'), 'Load SS9 prerequisite engine');
-assert.ok(ui.includes('rotation-lab.js?v=2.0.0') && ui.includes('rotation-commands.js?v=2.0.0'),
+assert.ok(ui.includes('build-systems.js?v=2.1.0'), 'Load SS9 prerequisite engine');
+assert.ok(ui.includes('rotation-lab.js?v=2.1.0') && ui.includes('rotation-commands.js?v=2.1.0'),
  'Ship discrete event rotation modules in the page');
 assert.ok(ui.includes('const rotationReply=rotations.answer(message);'),
  'Main chat must pass explicit player experiment text to the simulator');
@@ -61,11 +61,15 @@ assert.ok(ui.includes('buildSystems.assess(message,{context:buildContext})'), 'G
 assert.ok(ui.includes('buildContext=buildSystems.merge(buildContext,nextBuild)'),
  'Explicit build clues should accumulate in conversation only');
 assert.ok(ui.includes("buildContext=buildSystems.inspect(raw,{source:'image'});"), 'OCR extracts dependency context');
-assert.ok(ui.includes('thinking-guard.js?v=2.0.0'), 'Thinking guard loaded before prompt strategy');
+assert.ok(ui.includes('thinking-guard.js?v=2.1.0'), 'Thinking guard loaded before prompt strategy');
 assert.ok(ui.includes('thinkingGuard.observe(thinkingState,message,{source:'), 'Thinking guard observes only relevant messages');
+assert.ok(ui.includes("thinkingState=thinkingGuard.observePhoto(thinkingState,raw);"),
+ 'Two recent screenshots must be tracked as separate hypotheses');
+assert.ok(ui.includes('if(nextBuild&&!alternativeTurn)buildContext=buildSystems.merge(buildContext,nextBuild);'),
+ 'An A/B hypothetical comparison must not become the active equipment');
 assert.ok(ui.includes("if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();}"),
  'Clear dialogue must remove session-only hypotheses');
-assert.ok(ui.includes('prompt-strategy.js?v=2.0.0'),
+assert.ok(ui.includes('prompt-strategy.js?v=2.1.0'),
  'Prompt planning must be loaded from same-origin JavaScript');
 assert.ok(ui.includes('promptStrategy.answer(message,{context:buildContext})'),
  'Game chat must use context-aware prompt planning before generic fallback');

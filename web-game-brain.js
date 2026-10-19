@@ -162,6 +162,16 @@
       return summary(images,notes,legacy,measurements);
     return null;
   }
+  // In-session follow-up for an explicitly requested SS9 fact, not a
+  // free-floating recommendation and never saved as player evidence.
+  function followup(raw,priorPatch){
+    const q=norm(String(raw??'').slice(0,300));
+    if(!priorPatch||typeof priorPatch.text!=='string')return null;
+    if(!/^(nen dung|nen dung khong|co nen dung|co nen dung khong|dung duoc khong|co manh hon khong|manh hon khong|co hop boss|co hop farm|danh boss duoc khong|farm duoc khong|nen thay khong|co nen thay khong)$/.test(q))return null;
+    const topic=priorPatch.text.split(/[:.;]/,1)[0].trim().slice(0,60);
+    const goal=/boss/.test(q)?'đánh boss':/farm/.test(q)?'farm':'build hiện tại';
+    return reply('Về '+topic+': chưa thể khuyên dùng chỉ từ ghi chú bản vá. Cần xem điều kiện kích hoạt và chỉ số của '+goal+' để so với món đang dùng. Gửi bảng chỉ số hoặc 2 phép đo cùng mục tiêu nhé.','suggestion');
+  }
   function nextStudyPrompt(images,notes){
     const items=asItems(images), saved=sanitize({version:VERSION,items:notes});
     if(saved.length){
@@ -179,5 +189,5 @@
     return null;
   }
   return {KEY,MAX_NOTES,norm,sanitize,payload,addNote,pairedCrit,calcCrit,compareBuffs,
-    parseDamageBase,summary,answer,nextStudyPrompt};
+    parseDamageBase,summary,answer,followup,nextStudyPrompt};
 });

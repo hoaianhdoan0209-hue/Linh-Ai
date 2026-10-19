@@ -144,14 +144,16 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./stat-schema.js?v=1.7.0"></script>
-<script src="./vision-engine.js?v=1.7.0"></script>
-<script src="./web-image-memory.js?v=1.7.0"></script>
-<script src="./season-knowledge.js?v=1.7.0"></script>
-<script src="./web-game-brain.js?v=1.7.0"></script>
-<script src="./web-game-experiments.js?v=1.7.0"></script>
-<script src="./build-systems.js?v=1.7.0"></script>
-<script src="./game-coach.js?v=1.7.0"></script>
+<script src="./stat-schema.js?v=1.8.0"></script>
+<script src="./vision-engine.js?v=1.8.0"></script>
+<script src="./web-image-memory.js?v=1.8.0"></script>
+<script src="./season-knowledge.js?v=1.8.0"></script>
+<script src="./web-game-brain.js?v=1.8.0"></script>
+<script src="./web-game-experiments.js?v=1.8.0"></script>
+<script src="./build-systems.js?v=1.8.0"></script>
+<script src="./rotation-lab.js?v=1.8.0"></script>
+<script src="./rotation-commands.js?v=1.8.0"></script>
+<script src="./game-coach.js?v=1.8.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -161,6 +163,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
  const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
  const buildSystems=window.SocratesBuildSystems;
+ const rotations=window.SocratesRotationCommands;
  const linh=document.getElementById('linh');
  const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
@@ -177,7 +180,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!rotations||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -239,6 +242,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
    const measurement=experiments.record(measurements,message);
    const measuredReply=measurement || experiments.answer(message,measurements);
+   const rotationReply=rotations.answer(message);
    const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);
    const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy,measurements);
    const patchFollowup=gameBrain.followup(message,lastPatch);
@@ -250,7 +254,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
-   let reply=measuredReply || (studied?.action?studied:null) || groundedPatch || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || groundedPatch || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:

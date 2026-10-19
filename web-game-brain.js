@@ -167,10 +167,20 @@
   function followup(raw,priorPatch){
     const q=norm(String(raw??'').slice(0,300));
     if(!priorPatch||typeof priorPatch.text!=='string')return null;
-    if(!/^(nen dung|nen dung khong|co nen dung|co nen dung khong|dung duoc khong|co manh hon khong|manh hon khong|co hop boss|co hop farm|danh boss duoc khong|farm duoc khong|nen thay khong|co nen thay khong)$/.test(q))return null;
-    const topic=priorPatch.text.split(/[:.;]/,1)[0].trim().slice(0,60);
-    const goal=/boss/.test(q)?'đánh boss':/farm/.test(q)?'farm':'build hiện tại';
-    return reply('Về '+topic+': chưa thể khuyên dùng chỉ từ ghi chú bản vá. Cần xem điều kiện kích hoạt và chỉ số của '+goal+' để so với món đang dùng. Gửi bảng chỉ số hoặc 2 phép đo cùng mục tiêu nhé.','suggestion');
+    const decision=/^(nen dung|nen dung khong|co nen dung|co nen dung khong|dung duoc khong|co manh hon khong|manh hon khong|co hop boss|co hop farm|danh boss duoc khong|farm duoc khong|nen thay khong|co nen thay khong|nen chon khong|boss|boss lau|farm|farm quai|tai sao|vi sao|co loi gi|loi ich gi)$/.test(q);
+    if(!decision)return null;
+    const detail=priorPatch.text;
+    const topic=detail.split(/[:.;]/,1)[0].trim().slice(0,48);
+    const boss=/boss/.test(q),farm=/farm/.test(q);
+    const caution=/adhesive gunpowder/i.test(detail)?
+      'Hiệu ứng 480% chỉ gắn với Adhesive Gunpowder, không áp sang mọi kỹ năng.':
+      /4 mon|4 món/i.test(detail)?
+      'Cần đủ 4 món để kích hoạt, không nên suy hệ số cho 2–3 món.':
+      /Wolong/i.test(detail)?
+      'Wolong là Eidolon nhận qua sự kiện; chưa có số liệu so sức mạnh với đội hiện tại.':
+      'Thay đồ chỉ từ một dòng bản vá có thể sai do điều kiện kích hoạt.';
+    const metric=boss?'Đo trên cùng boss và cùng thời gian.':farm?'So thời gian dọn cùng nhóm quái.':'So với món đang dùng trong cùng điều kiện.';
+    return reply('Về '+topic+': '+caution+' '+metric+' Gửi ảnh chỉ số hai phương án để thần tính tiếp.','suggestion');
   }
   function nextStudyPrompt(images,notes){
     const items=asItems(images), saved=sanitize({version:VERSION,items:notes});

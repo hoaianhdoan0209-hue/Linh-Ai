@@ -4,8 +4,16 @@
  * not proof a skill is equipped, and not a measured DPS calculator.
  */
 (function(root,factory){
+ // Identical source works from the browser, repository-root Node tests, and
+ // the private gateway. Prefer gateway .cjs; fall back to root .js.
+ const get=name=>{
+  try{return require('./'+name+'.cjs')}catch(e){
+   if(e?.code!=='MODULE_NOT_FOUND')throw e;
+   return require('./'+name+'.js');
+  }
+ };
  const r=typeof module!=='undefined'&&module.exports?
- {roster:require('./ss9-class-roster.cjs'),classes:require('./class-catalog.cjs'),graph:require('./ss9-evidence-graph.cjs')}:
+ {roster:get('ss9-class-roster'),classes:get('class-catalog'),graph:get('ss9-evidence-graph')}:
  {roster:root.SocratesClassRoster,classes:root.SocratesClassCatalog,graph:root.SocratesEvidenceGraph};
  const api=factory(r);
  if(typeof module!=='undefined'&&module.exports)module.exports=api;

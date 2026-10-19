@@ -1,6 +1,6 @@
-// Linh Web 0.3: cache same-origin static assets only, never private screenshots.
-const CACHE='linh-site-0.7.0';
-const ASSETS=['./','./index.html','./legacy-dashboard.html','./vision-engine.js','./assistant-engine.js','./assistant-ui.js','./manifest.webmanifest','./icon.svg'];
+// Linh Web 1.0: cache public static assets only; never private screenshots or saved game data.
+const CACHE='linh-site-1.0.0';
+const ASSETS=['./','./index.html','./web-companion.js','./legacy-dashboard.html','./vision-engine.js','./assistant-engine.js','./assistant-ui.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',ev=>{ev.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',ev=>{ev.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('linh-site-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',ev=>{

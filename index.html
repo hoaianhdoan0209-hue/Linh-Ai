@@ -148,6 +148,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
     <input id="aiAccess" type="password" autocomplete="off" maxlength="256" placeholder="Mã truy cập chỉ giữ trong phiên">
     <div class="photo-actions">
       <button id="aiConnect" class="primary" type="button">Kết nối AI</button>
+      <button id="aiCheck" type="button" disabled>Kiểm tra máy chủ</button>
       <button id="aiDismiss" type="button">Đóng</button>
     </div>
   </div>
@@ -213,7 +214,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const aiEndpoint=document.getElementById('aiEndpoint'),aiAccess=document.getElementById('aiAccess');
  const aiConnect=document.getElementById('aiConnect'),aiDismiss=document.getElementById('aiDismiss');
  const aiStatus=document.getElementById('aiStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!visionUpload||!visionEvidence||!visionAnalyze||!approveVision||!linh||!thought){
+ const aiCheck=document.getElementById('aiCheck');
+ let gatewayProbeToken=0;
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!aiCheck||!visionUpload||!visionEvidence||!visionAnalyze||!approveVision||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -281,7 +284,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      return;
    }
    if(/^(tat ai rieng|ngat ai rieng)$/.test(normalized)){
-     aiBridge.disconnect();visionAnalyze.hidden=true;aiSetup.hidden=true;aiStatus.textContent='Đang dùng trí tuệ cục bộ · AI riêng chưa kết nối';
+     ++gatewayProbeToken;aiBridge.disconnect();aiCheck.disabled=true;visionAnalyze.hidden=true;aiSetup.hidden=true;aiStatus.textContent='Đang dùng trí tuệ cục bộ · AI riêng chưa kết nối';
      aiSettings.textContent='Kết nối AI riêng (tùy chọn)';
      show('Đã ngắt AI riêng và xóa lịch sử hội thoại AI trong RAM.', 'memory',0);return;
    }
@@ -409,14 +412,34 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(!aiSetup.hidden)aiEndpoint.focus();
  });
  aiDismiss.addEventListener('click',()=>{aiSetup.hidden=true;aiAccess.value='';});
+ async function verifyGateway(){
+   const gateway=aiBridge.status().endpoint;
+   if(!gateway){show('Chưa có URL gateway. Hãy cấu hình AI riêng trước.','question',0);return;}
+   const test=++gatewayProbeToken;
+   aiCheck.disabled=true;
+   aiStatus.textContent='Đang kiểm tra Render... Dịch vụ Free có thể mất khoảng một phút để khởi động.';
+   const result=await window.SocratesAIBridge.probe(gateway);
+   if(test!==gatewayProbeToken||aiBridge.status().endpoint!==gateway)return;
+   aiCheck.disabled=false;
+   aiStatus.textContent=result.ok?
+     'Render đang online · Đã có cấu hình AI (chưa thử khóa Gemini)':
+     'Đã lưu cấu hình nhưng CHƯA kết nối được Render';
+   aiSettings.textContent=result.ok?'AI riêng: Render online':'AI riêng: Cần kiểm tra Render';
+   show('Kiểm tra máy chủ: '+result.reason+
+     (result.ok?'\nBây giờ hãy thử một câu hội thoại và xác nhận gửi đến AI.':
+      '\nVào Render → chọn dịch vụ → Logs. Nếu đang chạy mã cũ, Manual Deploy → Deploy latest commit.'),'question',0);
+ }
+ aiCheck.addEventListener('click',()=>{void verifyGateway();});
  aiConnect.addEventListener('click',()=>{
    try{
      aiBridge.configure(aiEndpoint.value,aiAccess.value);
      aiAccess.value='';aiEndpoint.value='';aiSetup.hidden=true;
-     aiStatus.textContent='AI riêng đã bật · Mỗi câu gửi đều cần phê duyệt';
+     aiCheck.disabled=false;
+     aiStatus.textContent='Đã lưu cấu hình gateway, đang kiểm tra kết nối...';
      visionAnalyze.hidden=!(pendingVisionFile&&!photoReview.hidden);
-     aiSettings.textContent='Cổng AI riêng đã kết nối';
-     show('Cổng AI được cấu hình trong RAM của tab, chưa gửi tin nào. Bệ hạ có thể hỏi tự nhiên; mỗi lần chuyển dữ liệu ra ngoài đều phải duyệt. Gõ “tắt AI riêng” để ngắt.','memory',0);
+     aiSettings.textContent='AI riêng: Đang kiểm tra';
+     show('Đã lưu URL và mã truy cập trong RAM của tab. Chưa xác nhận Render hoạt động và chưa gửi lời nhắn hay ảnh.','memory',0);
+     void verifyGateway();
    }catch(error){aiAccess.value='';show(error.message,'question',0);}
  });
  visionAnalyze.addEventListener('click',async()=>{

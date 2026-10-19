@@ -15,6 +15,43 @@ function endpoint(raw){
   throw Error('Gateway phải là HTTPS và kết thúc bằng /chat, không gắn khóa trong URL.');
  return u.toString();
 }
+function healthUrl(gateway){
+ const u=new URL(endpoint(gateway));
+ u.pathname='/health';
+ return u.toString();
+}
+async function probe(gateway,{remoteFetch=fetch,timeoutMs=90000}={}){
+ const url=healthUrl(gateway);
+ let controller=null,timeout=null;
+ try{
+  controller=typeof AbortController==='function'?new AbortController():null;
+  if(controller&&typeof setTimeout==='function')
+    timeout=setTimeout(()=>controller.abort(),timeoutMs);
+  const res=await remoteFetch(url,{
+   method:'GET',cache:'no-store',credentials:'omit',mode:'cors',
+   ...(controller?{signal:controller.signal}:{})
+  });
+  if(!res.ok)return {ok:false,reason:res.status===403?
+    'Máy chủ chặn yêu cầu (403). Kiểm tra cấu hình Render và CORS.':
+    res.status===404?'Render đang chạy phiên bản cũ. Vào Manual Deploy → Deploy latest commit.':
+    'Máy chủ trả HTTP '+res.status+' khi kiểm tra trạng thái.'};
+  let data;try{data=await res.json()}catch{
+   return {ok:false,reason:'Máy chủ không trả JSON của Socrates. Kiểm tra URL Render.'};
+  }
+  if(data?.service!=='socrates-gateway'||data?.status!=='online')
+   return {ok:false,reason:'Địa chỉ này không phải gateway Socrates phiên bản mới.'};
+  if(data.configured!==true)
+   return {ok:false,online:true,reason:'Render online nhưng chưa đủ cấu hình bí mật GEMINI_API_KEY / LINH_ACCESS_TOKEN.'};
+  return {ok:true,online:true,configured:true,
+   reason:'Render online và đã nhận cấu hình. Chưa xác minh Gemini API key bằng lời gọi thật.'};
+ }catch(err){
+  return {ok:false,reason:err?.name==='AbortError'?
+   'Render khởi động quá lâu hoặc mạng bị ngắt (quá 90 giây). Hãy kiểm tra Logs trên Render.':
+   'Không liên lạc được máy chủ. Kiểm tra Render đang Live, URL .onrender.com và kết nối mạng.'};
+ }finally{
+  if(timeout!==null&&typeof clearTimeout==='function')clearTimeout(timeout);
+ }
+}
 function create(){
  let server='',token='',history=[],inFlight=false,revision=0;
  function configure(url,access){
@@ -78,5 +115,5 @@ function create(){
  }
  return {configure,disconnect,clear,status,ask,askImage};
 }
-return {create,endpoint};
+return {create,endpoint,healthUrl,probe};
 });

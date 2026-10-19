@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict');
 const M=require('./web-image-memory.js');
 const V=require('./vision-engine.js');
-const NOW=Date.UTC(2026,9,19,3);
+const NOW=Date.now()-10000;
 const imageText='Tỷ lệ chí mạng: 35%\nThiêu đốt mục tiêu\nKỹ năng hồi chiêu 8 giây';
 const v=V.observe(imageText);
 const candidate=M.candidate(imageText,v);

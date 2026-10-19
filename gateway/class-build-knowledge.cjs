@@ -41,6 +41,16 @@ const specs=Object.freeze([
  item('astreon-starsigil-noesis','Astreon','Amaranthine Starsigil','Noesis','fix','Using Smartcast','Specialization should trigger after 2026-09-21 fix; effect values not described','fix'),
  item('pyroknight-matrix-ferrokinesis','Pyroknight','Fireblade Matrix','Ferrokinesis','fix','Activating Fireblade Matrix on some devices','Fix for specialization not taking effect on 2026-09-20; effect values not described','fix')
 ]);
+const combos=Object.freeze([
+ Object.freeze({owner:'Aegis',skill:'Shield Blitz',names:['Concuss','Skyfall'],
+  condition:'Both specializations equipped on Shield Blitz',
+  result:'Skyfall changes the charge into a leap; Concuss adds a chance to stun when the leap damages enemies',
+  source:src.spec.url,sourceDate:src.spec.date,verifiedDamageFormula:false}),
+ Object.freeze({owner:'Aegis',skill:'Shield Blitz',names:['Proficiency','Blinkstrike'],
+  condition:'Both specializations equipped on Shield Blitz',
+  result:'Proficiency reduces base cooldown while Blinkstrike converts damage to Light and adjusts dash movement',
+  source:src.spec.url,sourceDate:src.spec.date,verifiedDamageFormula:false})
+]);
 const concordance=Object.freeze([
  ['Assassin',400],['Dark Ranger',100],['Soulkeeper',800],['Shinobi',400],
  ['Stormwarden',150],['Stormblade',800],['Stormshaman',250],['Elementalist',400]
@@ -132,9 +142,15 @@ function answer(q){
     ' theo nguồn SS9. Hãy chọn một class và gửi màn hình kỹ năng của chính class đó.',
    kind:'mechanics',focus:'game',evidenceScope:'cross-class-guard'};
  }
- const chosen=chosenSpecial.length?chosenSpecial.slice(0,3):
-  detail.specs.slice(0,cls.name==='Aegis'?5:2);
- const effects=chosenEdge.length?chosenEdge.slice(0,2):detail.edges.slice(0,2);
+ const askedList=/(?:cac|nhung|danh sach|liet ke|tat ca)/.test(norm(q))&&
+   /(?:specialization|chuyen mon)/.test(norm(q));
+ const limit=askedList?8:3;
+ const chosen=chosenSpecial.length?chosenSpecial.slice(0,limit):
+  detail.specs.slice(0,cls.name==='Aegis'?(askedList?8:5):2);
+ const activeCombos=combos.filter(row=>
+   relatedClasses(cls.name).some(owner=>norm(owner)===norm(row.owner))&&
+   row.names.every(name=>exact(q,name)));
+  const effects=chosenEdge.length?chosenEdge.slice(0,2):detail.edges.slice(0,2);
  let text='Hồ sơ build '+cls.name+' ['+cls.grade+']. '+cls.style+'.';
  if(profile){
   text+='\nActive đã thấy trong trang class: '+profile.active.join('; ')+'.';
@@ -145,7 +161,12 @@ function answer(q){
   for(const x of chosen)text+='\n• '+x.skill+' → '+x.name+
    ': '+x.result+'. Điều kiện: '+x.condition+'. ('+x.sourceDate+')';
  }
- if(effects.length){
+ if(activeCombos.length){
+  for(const combo of activeCombos)
+   text+='\nPhối hợp '+combo.names.join(' + ')+': '+combo.result+
+    '. Điều kiện: '+combo.condition+' ('+combo.sourceDate+').';
+ }
+  if(effects.length){
   text+='\nKỹ năng ↔ trang bị/cơ chế SS9:';
   for(const x of effects)text+='\n• '+x.item+' → '+x.skill+
    ': '+x.trigger+'; '+x.effect+' ('+x.sourceDate+')';
@@ -186,5 +207,5 @@ function evidence(q){
  };
  return data;
 }
-return {sources:src,specs,concordance,coverage,identify,answer,evidence};
+return {sources:src,specs,combos,concordance,coverage,identify,answer,evidence};
 });

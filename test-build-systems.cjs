@@ -51,4 +51,6 @@ assert.ok(!deep.missing.some(x=>x.includes('lớp nhân vật')));
 assert.equal(B.assess('Cảm ơn',{context:state}),null);
 assert.equal(B.assess('xóa hội thoại',{context:state}),null);
 assert.equal(B.merge(state,null).season,'SS9');
+assert.match(B.assess('Tối ưu Arcane Scroll SS8 trong SS9').text,/được gỡ/);
+assert.match(B.assess('Echo system build nên dùng không').text,/Forged Affix mới/);
 console.log('PASS: 11 SS9 build systems, gated triggers, source-aware OCR and no imaginary global DPS');

@@ -51,6 +51,7 @@ jobs:
           node test-gateway.mjs
           node test-ai-providers.mjs
           node test-ai-vision.mjs
+          node test-ai-grounding.mjs
           node test-vision-evidence.cjs
       - name: Kiểm tra thực thi Swift của bộ gợi ý gọn
         run: |

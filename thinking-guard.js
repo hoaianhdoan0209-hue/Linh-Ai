@@ -112,6 +112,12 @@ function audit(state){
  if(s.mechanicId==='karmic')return {status:'unverified',
    blocking:['Chưa xác minh cokerize trên mục tiêu và đòn Adhesive Gunpowder.'],
    nextTest:'Giữ cùng mục tiêu, so hit Adhesive Gunpowder khi có/không có cokerize.',pieceCount:null};
+ if(s.mechanicId==='anemoian')return {status:'unverified',
+   blocking:['Chưa xác minh Breath of the Wild, Fortitude và số lần airburst kích hoạt.'],
+   nextTest:'Giữ cùng mục tiêu và 20 giây, đo số airburst, độ ổn định Fortitude và lượng sát thương trúng.',pieceCount:null};
+ if(s.mechanicId==='charred')return {status:'unverified',
+   blocking:['Chưa xác minh Iridescence và số lượt concentrated attacks kích hoạt Charred Aperture.'],
+   nextTest:'Giữ cùng mục tiêu, đếm concentrated attacks và đo sát thương chiêu khi bật/tắt hiệu ứng.',pieceCount:null};
  return {status:'unverified',blocking:['Chưa có điều kiện kích hoạt và phép đo đầy đủ.'],
   nextTest:'Giữ cùng mục tiêu, so riêng một thay đổi trong hai lượt đo.',pieceCount:null};
 }
@@ -173,7 +179,14 @@ function answer(input,state){
  if(compare&&ab?.status==='different-mechanics')
   return {kind:'question',focus:'game',reason:'non-comparable-builds',
     text:'Hai phương án dùng các cơ chế khác nhau. '+ab.nextTest};
- if(a.status!=='conflict')return null;
+ if(a.status!=='conflict'){
+  const diagnose=/(khong kich hoat|vi sao khong|tai sao khong|sao khong|thu dieu kien|kiem tra dieu kien|co du dieu kien|du set|da kich hoat|da du mon)/.test(q);
+  if(!diagnose||!s.mechanicId)return null;
+  return {kind:'question',focus:'game',reason:a.status,
+    text:'Kiểm tra điều kiện '+s.mechanicId+': '+a.blocking.join(' ')+
+      ' Phép thử tiếp theo: '+a.nextTest+
+      ' Thần chưa xác nhận hiệu quả bằng chiến đấu thực tế.'};
+ }
  return {kind:'question',focus:'game',reason:'contradiction',
   text:'Dữ liệu build đang mâu thuẫn: '+a.blocking[0]+
     ' Thần chưa kết luận nên chọn món nào hoặc áp hệ số thưởng. '+a.nextTest};

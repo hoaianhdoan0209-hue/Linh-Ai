@@ -60,8 +60,12 @@ function create(){
    if(startedAt!==revision||(typeof isValid==='function'&&!isValid()))return {ok:false,cancelled:true,reason:'Ảnh hoặc phiên AI đã thay đổi.'};
    const reply=typeof raw?.reply==='string'?raw.reply.trim().slice(0,3200):'';
    if(!reply)return {ok:false,reason:'AI không trả về văn bản hợp lệ.'};
-   history.push({role:'user',text:q},{role:'assistant',text:reply.slice(0,420)});
-   history=history.slice(-6);
+   // Image-derived text is unconfirmed and must not silently enter
+   // subsequent dialogue history or be sent to a model again.
+   if(!image){
+     history.push({role:'user',text:q},{role:'assistant',text:reply.slice(0,420)});
+     history=history.slice(-6);
+   }
    return {ok:true,reply};
   }catch(_){
    if(startedAt!==revision)return {ok:false,cancelled:true,reason:'Phiên AI đã kết thúc.'};

@@ -6,6 +6,7 @@ import graph from './ss9-evidence-graph.cjs';
 import patch from './season-knowledge.cjs';
 import classes from './class-catalog.cjs';
 import roster from './ss9-class-roster.cjs';
+import classBuild from './class-build-knowledge.cjs';
 
 const normalize=graph.normalize;
 const small=s=>String(s??'').replace(/[\u0000-\u001f]/g,' ').trim().slice(0,220);
@@ -16,7 +17,7 @@ const mechanicLimits='Những quan hệ sau là mô tả / hotfix theo phiên b�
 const relevance=(question,history=[])=>{
  const q=normalize(question);
  if(!q||greeting.test(q))return {query:'',contextual:false};
- if(graph.find(question).length||classes.find(question).length||roster.answer(question)||patch.lookup(question,'Soul Knight Prequel').length)
+ if(graph.find(question).length||classes.find(question).length||roster.answer(question)||classBuild.evidence(question)||patch.lookup(question,'Soul Knight Prequel').length)
   return {query:question,contextual:false};
  if(!followed.test(q)||!gameWords.test(q)){
    // Short follow-up questions are allowed only with a recently grounded
@@ -25,7 +26,7 @@ const relevance=(question,history=[])=>{
  }
  const last=Array.isArray(history)?
    history.filter(x=>x?.role==='user').slice(-2).reverse().find(x=>
-     graph.find(x.text).length||classes.find(x.text).length||roster.identified(x.text).length||patch.lookup(x.text,'Soul Knight Prequel').length):null;
+     graph.find(x.text).length||classes.find(x.text).length||roster.identified(x.text).length||classBuild.evidence(x.text)||patch.lookup(x.text,'Soul Knight Prequel').length):null;
  if(last)return {query:last.text,contextual:true};
  return {query:gameWords.test(q)?question:'',contextual:false};
 };
@@ -65,24 +66,32 @@ export function buildEvidence(question,history=[]){
   {basic:roster.basics.map(r=>r.name),combined:roster.combined.map(r=>r.name),
    direct:roster.direct.map(r=>r.name),officialComplete:false,
    note:'39 name candidates from user and dated sources, NOT all current Codex skills'}:null;
+ const skillBuildFacts=classBuild.evidence(query.query);
+ const skillRefs=skillBuildFacts?[
+   ...(skillBuildFacts.officialProfile?[{id:'skill-profile-'+roster.norm(skillBuildFacts.className),url:skillBuildFacts.officialProfile.source,date:null,grade:'official-profile'}]:[]),
+   ...skillBuildFacts.specializations.map((x,i)=>({id:'specialization-'+i,url:x.source,date:x.sourceDate,grade:'dated-developer-document'})),
+   ...skillBuildFacts.mechanics.map((x,i)=>({id:'gear-interaction-'+i,url:x.source,date:x.sourceDate,grade:'dated-developer-document'}))
+ ].filter(x=>x.url&&x.url.startsWith('https://')).slice(0,2):[];
  const sources=[...classFacts.map(c=>({id:'class-'+classes.norm(c.name),...c.source})),
   ...rosterFacts.filter(r=>r.source.url).map(r=>({id:'roster-'+roster.norm(r.name),...r.source})),
   ...(rosterOverview?[{id:'roster-overview',url:roster.source.tier,date:null,
      type:'secondary-current',grade:'mixed-user-and-secondary'}]:[]),
+  ...skillRefs,
   ...facts.map(f=>({id:f.id,...f.source})),
    ...updates.map(x=>({id:x.id,...x.source}))].slice(0,6);
  const warnings=[];
  if(updates.length)warnings.push('Bản ghi ngày 2026-10-16 chưa được kiểm chứng độc lập bằng văn bản nguồn trong lượt nghiên cứu này. KHÔNG coi là hệ số được xác nhận hiện hành.');
  const differing=matches.length&&updates.some(u=>/\d+%/.test(u.claim));
  if(differing)warnings.push('Bản ghi có thể thuộc các ngày/cấp khác nhau. Không cộng hai hệ số; khi không xác thực được bản cập nhật mới, phải nêu sự chưa chắc chắn.');
- if(!facts.length&&!updates.length&&!classFacts.length&&!rosterFacts.length&&!rosterOverview)
+ if(!facts.length&&!updates.length&&!classFacts.length&&!rosterFacts.length&&!rosterOverview&&!skillBuildFacts)
   return {season:'SS9',retrieval:'none',facts:[],warnings:[],sources:[]};
  if(classFacts.length)warnings.push('Trang class chỉ xác nhận tên/kết hợp lớp/kỹ năng và mô tả nền; không chứng minh hệ số SS9 đang hiệu lực.');
+ if(skillBuildFacts)warnings.push('Các quan hệ kỹ năng, Specialization và gear đến từ tài liệu có ngày; KHÔNG có cây kỹ năng hoàn chỉnh hoặc công thức DPS thực nghiệm.');
  if(rosterFacts.length||rosterOverview)warnings.push('Danh mục lớp gồm cả dữ liệu do người chơi cung cấp và nguồn thứ cấp; không được coi tất cả công thức là ChillyRoom đã xác nhận.');
  if(rosterFacts.some(r=>r.grade==='conflicting-sources'))
   warnings.push('Công thức ghép Stormwarden đang mâu thuẫn giữa các nguồn. Không chọn một công thức như sự thật đã xác minh.');
  return {season:'SS9',retrieval:query.contextual?'explicit-user-history':'current-question',
-   facts,updates,classFacts,rosterFacts,rosterOverview,sources,warnings,policy:mechanicLimits};
+   facts,updates,classFacts,rosterFacts,rosterOverview,skillBuildFacts,sources,warnings,policy:mechanicLimits};
 }
 export function metadata(packet){
  // These source links come only from the gateway's own static allowlisted

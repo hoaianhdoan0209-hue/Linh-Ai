@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#070b18">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Linh">
-<meta name="description" content="Trò chuyện cùng Linh ngay trên iPhone: Linh phản hồi bằng chữ, có giọng đọc và nhớ mạch trò chuyện trong phiên.">
-<title>Linh</title>
+<meta name="apple-mobile-web-app-title" content="Socrates">
+<meta name="description" content="Trò chuyện cùng Socrates ngay trên iPhone: Socrates phản hồi bằng chữ, có giọng đọc và nhớ mạch trò chuyện trong phiên.">
+<title>Socrates — người bạn thông thái</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <style>
@@ -24,6 +24,7 @@ body{
  color:#edf6ff;-webkit-tap-highlight-color:transparent
 }
 main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:env(safe-area-inset-top) 12px calc(12px + env(safe-area-inset-bottom));gap:10px}
+.character-name{font-size:12px;font-weight:780;letter-spacing:.33em;color:#b9d7ffb5;text-align:center;margin-top:6px;margin-bottom:-24px;z-index:1;pointer-events:none}
 .world{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding-top:clamp(0px,3vh,24px)}
 .stage{width:min(86vw,355px);height:min(86vw,355px);max-height:48dvh;min-height:224px;display:grid;place-items:center;position:relative}
 .stage::before{
@@ -102,11 +103,12 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 <body>
 <main>
   <div class="world">
+    <div class="character-name" aria-label="Tên nhân vật Socrates">SOCRATES</div>
     <div class="stage">
       <span class="ring" aria-hidden="true"></span>
       <i class="particle p1" aria-hidden="true"></i><i class="particle p2" aria-hidden="true"></i>
       <i class="particle p3" aria-hidden="true"></i><i class="particle p4" aria-hidden="true"></i>
-      <button type="button" class="linh" id="linh" aria-label="Linh. Chạm để trò chuyện. Giữ để bật hoặc tắt giọng đọc.">
+      <button type="button" class="linh" id="linh" aria-label="Socrates. Chạm để trò chuyện. Giữ để bật hoặc tắt giọng đọc.">
         <span class="body"></span>
         <span class="face"><span class="eye l"></span><span class="eye r"></span><span class="cheek l"></span><span class="cheek r"></span><span class="mouth"></span></span>
       </button>
@@ -118,16 +120,16 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
       </div>
     </div>
     <form id="chatDock" class="chat-dock" autocomplete="off">
-      <input id="chatMessage" type="text" maxlength="300" autocomplete="off" aria-label="Nhắn cho Linh" placeholder="Nói với Linh…" enterkeyhint="send">
-      <button id="photo" type="button" aria-label="Gửi ảnh cho Linh" title="Chọn ảnh">▧</button>
-      <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Chọn ảnh để Linh đọc">
+      <input id="chatMessage" type="text" maxlength="300" autocomplete="off" aria-label="Nhắn cho Socrates" placeholder="Nói với Socrates…" enterkeyhint="send">
+      <button id="photo" type="button" aria-label="Gửi ảnh cho Socrates" title="Chọn ảnh">▧</button>
+      <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Chọn ảnh để Socrates đọc">
       <button id="mic" type="button" hidden aria-label="Nói bằng giọng nói" title="Dùng mic nếu Safari hỗ trợ">🎙</button>
-      <button id="send" type="submit" aria-label="Gửi cho Linh">➤</button>
+      <button id="send" type="submit" aria-label="Gửi cho Socrates">➤</button>
     </form>
     <div class="photo-review" id="photoReview" hidden>
       <div class="photo-top">
         <img id="imagePreview" alt="Ảnh Bệ hạ vừa chọn" hidden>
-        <p id="imageStatus" role="status" aria-live="polite">Linh chờ ảnh của Bệ hạ.</p>
+        <p id="imageStatus" role="status" aria-live="polite">Socrates chờ ảnh của Bệ hạ.</p>
       </div>
       <div class="photo-actions">
         <button type="button" id="approveImage" class="primary" disabled>Ghi nhớ điều đã đọc</button>
@@ -136,7 +138,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
     </div>
   </div>
   <button id="eraseImages" class="erase-memory" type="button" hidden>Quên các ảnh đã học</button>
-  <p class="subtle">Trò chuyện cục bộ · Giữ Linh để bật giọng đọc</p>
+  <p class="subtle">Trò chuyện cục bộ · Giữ Socrates để bật giọng đọc</p>
   <span class="sr-only" id="liveStatus" aria-live="polite" aria-atomic="true"></span>
 </main>
 <script src="./web-companion.js"></script>
@@ -165,7 +167,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  if(!brain||!chat||!vision||!imageMemory||!linh||!thought){
-   if(live)live.textContent='Linh chưa tải được bộ hội thoại cục bộ.';
+   if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
  const get=k=>{try{return localStorage.getItem(k)}catch(_){return null}};
@@ -208,7 +210,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    }catch(_){/* Browser voice is optional; text always displays. */}
  }
  function openChat(){
-   // Composer is already visible. Tapping Linh only focuses it.
+   // Composer is already visible. Tapping Socrates only focuses it.
    field.focus();
  }
  function send(raw){
@@ -223,7 +225,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const reply=photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
-     {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Linh sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
+     {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
      chat.respond(message,dialogue,legacy);
    const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
    dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};
@@ -234,12 +236,12 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  }
  function toggleVoice(){
    if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){
-     show('Safari này chưa hỗ trợ giọng đọc. Linh vẫn trò chuyện bằng chữ nhé.','question');return;
+     show('Safari này chưa hỗ trợ giọng đọc. Socrates vẫn trò chuyện bằng chữ nhé.','question');return;
    }
    session.voice=!session.voice;
    set(brain.STATE_KEY,session);
    silence();
-   const msg=session.voice?'Linh sẽ đọc lời trả lời khi Bệ hạ nhắn.':'Linh sẽ trả lời bằng chữ, không làm phiền nữa.';
+   const msg=session.voice?'Socrates sẽ đọc lời trả lời khi Bệ hạ nhắn.':'Socrates sẽ trả lời bằng chữ, không làm phiền nữa.';
    show(msg,'greeting',4500);
    if(session.voice)speak(msg);
  }
@@ -292,7 +294,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
        recognition.onend=()=>{recognizing=false;mic.classList.remove('listening')};
        recognition.start();
        recognizing=true;mic.classList.add('listening');
-       show('Linh đang nghe…','greeting',4200);
+       show('Socrates đang nghe…','greeting',4200);
      }catch(_){
        recognizing=false;mic.classList.remove('listening');
        show('Không mở được mic trên Safari này. Bệ hạ nhắn chữ nhé.','question');
@@ -340,7 +342,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    previewURL=URL.createObjectURL(file);
    imagePreview.src=previewURL;
    imagePreview.hidden=false;
-   imageStatus.textContent='Linh đang chuẩn bị đọc chữ trong ảnh…';
+   imageStatus.textContent='Socrates đang chuẩn bị đọc chữ trong ảnh…';
    scanning=true;
    let worker=null;
    try{
@@ -354,7 +356,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      };
      worker=await T.createWorker(['eng','vie'],1,opts);
      if(myScan!==scanToken)return;
-     imageStatus.textContent='Linh đang đọc chữ. Ảnh chỉ xử lý trong trình duyệt.';
+     imageStatus.textContent='Socrates đang đọc chữ. Ảnh chỉ xử lý trong trình duyệt.';
      const result=await worker.recognize(file);
      if(myScan!==scanToken)return;
      const raw=String(result?.data?.text||'').trim().slice(0,12000);
@@ -363,13 +365,13 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      approveImage.disabled=!pendingImage;
      imageStatus.textContent=imageMemory.describe(pendingImage);
      show(pendingImage?
-       'Linh đọc được vài dấu hiệu. Bệ hạ xem và bấm Ghi nhớ nếu OCR đúng nhé.':
-       'Linh chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.',
+       'Socrates đọc được vài dấu hiệu. Bệ hạ xem và bấm Ghi nhớ nếu OCR đúng nhé.':
+       'Socrates chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.',
        pendingImage?'question':'dialogue',14000);
    }catch(_){
      if(myScan===scanToken){
-       imageStatus.textContent='OCR chưa chạy được. Thử lại khi có mạng để tải bộ chữ từ Linh.';
-       show('Ảnh vẫn ở trên máy. Linh chưa đọc được chữ, và chưa lưu gì.','question');
+       imageStatus.textContent='OCR chưa chạy được. Thử lại khi có mạng để tải bộ chữ từ Socrates.';
+       show('Ảnh vẫn ở trên máy. Socrates chưa đọc được chữ, và chưa lưu gì.','question');
      }
    }finally{
      if(worker)try{await worker.terminate()}catch(_){}
@@ -383,12 +385,12 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    lastInteractionAt=Date.now();
    const change=imageMemory.approve(savedImages,pendingImage);
    if(!change.added){
-     imageStatus.textContent='Linh đã nhớ các dấu hiệu này rồi, không lưu trùng.';
+     imageStatus.textContent='Socrates đã nhớ các dấu hiệu này rồi, không lưu trùng.';
      return;
    }
    // Only user-confirmed numeric facts/tags, not raw OCR/images, are persisted.
    if(!set(imageMemory.KEY,{version:1,items:change.items})){
-     imageStatus.textContent='Safari không lưu được trí nhớ. Linh chưa xác nhận đã lưu.';
+     imageStatus.textContent='Safari không lưu được trí nhớ. Socrates chưa xác nhận đã lưu.';
      return;
    }
    savedImages=change.items;
@@ -396,7 +398,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    pendingImage=null;
    approveImage.disabled=true;
    imageStatus.textContent='Đã nhớ chữ/chỉ số Bệ hạ xác nhận. Chưa khẳng định cơ chế game.';
-   show('Linh đã nhớ những dấu hiệu được xác nhận. Cảm ơn Bệ hạ!','memory');
+   show('Socrates đã nhớ những dấu hiệu được xác nhận. Cảm ơn Bệ hạ!','memory');
  });
  dismissImage.addEventListener('click',()=>{lastInteractionAt=Date.now();closeImage()});
  eraseImages.addEventListener('click',()=>{
@@ -408,13 +410,13 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    savedImages=[];
    closeImage();
    refreshImageMemoryUI();
-   show('Linh đã xóa các dấu hiệu học từ ảnh trên máy này.','memory');
+   show('Socrates đã xóa các dấu hiệu học từ ảnh trên máy này.','memory');
  });
  const proactive=[
-   'Linh ở đây. Bệ hạ muốn kể chuyện hay gửi ảnh cho Linh xem?',
-   'Nếu có ảnh kỹ năng, chạm ▧; Linh có thể thử đọc chữ và hỏi trước khi nhớ.',
-   'Hôm nay Bệ hạ có điều gì muốn kể với Linh không?',
-   'Linh sẽ chờ. Khi muốn trò chuyện, chỉ cần gõ vào ô dưới nhé.'
+   'Socrates ở đây. Bệ hạ muốn kể chuyện hay gửi ảnh cho Socrates xem?',
+   'Nếu có ảnh kỹ năng, chạm ▧; Socrates có thể thử đọc chữ và hỏi trước khi nhớ.',
+   'Hôm nay Bệ hạ có điều gì muốn kể với Socrates không?',
+   'Socrates sẽ chờ. Khi muốn trò chuyện, chỉ cần gõ vào ô dưới nhé.'
  ];
  function autonomousThought(){
    const now=Date.now();

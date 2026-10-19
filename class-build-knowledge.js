@@ -119,7 +119,8 @@ function answer(q){
  const interest=/(?:build|ky nang|skills?|chieu|trang bi|fatebound|fatestone|combo|specialization|chuyen mon|concordance|co che|cay skill|active|passive|choi class|choi lop|thu skill|phep|tier)/;
  const detail=identify(q),{cls,profile}=detail;
  if(!cls||(!interest.test(norm(q))&&!detail.exactSkillQuery))return null;
- const chosenSpecial=detail.specs.filter(x=>exact(q,x.name)||exact(q,x.skill));
+ const explicitlyNamed=detail.specs.filter(x=>exact(q,x.name));
+ const chosenSpecial=explicitlyNamed.length?explicitlyNamed:detail.specs.filter(x=>exact(q,x.skill));
  const chosenEdge=detail.edges.filter(x=>exact(q,x.item)||exact(q,x.skill));
  // A mixed-class question must never assign a class-specific skill to the
  // wrong character just because that skill name occurs in a separate source.
@@ -164,7 +165,8 @@ function answer(q){
 function evidence(q){
  const x=identify(q);
  if(!x.cls)return null;
- const chosenSpec=x.specs.filter(v=>exact(q,v.name)||exact(q,v.skill)).slice(0,5);
+ const byName=x.specs.filter(v=>exact(q,v.name));
+ const chosenSpec=(byName.length?byName:x.specs.filter(v=>exact(q,v.skill))).slice(0,5);
  const chosenEdge=x.edges.filter(v=>exact(q,v.item)||exact(q,v.skill)).slice(0,3);
  if(!x.exactSkillQuery&&!/(?:build|ky nang|skill|trang bi|chuyen mon|specialization)/.test(norm(q)))return null;
  const data={

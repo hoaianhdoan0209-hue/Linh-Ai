@@ -12,6 +12,15 @@ assert.ok(ui.includes('Safari PWA cannot stream the screen'),
   'Do not promise web screen capture');
 assert.ok(!/getDisplayMedia\(/.test(ui),'Web must not pretend to capture other apps');
 assert.ok(ui.includes('serviceWorker'),'PWA service worker must be registered');
+assert.ok(ui.includes('web-companion.js'),'Local Web assistant engine must load');
+assert.ok(ui.includes('aria-live="polite"'),'Linh hints must be screen-reader accessible');
+assert.ok(ui.includes('thought.textContent=text'),'Never use untrusted local game data as HTML');
+assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-only');
+assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
+ 'Web home must not overwrite existing game profiles');
+const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
+assert.ok(offline.includes("'./web-companion.js'"),
+ 'Service worker must cache the new offline thought engine');
 
 for(const marker of [
 'id="mascot"','id="gameList"','id="effectsList"','id="runOptimize"',

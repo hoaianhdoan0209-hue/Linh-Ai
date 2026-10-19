@@ -6,9 +6,20 @@ const legacy = readFileSync(new URL('./legacy-dashboard.html',import.meta.url),'
 
 assert.ok(ui.includes('id="linh"'),'Missing the single visible Linh character');
 assert.equal((ui.match(/id="linh"/g)||[]).length,1,'Home must have one Linh character');
-assert.ok(ui.includes('id="chatDock" class="chat-dock" hidden'),'Conversation composer must be hidden until Linh is tapped');
+assert.ok(ui.includes('id="chatDock" class="chat-dock" autocomplete="off"'),
+  'Conversation composer must always be visible without tapping Linh');
 assert.ok(ui.includes('id="chatMessage"'),'Typing to Linh must be possible on all browsers');
 assert.ok(ui.includes('id="mic" type="button" hidden'),'Optional mic requires explicit consent');
+assert.ok(ui.includes('id="imageInput" type="file"'),
+  'User must be able to choose an image directly from the main Linh UI');
+assert.ok(ui.includes('id="approveImage"') && ui.includes('id="dismissImage"'),
+  'OCR memory must require explicit user approval and support skipping');
+assert.ok(ui.includes('id="eraseImages"'),
+  'User must be able to delete confirmed photo memory');
+assert.ok(ui.includes('autonomousThought()') && ui.includes('document.hidden||scanning'),
+  'Proactive speech must be limited to visible pages and stop during OCR');
+assert.ok(ui.includes('web-image-memory.js') && ui.includes('vision-engine.js'),
+  'Image memory and OCR interpretation modules are required');
 assert.ok(ui.includes("const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition"),
  'Voice input must be feature detected, not promised');
 assert.ok(ui.includes('chat.respond(message,dialogue,legacy)'),'Home must answer user questions, not only rotate canned quotes');
@@ -27,6 +38,9 @@ assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-onl
 assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
  'Web home must not overwrite existing game profiles');
 const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
+assert.ok(offline.includes("'./web-image-memory.js'") &&
+          offline.includes("'./vision-engine.js'"),
+ 'Offline service worker must cache the image learning modules');
 assert.ok(offline.includes("'./web-dialogue.js'"),
  'Service worker must cache the new offline thought engine');
 

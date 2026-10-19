@@ -22,6 +22,10 @@ struct CheckSocratesVoiceDialog {
         check(SocratesVoiceDialog.reply(to: "").contains("nghe"), "Empty speech input")
         check(SocratesVoiceDialog.compact(String(repeating: "a", count: 600)).count == 200,
               "Bounded audio response")
+        check(SocratesVoiceDialog.reply(to: "Karmic Cinderpult").contains("480%"), "SS9 maximum-level patch")
+        check(SeasonKnowledge.lookup("Genshin Karmic Cinderpult") == nil, "Game isolation")
+        check(SeasonKnowledge.lookup("đã học gì") == nil, "No hidden knowledge dump")
+        check(SocratesVoiceDialog.reply(to: "Charred Aperture").contains("120%"), "Updated weapon coefficient")
         print("PASS: Socrates offline Vietnamese voice dialogue (pure Swift)")
     }
 }

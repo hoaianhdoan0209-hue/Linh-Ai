@@ -75,7 +75,8 @@ jobs:
             CODE_SIGNING_ALLOWED=NO build
       - name: Kiểm thử hội thoại giọng nói Socrates cục bộ
         run: |
-          swiftc ios/LinhCompanion/Sources/SocratesVoiceDialog.swift \
+          swiftc ios/LinhCompanion/Sources/SeasonKnowledge.swift \
+            ios/LinhCompanion/Sources/SocratesVoiceDialog.swift \
             ios/LinhCompanion/Tests/SocratesVoiceDialogTests.swift \
             -o /tmp/SocratesVoiceTests
           /tmp/SocratesVoiceTests

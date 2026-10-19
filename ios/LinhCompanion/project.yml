@@ -46,6 +46,7 @@ targets:
       - path: BroadcastExtension
       - path: Sources/GameInsight.swift
       - path: Sources/GameReasoner.swift
+      - path: Sources/SeasonKnowledge.swift
       - path: Sources/GameEvidenceLedger.swift
       - path: Sources/LinhSharedStore.swift
     info:

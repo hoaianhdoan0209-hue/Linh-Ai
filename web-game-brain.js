@@ -10,6 +10,7 @@
   if(root)root.SocratesGameBrain=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
+  const seasons=typeof module!=='undefined'&&module.exports?require('./season-knowledge.js'):globalThis.SocratesSeasonKnowledge;
   const KEY='socrates-game-notes-v1', VERSION=1, MAX_NOTES=25;
   const AGE=365*24*60*60*1000;
   const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
@@ -106,6 +107,7 @@
     const detail=recent?' Ghi chú gần nhất: '+recent+' (chưa kiểm chứng).':'';
     return reply(intro+detail,'memory');
   }
+  const percentsIn=s=>/[0-9]\s*%/.test(s);
   function answer(original,images=[],notes=[],legacy=null,measurements=[]){
     const raw=String(original??'').trim().slice(0,300),q=norm(raw);
     if(!raw)return null;
@@ -123,6 +125,8 @@
     if(/(so sanh|chenh lech|thay doi|phep do)/.test(q)&&/sat thuong|do|phep do|damage/.test(q)&&legacy?.comparison)
       return reply('Hai phép đo cùng ngữ cảnh đã lưu: '+legacy.comparison+
         ' Đây là chênh lệch, chưa chứng minh nguyên nhân.','calculation');
+    const patch=seasons?.lookup(raw)||[];
+    if(patch.length&&!percentsIn(raw))return {text:patch[0].text,focus:'game',kind:'official-patch'};
     // Only compute explicitly supplied percentages. Never invent in-game buff
     // stacking, energy, skill timing or DPS from a static picture.
     const percents=[...raw.matchAll(/([+-]?\d+(?:[.,]\d+)?)\s*%/g)]

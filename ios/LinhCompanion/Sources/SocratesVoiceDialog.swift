@@ -40,6 +40,7 @@ enum SocratesVoiceDialog {
         if text.contains("chao") || text.contains("alo") || text.contains("socrates oi") {
             return "Chào Bệ hạ! Hôm nay người muốn trò chuyện hay bàn về game?"
         }
+        if let fact = SeasonKnowledge.lookup(input) { return fact }
         if text.contains("combo") || text.contains("boss") || text.contains("game") ||
            text.contains("sat thuong") || text.contains("ky nang") {
             return "Muốn phân tích game, ta cần biết kỹ năng, mục tiêu và số liệu thật. Bệ hạ muốn nói về phần nào trước?"

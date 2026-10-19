@@ -157,6 +157,9 @@ class LiveState:
         self.processor: subprocess.Popen | None = None
         self.generation = 0
         self.last_sent_at = 0.0
+        self.frames_seen = 0
+        self.phase = 'idle'
+        self.last_error_type = None
 
     def status(self) -> dict:
         with self.lock:
@@ -168,6 +171,9 @@ class LiveState:
                 "last_idea": self.last_idea,
                 "last_kind": self.last_kind,
                 "discord_configured": bool(WEBHOOK_URL),
+                "frames_seen": self.frames_seen,
+                "phase": self.phase,
+                "last_error_type": self.last_error_type,
                 "capture": "RTMP external broadcast only; no frames stored",
                 "transport_security": "plain RTMP is NOT encrypted; use only a non-sensitive test screen",
             }
@@ -177,7 +183,7 @@ class LiveState:
             self.generation += 1
             self.active = False
             self.since = None
-            self.last_frame = None
+            self.phase = 'stopped'
             proc = self.processor
             self.processor = None
         if proc is not None:
@@ -195,6 +201,9 @@ class LiveState:
             gen = self.generation
             self.since = time.time()
             self.last_frame = None
+            self.frames_seen = 0
+            self.phase = 'publishing'
+            self.last_error_type = None
         threading.Thread(target=self.process, args=(gen,), daemon=True).start()
         return True
 
@@ -223,6 +232,7 @@ class LiveState:
                 proc.terminate()
                 return
             self.processor = proc
+            self.phase = 'reading'
         previous = None
         try:
             while True:
@@ -230,6 +240,11 @@ class LiveState:
                     if not self.active or self.generation != gen:
                         break
                 frame = next_png(proc.stdout)
+                with self.lock:
+                    if self.generation == gen:
+                        self.frames_seen += 1
+                        self.last_frame = time.time()
+                        self.phase = 'ocr-running'
                 text = ocr_png(frame)
                 # Release the frame bytes before storing or notifying anything.
                 del frame
@@ -241,7 +256,7 @@ class LiveState:
                     if not self.active or self.generation != gen:
                         break
                     now = time.time()
-                    self.last_frame = now
+                    self.phase = 'analyzed'
                     if stable and now - self.last_sent_at >= COOLDOWN_SECONDS:
                         self.last_sent_at = now
                         self.last_kind = stable[0]
@@ -252,15 +267,17 @@ class LiveState:
                         idea_to_send = None
                 if idea_to_send:
                     post_discord(idea_to_send)
-        except (EOFError, ValueError, BrokenPipeError, OSError, subprocess.TimeoutExpired):
-            pass
+        except (EOFError, ValueError, BrokenPipeError, OSError, subprocess.TimeoutExpired) as error:
+            with self.lock:
+                if self.generation == gen:
+                    self.last_error_type = type(error).__name__
         finally:
             with self.lock:
                 current_generation = self.generation == gen
                 if current_generation:
                     self.active = False
                     self.since = None
-                    self.last_frame = None
+                    self.phase = 'stopped'
                     self.processor = None
             try:
                 proc.terminate()

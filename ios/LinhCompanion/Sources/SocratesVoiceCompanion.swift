@@ -20,6 +20,9 @@ final class SocratesVoiceCompanion: NSObject, ObservableObject, AVSpeechSynthesi
     private var recognitionTask: SFSpeechRecognitionTask?
     private var pendingUtterance: Task<Void, Never>?
     private var listening = false
+    private var tapInstalled = false
+    private var isRequestingPermission = false
+    private var permissionGeneration = 0
     private var interruptionToken: NSObjectProtocol?
     private var turnCount = 0
 
@@ -64,6 +67,15 @@ final class SocratesVoiceCompanion: NSObject, ObservableObject, AVSpeechSynthesi
 
     func toggleConversation() {
         if isConversationActive { stop(); return }
+        if isRequestingPermission {
+            permissionGeneration += 1
+            isRequestingPermission = false
+            status = "Đã hủy yêu cầu mở micro."
+            return
+        }
+        permissionGeneration += 1
+        let currentGeneration = permissionGeneration
+        isRequestingPermission = true
         status = "Đang xin quyền nhận dạng tiếng nói và micro…"
         Task { @MainActor in
             let speechAllowed = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
@@ -71,22 +83,28 @@ final class SocratesVoiceCompanion: NSObject, ObservableObject, AVSpeechSynthesi
                     continuation.resume(returning: result == .authorized)
                 }
             }
+            guard permissionGeneration == currentGeneration else { return }
             guard speechAllowed else {
+                isRequestingPermission = false
                 status = "Socrates chưa được phép nhận dạng tiếng nói. Nút Nghe lời chào vẫn dùng được."
                 return
             }
             let microphoneAllowed = await AVAudioApplication.requestRecordPermission()
+            guard permissionGeneration == currentGeneration else { return }
             guard microphoneAllowed else {
+                isRequestingPermission = false
                 status = "Micro chưa được cấp phép. Socrates không thu âm; vẫn có thể phát lời chào."
                 return
             }
             guard let recognition, recognition.supportsOnDeviceRecognition,
                   recognition.isAvailable else {
+                isRequestingPermission = false
                 status = "Máy chưa hỗ trợ nhận dạng tiếng Việt trên thiết bị. Socrates không tự gửi tiếng nói lên mạng."
                 return
             }
             do {
                 try configureConversationAudio()
+                isRequestingPermission = false
                 isConversationActive = true
                 turnCount = 0
                 speak("Socrates đang nghe đây. Bệ hạ có thể nói chuyện. Micro chỉ bật trong phiên này.")
@@ -126,6 +144,7 @@ final class SocratesVoiceCompanion: NSObject, ObservableObject, AVSpeechSynthesi
             input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
                 next.append(buffer)
             }
+            tapInstalled = true
             recognitionTask = recognition.recognitionTask(with: next) { [weak self] result, error in
                 Task { @MainActor [weak self] in
                     self?.accept(result: result, error: error)
@@ -200,7 +219,10 @@ final class SocratesVoiceCompanion: NSObject, ObservableObject, AVSpeechSynthesi
         pendingUtterance = nil
         if engine.isRunning { engine.stop() }
         // Remove only the tap we installed; a stopped engine still owns its node.
-        engine.inputNode.removeTap(onBus: 0)
+        if tapInstalled {
+            engine.inputNode.removeTap(onBus: 0)
+            tapInstalled = false
+        }
         recognitionTask?.cancel()
         recognitionTask = nil
         request?.endAudio()
@@ -208,8 +230,10 @@ final class SocratesVoiceCompanion: NSObject, ObservableObject, AVSpeechSynthesi
     }
 
     func stop() {
+        permissionGeneration += 1
+        isRequestingPermission = false
         isConversationActive = false
-        if listening { stopListening() }
+        if listening || tapInstalled { stopListening() }
         if speaker.isSpeaking { speaker.stopSpeaking(at: .immediate) }
         try? AVAudioSession.sharedInstance().setActive(false,
                 options: .notifyOthersOnDeactivation)

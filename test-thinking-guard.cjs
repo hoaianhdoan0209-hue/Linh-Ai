@@ -50,7 +50,7 @@ assert.equal(G.compareOptions(c,w).scores.B,81.67);
 let alternatives=G.empty();
 alternatives=G.observe(alternatives,'phương án A Tarta 3 món',{source:'user-text'});
 alternatives=G.observe(alternatives,'phương án B Tarta 4 món',{source:'user-text'});
-assert.equal(G.audit(alternatives).status,'unverified','Alternative evidence is not equipped active build');
+assert.equal(G.audit(alternatives).status,'unknown','Alternative evidence is not equipped active build');
 assert.equal(G.auditAlternatives(alternatives).status,'separate-options');
 assert.equal(G.auditAlternatives(alternatives).items.A.pieceCount,3);
 assert.equal(G.auditAlternatives(alternatives).items.B.pieceCount,4);

@@ -36,6 +36,6 @@ assert.ok(page.includes('const patchFollowup=gameBrain.followup(message,lastPatc
   'Image/patch conversation needs a contextual follow-up route');
 assert.ok(page.includes('lastPatch=named[0]||null;'),
   'OCR patch fact should live in the current conversation only');
-assert.ok(page.includes('if(clear){lastPatch=null;buildContext=null;}'),
+assert.ok(page.includes('if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();}'),
   'Clearing chat must forget temporary SS9 conversation context');
 console.log('PASS: SS9 scoped knowledge, image-only named patch fallback, no UI/summary/automatic speech exposure');

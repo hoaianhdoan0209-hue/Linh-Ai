@@ -70,7 +70,7 @@ assert.ok(ui.includes("thinkingState=thinkingGuard.observePhoto(thinkingState,ra
  'Two recent screenshots must be tracked as separate hypotheses');
 assert.ok(ui.includes('if(nextBuild&&!alternativeTurn)buildContext=buildSystems.merge(buildContext,nextBuild);'),
  'An A/B hypothetical comparison must not become the active equipment');
-assert.ok(ui.includes("if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();}"),
+assert.ok(ui.includes("if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();aiBridge.clear();}"),
  'Clear dialogue must remove session-only hypotheses');
 assert.ok(ui.includes('prompt-strategy.js?v=2.3.0'),
  'Prompt planning must be loaded from same-origin JavaScript');

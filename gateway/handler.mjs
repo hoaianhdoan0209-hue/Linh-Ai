@@ -100,7 +100,7 @@ export function makeHandler(config, remoteFetch=fetch){
   const evidence=isGame?buildEvidence(raw.question,raw.history):buildEvidence('');
   const prompt=JSON.stringify({...raw,
    ...(officialPatch.length?{officialPatch}:{}),
-   ...(evidence.sources.length?{groundedGameEvidence:evidence}:{})});
+   ...(evidence.sources.length||evidence.rosterFacts?.length?{groundedGameEvidence:evidence}:{})});
   try{
    const visionSchemaPrompt=[
     'KHI CÓ ẢNH GAME: CHỈ TRẢ JSON, KHÔNG MARKDOWN, KHÔNG VĂN BẢN KHÁC.',

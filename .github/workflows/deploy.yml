@@ -34,6 +34,7 @@ jobs:
           node test-web-image-memory.cjs
           node test-game-coach.cjs
           node test-build-systems.cjs
+          node test-rotation-lab.cjs
           node test-season-knowledge.cjs
           node test-web-game-brain.cjs
           node test-web-game-experiments.cjs

@@ -1,3 +1,11 @@
+## Socrates 2.6 — nguồn SS9 được truy xuất theo từng câu hỏi
+
+[Chi tiết triển khai, test và hạn chế](../research/ai-grounding-v2.6.md). Gateway có `game-context.mjs` và bản đồ quan hệ SS9 tĩnh đồng bộ với ứng dụng Web; tìm đúng nguồn ngày 15/09, các hotfix và cảnh báo mâu thuẫn bản ghi 16/10 chưa đối chiếu. `answer-audit.mjs` chặn một số lỗi AI bịa tỷ lệ %, mở rộng thưởng riêng một skill thành toàn build và khẳng định chắc chắn khi không có phép đo.
+
+**Không thêm chi phí hoặc model tự động.** Phần này chỉ có tác dụng khi chủ ứng dụng đã cấu hình gateway/model AI thực sự; mặc định Socrates vẫn chạy offline và phân tích ảnh bằng OCR cục bộ. Không đưa khóa Gemini/OpenAI vào trình duyệt.
+
+---
+
 ## Socrates 2.4 — Gateway có thể nhận ảnh nếu chủ ứng dụng chủ động bật AI
 
 Ở PWA, bấm nút **Hỏi AI xem ảnh (cần đồng ý)** sau khi kết nối gateway riêng. Ảnh JPEG đã được canvas thu nhỏ tối đa 1280 px, dung lượng ≤850 KB. Gateway chỉ nhận dữ liệu dưới quyền của mã `LINH_ACCESS_TOKEN`; mỗi ảnh cần được chủ máy phê duyệt trước khi gửi. Gemini nhận `inline_data`; OpenAI-compatible dùng `image_url`. **Model phải hỗ trợ vision**. Nếu model chỉ nhận văn bản, đừng kỳ vọng phân tích ảnh.

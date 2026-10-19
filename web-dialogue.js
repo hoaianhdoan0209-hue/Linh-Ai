@@ -39,7 +39,7 @@
       return make('Dạ, ta cứ trò chuyện thôi. Không cần chia sẻ màn hình hay cài thêm gì cả.','general','greeting');
     if(match(q,/gioi han|lam duoc gi|co thong minh|ai that|co phai ai/))
       return make('Linh hiện phản hồi bằng quy tắc có nhớ mạch hội thoại. Câu hỏi quá mở có thể chưa hiểu đúng; Linh sẽ nói rõ khi chưa biết.','capability');
-    if(match(q,/^((toi|ta|minh) (buon|met|lo|chan|co don)|hom nay (buon|met|te)|buon qua|met qua|stress|ap luc)/) ||
+    if(match(q,/^((toi|ta|minh) (buon|met|lo|chan|co don)|hom nay ((toi|ta|minh) )?(buon|met|te)|buon qua|met qua|stress|ap luc)/) ||
        match(q,/^(buon|met|chan|co don)$/))
       return make('Linh nghe đây. Có chuyện gì làm Bệ hạ không vui, hay Người chỉ muốn có ai đó ngồi nghe?','support','question','feelings');
     if(match(q,/^((toi|ta|minh) (vui|hanh phuc)|vui qua|tot qua|hay qua|hom nay vui)/))

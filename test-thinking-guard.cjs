@@ -41,9 +41,29 @@ assert.equal(G.compareOptions([c[0],{...c[1],contextKey:'different-boss'}],w).ok
 assert.equal(G.compareOptions([c[0],{...c[1],ratings:{dps:{value:75,evidence:'ocr'},uptime:c[1].ratings.uptime}}],w).ok,false);
 assert.equal(G.compareOptions(c,[{id:'missing',weight:1}]).ok,false);
 assert.equal(G.compareOptions(c,[{id:'dps',weight:0}]).ok,false);
-assert.equal(G.compareOptions(c,[{id:'dps',weight:2},{id:'dps',weight:1}]).ok,true,
- 'Repeated criterion does not produce an unsupported decision, but callers should dedupe inputs');
+assert.equal(G.compareOptions(c,[{id:'dps',weight:2},{id:'dps',weight:1}]).ok,false,
+ 'Duplicate criteria must not silently double-count a metric');
 assert.equal(G.compareOptions(c,[{id:'dps',weight:2}]).ok,true);
 assert.equal(G.compareOptions(c,[{id:'dps',weight:2}]).ranked[0],'A');
 assert.equal(G.compareOptions(c,w).scores.B,81.67);
+// A/B versions of the same set do not conflict with the equipped active build.
+let alternatives=G.empty();
+alternatives=G.observe(alternatives,'phương án A Tarta 3 món',{source:'user-text'});
+alternatives=G.observe(alternatives,'phương án B Tarta 4 món',{source:'user-text'});
+assert.equal(G.audit(alternatives).status,'unverified','Alternative evidence is not equipped active build');
+assert.equal(G.auditAlternatives(alternatives).status,'separate-options');
+assert.equal(G.auditAlternatives(alternatives).items.A.pieceCount,3);
+assert.equal(G.auditAlternatives(alternatives).items.B.pieceCount,4);
+assert.equal(G.answer('nên chọn phương án nào',alternatives).reason,'separate-builds');
+assert.match(G.answer('so sánh A B',alternatives).text,/A: 3\/4/);
+assert.match(G.answer('so sánh A B',alternatives).text,/B: khai báo 4\/4/);
+assert.doesNotMatch(G.answer('so sánh A B',alternatives).text,/đang mâu thuẫn/);
+assert.equal(G.answer('cảm ơn',alternatives),null);
+let same=G.observe(alternatives,'phương án A Tarta 4 món',{source:'user-text'});
+assert.equal(G.auditAlternatives(same).items.B.pieceCount,4,'Updating A must not alter B');
+assert.equal(G.auditAlternatives(same).items.A.pieceCount,4);
+const different=G.observe(same,'phương án B Karmic Cinderpult',{source:'user-text'});
+assert.equal(G.auditAlternatives(different).status,'different-mechanics');
+assert.equal(G.answer('so sánh hai phương án',different).reason,'non-comparable-builds');
+assert.equal(G.auditAlternatives(G.empty()),null);
 console.log('PASS: session evidence, contradictions, corrected set counts, source provenance and conservative weighted decisions');

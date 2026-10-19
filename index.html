@@ -242,10 +242,15 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);
    const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy,measurements);
    const patchFollowup=gameBrain.followup(message,lastPatch);
+   const clearCommand=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(normalized);
+   const nextBuild=clearCommand||photoRequest?null:buildSystems.inspect(message,{source:'user-text'});
+   if(nextBuild)buildContext=buildSystems.merge(buildContext,nextBuild);
+   const buildAcknowledgment=nextBuild&&/\b(?:toi|ta|minh)\s+(?:choi|dung|dang dung|mac|su dung)\b/.test(normalized)?
+     {text:'Socrates ghi nhận thông tin build trong phiên này, chưa coi là đã kiểm chứng. Muốn phân tích đúng cần hiệu ứng đang kích hoạt, Fatestone và kỹ năng chủ lực.',kind:'memory',focus:'game'}:null;
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
-   let reply=measuredReply || (studied?.action?studied:null) || groundedPatch || deepBuild || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || groundedPatch || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -280,7 +285,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(clear){lastPatch=null;buildContext=null;}
    else if(reply===groundedPatch){
      lastPatch=studied;
-     buildContext=buildSystems.inspect(message,{source:'user-text'})||null;
+     buildContext=buildSystems.merge(buildContext,buildSystems.inspect(message,{source:'user-text'}));
    }
    else if(!patchFollowup&&reply?.focus!=='game')lastPatch=null;
    dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};

@@ -22,7 +22,9 @@
   function cleanNote(x,now=Date.now()){
     if(!x||typeof x!=='object'||typeof x.text!=='string')return null;
     const text=x.text.trim().replace(/\s+/g,' ').slice(0,140);
-    if(text.length<7||!gameTopic(text)||/https?:\/\/|www\.|@|token|mat khau|password|api.key/i.test(text)||
+    if(text.length<7||!gameTopic(text)||
+       /https?:\/\/|www\.|@/i.test(text)||
+       /\b(?:token|mat khau|password|api key|ma otp|so dien thoai|email|dia chi)\b/.test(norm(text))||
        /\b\d{8,}\b/.test(text))return null;
     if(!Number.isFinite(x.at)||x.at>now+60000||x.at<now-AGE)return null;
     return {text,at:x.at,source:'user-note',status:'chưa kiểm chứng'};

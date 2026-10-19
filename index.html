@@ -144,18 +144,19 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./stat-schema.js?v=2.1.0"></script>
-<script src="./vision-engine.js?v=2.1.0"></script>
-<script src="./web-image-memory.js?v=2.1.0"></script>
-<script src="./season-knowledge.js?v=2.1.0"></script>
-<script src="./web-game-brain.js?v=2.1.0"></script>
-<script src="./web-game-experiments.js?v=2.1.0"></script>
-<script src="./build-systems.js?v=2.1.0"></script>
-<script src="./rotation-lab.js?v=2.1.0"></script>
-<script src="./rotation-commands.js?v=2.1.0"></script>
-<script src="./thinking-guard.js?v=2.1.0"></script>
-<script src="./prompt-strategy.js?v=2.1.0"></script>
-<script src="./game-coach.js?v=2.1.0"></script>
+<script src="./stat-schema.js?v=2.2.0"></script>
+<script src="./vision-engine.js?v=2.2.0"></script>
+<script src="./web-image-memory.js?v=2.2.0"></script>
+<script src="./season-knowledge.js?v=2.2.0"></script>
+<script src="./web-game-brain.js?v=2.2.0"></script>
+<script src="./web-game-experiments.js?v=2.2.0"></script>
+<script src="./build-systems.js?v=2.2.0"></script>
+<script src="./ss9-evidence-graph.js?v=2.2.0"></script>
+<script src="./rotation-lab.js?v=2.2.0"></script>
+<script src="./rotation-commands.js?v=2.2.0"></script>
+<script src="./thinking-guard.js?v=2.2.0"></script>
+<script src="./prompt-strategy.js?v=2.2.0"></script>
+<script src="./game-coach.js?v=2.2.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -165,6 +166,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
  const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
  const buildSystems=window.SocratesBuildSystems;
+ const evidenceGraph=window.SocratesEvidenceGraph;
  const rotations=window.SocratesRotationCommands;
  const promptStrategy=window.SocratesPromptStrategy;
  const thinkingGuard=window.SocratesThinkingGuard;
@@ -184,7 +186,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!rotations||!promptStrategy||!thinkingGuard||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -271,9 +273,10 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      {text:'Socrates ghi nhận thông tin build trong phiên này, chưa coi là đã kiểm chứng. Muốn phân tích đúng cần hiệu ứng đang kích hoạt, Fatestone và kỹ năng chủ lực.',kind:'memory',focus:'game'}:null;
    const promptAdvice=photoRequest||photoRecall?null:promptStrategy.answer(message,{context:buildContext});
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
+   const sourcedMechanic=photoRequest||photoRecall?null:evidenceGraph.explain(message);
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
-   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || sourcedMechanic || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -501,20 +504,21 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      // A named SS9 mechanic can be recognized even when OCR finds no numeric
      // stats or generic tags. Answer the relevant question without saving OCR.
      const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];
+     const sourcedOCR=evidenceGraph.explain(raw);
      lastPatch=named[0]||null;
      buildContext=buildSystems.inspect(raw,{source:'image'});
      thinkingState=thinkingGuard.observePhoto(thinkingState,raw);
      if(pendingImage){
        const analysis=coach.image(pendingImage);
        const mechanics=buildContext?buildSystems.assess('phân tích cơ chế',{context:buildContext}):null;
-       show(analysis.text+(named.length?'\n\n'+named[0].text:'')+(mechanics?'\n\n'+mechanics.text:''),analysis.kind,0);
+       show(analysis.text+(named.length?'\n\n'+named[0].text:'')+(sourcedOCR?'\n\n'+sourcedOCR.text:'')+(mechanics?'\n\n'+mechanics.text:''),analysis.kind,0);
        return;
      }
      if(named.length){
        coach.reset();
        imageStatus.textContent='Đã nhận ra tên cơ chế SS9, nhưng chưa đọc được chỉ số đủ tin cậy; ảnh không được ghi nhớ.';
        const mechanics=buildSystems.assess('phân tích cơ chế',{context:buildContext});
-       show(named[0].text+(mechanics?'\n\n'+mechanics.text:''),'question',0);
+       show(named[0].text+(sourcedOCR?'\n\n'+sourcedOCR.text:'')+(mechanics?'\n\n'+mechanics.text:''),'question',0);
        return;
      }
      show('Socrates chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.','question',14000);

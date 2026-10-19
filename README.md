@@ -1,3 +1,10 @@
+# Socrates 2.3 — bước đầu có thể kết nối AI riêng
+
+Theo định hướng nhân vật AI [Moeru AI/AIRI](https://github.com/moeru-ai/airi) và adapter mô hình [xsAI](https://github.com/moeru-ai/xsai), Socrates đã có chế độ kết nối **mô hình AI riêng tùy chọn** qua gateway HTTPS của chính chủ. Chế độ này **không tự bật** và không gửi ảnh hoặc chat khi chưa có xác nhận. Cổng hiện hỗ trợ Gemini và OpenAI-compatible (ví dụ mô hình do chủ máy tự host).
+
+**Chưa có model online mặc định, chưa có khóa API nào trong website.** Tất cả vẫn chạy bằng quy tắc local nếu chủ ứng dụng chưa triển khai gateway. Xem [kiến trúc, bảo mật và cách cấu hình](research/socrates-owned-ai-architecture.md) hoặc mở [Socrates Web](https://hoaianhdoan0209-hue.github.io/Linh-Ai/).
+
+---
 # Socrates Web 1.5 — tính toán từ dữ kiện và ghi nhớ có kiểm chứng
 
 Socrates trên **trang Web chính** đã nối trực tiếp việc đọc ảnh và trí nhớ vào hội thoại. Không cần mở dashboard cũ để dùng các phép tính nhanh. Tất cả chạy cục bộ trên thiết bị; không có máy chủ mới.

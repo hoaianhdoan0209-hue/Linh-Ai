@@ -11,6 +11,21 @@ assert.equal(serverClasses,webClasses,'Private AI class data must match the publ
 const webRoster=readFileSync(new URL('./ss9-class-roster.js',import.meta.url),'utf8');
 const gatewayRoster=readFileSync(new URL('./gateway/ss9-class-roster.cjs',import.meta.url),'utf8');
 assert.equal(gatewayRoster,webRoster,'Candidate 39-class roster must be synchronized byte-for-byte');
+const clientClassBuild=readFileSync(new URL('./class-build-knowledge.js',import.meta.url),'utf8');
+const gatewayClassBuild=readFileSync(new URL('./gateway/class-build-knowledge.cjs',import.meta.url),'utf8');
+assert.equal(gatewayClassBuild,clientClassBuild,'Class build graph must be byte-identical in Web and private gateway');
+const shieldSpec=buildEvidence('Shield Blitz + Skyfall và Concuss');
+assert.equal(shieldSpec.skillBuildFacts.className,'Aegis');
+assert.ok(shieldSpec.skillBuildFacts.specializations.some(x=>x.name==='Skyfall'));
+assert.ok(shieldSpec.sources.some(x=>x.url==='https://prequel.chillyroom.com/et/article/base/133'));
+assert.equal(shieldSpec.skillBuildFacts.completeSS9Tree,false);
+const buildArt=buildEvidence('build Artillerist');
+assert.equal(buildArt.skillBuildFacts.className,'Artillerist');
+assert.ok(buildArt.skillBuildFacts.mechanics.some(x=>x.item==='Karmic Cinderpult'));
+const classNeverComplete=buildEvidence('build Druid');
+assert.equal(classNeverComplete.skillBuildFacts.completeSS9Tree,false);
+assert.equal(classNeverComplete.skillBuildFacts.officialProfile,null);
+
 const necro=buildEvidence('Necromancer');
 assert.equal(necro.classFacts[0].name,'Necromancer');
 assert.deepEqual(necro.classFacts[0].base,['Voidfarer','Animancer']);
@@ -93,6 +108,11 @@ assert.ok(body.evidence.sources.some(x=>x.id==='artillerist-karmic'));
 assert.ok(seen.body.groundedGameEvidence.facts.some(x=>x.id==='artillerist-karmic'));
 assert.ok(seen.system.includes('phần trăm'));
 assert.equal(calls,1);
+res=await post({question:'Shield Blitz có Skyfall và Concuss thì sao?'});
+body=await res.json();
+assert.ok(seen.body.groundedGameEvidence.skillBuildFacts?.specializations.some(x=>x.name==='Skyfall'));
+assert.ok(body.evidence.sources.some(x=>x.url==='https://prequel.chillyroom.com/et/article/base/133'));
+
 res=await post({question:'Nightpiercer là kỹ năng class nào?'});
 body=await res.json();
 assert.ok(body.evidence.sources.some(x=>x.url==='https://prequel.chillyroom.com/et/class/3'));

@@ -426,6 +426,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      const question=(field.value.trim()||
        'Hãy nhìn ảnh Soul Knight Prequel này: nhận dạng tên kỹ năng, trang bị, tier và hiệu ứng thấy rõ. Chỉ nêu chi tiết nhìn thấy; nếu chữ hoặc biểu tượng mờ thì nói chưa rõ. Không khẳng định đồ đang mặc hay DPS thật.').slice(0,700);
      const result=await aiBridge.askImage(question,image,{
+       isValid:()=>scan===scanToken&&file===pendingVisionFile,
        confirm:({endpoint,body,imagePreview})=>{
          if(scan!==scanToken||file!==pendingVisionFile)return false;
          const outgoing=JSON.parse(body),{image:excluded,...textOnly}=outgoing;
@@ -438,7 +439,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
        }
      });
      if(scan!==scanToken||file!==pendingVisionFile)return;
-     if(result.ok){field.value='';show(result.reply,'dialogue',0);speak(result.reply);}
+     if(result.ok){field.value='';show('Nhận định AI từ ảnh (CHƯA XÁC NHẬN trong game):\n'+result.reply,'dialogue',0);speak(result.reply);}
      else if(!result.cancelled)show('AI hình ảnh: '+result.reason,'question',0);
    }catch(error){
      if(scan===scanToken)show('Không thể chuẩn bị ảnh cho AI: '+(error?.message||'lỗi ảnh'),'question',0);

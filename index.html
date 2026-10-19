@@ -231,7 +231,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
    const measurement=experiments.record(measurements,message);
    const measuredReply=measurement || experiments.answer(message,measurements);
-   const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy);
+   const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy,measurements);
    let reply=measuredReply || studied || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?

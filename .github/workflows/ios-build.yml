@@ -4,6 +4,8 @@ on:
     paths:
       - 'ios/LinhCompanion/Sources/**'
       - 'ios/LinhCompanion/sign_on_mac.py'
+      - 'ios/LinhCompanion/prepare_cloud_signing.py'
+      - 'codemagic.yaml'
       - 'ios/LinhCompanion/Tests/**'
       - 'ios/LinhCompanion/project.yml'
       - 'ios/LinhCompanion/BroadcastExtension/**'
@@ -27,6 +29,31 @@ jobs:
             --team ABCDE12345 \
             --device 00008020-001111122223000A \
             --check-only
+      - name: Kiểm tra dự án cloud signing (không dùng Apple keys)
+        run: |
+          set -euo pipefail
+          python3 -m py_compile ios/LinhCompanion/prepare_cloud_signing.py
+          python3 ios/LinhCompanion/prepare_cloud_signing.py \
+            --bundle-id com.linh.example.testapp \
+            --build-number 127 \
+            --output /tmp/LinhCloudTest
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          project = Path('/tmp/LinhCloudTest/project.yml').read_text()
+          picker = Path('/tmp/LinhCloudTest/Sources/ReplayKitPicker.swift').read_text()
+          shared = Path('/tmp/LinhCloudTest/Sources/LinhSharedStore.swift').read_text()
+          catalog = Path('/tmp/LinhCloudTest/Sources/Assets.xcassets/AppIcon.appiconset/Contents.json')
+          assert project.count('com.apple.security.application-groups:') == 2
+          assert project.count('CFBundleVersion: "127"') == 2
+          assert project.count('ASSETCATALOG_COMPILER_APPICON_NAME: "AppIcon"') == 1
+          assert 'com.linh.example.testapp.broadcast' in picker
+          assert 'group.com.linh.example.testapp' in shared
+          assert json.loads(catalog.read_text())['images'][0]['size'] == '1024x1024'
+          assert Path('/tmp/LinhCloudTest/LinhIcon.svg').is_file()
+          print('PASS: cloud project IDs, ReplayKit, App Group, AppIcon, build number')
+          PY
+          ruby -e 'require "yaml"; y=YAML.load_file("codemagic.yaml"); raise "Missing workflow" unless y.dig("workflows", "linh-testflight", "environment", "ios_signing", "distribution_type") == "app_store"; puts "PASS: codemagic.yaml valid"'
       - name: Kiểm tra bộ SDK Apple
         run: |
           xcodebuild -version

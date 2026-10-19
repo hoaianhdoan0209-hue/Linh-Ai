@@ -28,7 +28,7 @@ new MutationObserver(()=>{hint.textContent=$('mic').classList.contains('listenin
 const panel=el('dialog','settings-panel');panel.setAttribute('aria-label','Menu Socrates');const close=el('button','panel-close','Đóng ×');close.type='button';close.onclick=()=>panel.close();panel.append(close,el('h2','','Socrates'),el('p','panel-description','Soul Knight Prequel · Giao diện 2.11'));
 const explain=el('p','panel-description','Lịch sử chat chỉ ở trong phiên này. Chỉ dữ kiện ảnh đã được Bệ hạ xác nhận mới được ghi nhớ.');panel.append(explain);
 for(const id of ['learnStatus','eraseImages','aiStatus','aiSettings'])panel.append($(id));
-const clear=el('button','starter','Xóa hội thoại trong phiên');clear.type='button';clear.onclick=()=>{$('chatMessage').value='xóa hội thoại';panel.close();$('chatDock').requestSubmit();};panel.append(clear);main.append(panel);
+const clear=el('button','starter','Xóa hội thoại trong phiên');clear.type='button';clear.onclick=()=>{$('chatMessage').value='xóa hội thoại';panel.close();$('chatDock').requestSubmit();};panel.append(clear);const readAloud=el('button','starter','Bật / tắt đọc câu trả lời');readAloud.type='button';readAloud.onclick=()=>{panel.close();document.dispatchEvent(new Event('socrates-toggle-voice'));};panel.append(readAloud);main.append(panel);
 menu.onclick=()=>panel.showModal();game.onclick=()=>panel.showModal();settings.onclick=()=>{$('aiSettings').click();$('aiSetup').scrollIntoView({block:'center'});};
 $('aiSettings').addEventListener('click',()=>panel.close());
 function card(row){
@@ -41,7 +41,7 @@ function card(row){
  const source=el('a','source-link','Xem nguồn dữ liệu ↗');source.href=row.source;source.target='_blank';source.rel='noopener noreferrer';content.append(source);c.append(content);return c;
 }
 function add(role,text,kind){
- if(!text)return;empty.remove();
+ if(!text)return;if(role==='user')empty.remove();
  if(role==='user'&&/^(xóa hội thoại|quên cuộc trò chuyện|xóa trò chuyện)$/i.test(text.trim()))history.replaceChildren(welcome);
  const nearBottom=history.scrollHeight-history.scrollTop-history.clientHeight<120;
  const article=el('article','message '+role);const bubble=el('div','bubble');

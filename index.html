@@ -424,6 +424,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    show(msg,'greeting',4500);
    if(session.voice)speak(msg);
  }
+ document.addEventListener('socrates-toggle-voice',toggleVoice);
  linh.addEventListener('pointerdown',e=>{
    if(e.button!==0)return;
    holding=true;

@@ -18,4 +18,18 @@ const html=fs.readFileSync('index.html','utf8').replace(/<script[\s\S]*?<\/scrip
 assert.doesNotMatch(html,/SS9|Karmic Cinderpult|Three Kingdoms/);
 const swift=fs.readFileSync('ios/LinhCompanion/Sources/SeasonKnowledge.swift','utf8');
 for(const q of ['Karmic Cinderpult','Anemoian Cortain','Charred Aperture','Tarta'])assert.ok(swift.includes(k.lookup(q)[0].text));
-console.log('PASS: SS9 scoped knowledge, updated coefficients, no UI/summary/automatic speech exposure');
+// Some SS9 item-name screenshots contain no generic stat/keyword: OCR still
+// identifies the named mechanic and the Web should reply, not silently drop it.
+const V=require('./vision-engine.js'),M=require('./web-image-memory.js');
+for(const name of ['Karmic Cinderpult','Wolong','Conquer the Pass']){
+  assert.equal(M.candidate(name,V.observe(name)),null,'No false numeric facts from '+name);
+  assert.ok(k.lookup(name).length,'Internal named knowledge exists for '+name);
+}
+const page=fs.readFileSync('index.html','utf8');
+assert.ok(page.includes("if(named.length){\n       coach.reset();"),
+  'Image without numeric OCR must still answer recognized SS9 names');
+assert.ok(page.includes("ảnh không được ghi nhớ."),
+  'Name-only OCR must not be saved as a verified photo');
+assert.ok(page.includes("const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];"),
+  'Season lookup must run independently from numeric OCR candidate');
+console.log('PASS: SS9 scoped knowledge, image-only named patch fallback, no UI/summary/automatic speech exposure');

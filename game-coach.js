@@ -51,6 +51,39 @@ function analyze(item,{critMode=null,goal=null,unconfirmed=false}={}){
  else if(m.average===undefined)parts.push('Cần tỷ lệ và ST chí mạng để tính sát thương trung bình đầy đủ.');
  return result(parts.join('\n\n'),unconfirmed?'question':'calculation');
 }
+// Treat two screenshots as separate alternatives. Never merge their values.
+function compareImages(first,second,{critMode=null,goal=null,unconfirmed=false}={}){
+ const a=clean(first),b=clean(second);
+ if(!a||!b)return result('Cần hai ảnh có dữ kiện rõ để so sánh.','question');
+ const av=values(a),bv=values(b);
+ const shared=Object.keys(av).filter(k=>bv[k]!==undefined);
+ const changed=shared.filter(k=>av[k]!==bv[k]);
+ const lines=['So sánh riêng hai ảnh (A: trước, B: mới):'];
+ if(changed.length)for(const key of changed.slice(0,7)){
+  lines.push(S.labels[key]+': A '+fmt(av[key])+' → B '+fmt(bv[key])+'.');
+ }else if(shared.length)lines.push('Các chỉ số trùng nhãn đang bằng nhau.');
+ else lines.push('Hai ảnh chưa có chỉ số cùng nhãn để đối chiếu.');
+ const ma=metrics(a,critMode),mb=metrics(b,critMode);
+ let advantage=null;
+ if(critMode&&ma.average!==undefined&&mb.average!==undefined&&ma.average>0){
+  const bothSpeed=Number.isFinite(av.attackSpeed)&&Number.isFinite(bv.attackSpeed)&&av.attackSpeed>0&&bv.attackSpeed>0;
+  const valueA=ma.average*(bothSpeed?av.attackSpeed:1),valueB=mb.average*(bothSpeed?bv.attackSpeed:1);
+  const name=bothSpeed?'DPS giả định':'sát thương trung bình mỗi đòn giả định';
+  lines.push(name+': A ≈ '+fmt(valueA)+'; B ≈ '+fmt(valueB)+' ('+(valueB>=valueA?'+':'')+fmt((valueB/valueA-1)*100)+'%).');
+  advantage=valueB>valueA?'B':valueA>valueB?'A':null;
+  lines.push(advantage?'Nếu cùng kỹ năng, mục tiêu và điều kiện, mô hình nghiêng về '+advantage+'.':'Theo mô hình hai phương án ngang nhau.');
+ }else{
+  if(ma.base!==undefined&&mb.base!==undefined){
+   lines.push('Sát thương cơ sở trong ảnh: A '+fmt(ma.base)+'; B '+fmt(mb.base)+'. Chưa đủ hệ số chí mạng để xếp hạng hiệu quả tổng.');
+  }
+  lines.push('Chưa đủ dữ kiện đồng nhất để khẳng định A hay B mạnh hơn.');
+ }
+ if(goal==='farm')lines.push('Đánh farm cần thêm tầm đánh, diện rộng và thời gian dọn nhóm quái.');
+ else if(goal==='boss')lines.push('Đánh boss cần thêm hồi chiêu và số đo trên cùng boss.');
+ else lines.push('Bệ hạ định đánh boss hay farm để thần chọn tiêu chí phù hợp?');
+ if(unconfirmed)lines.push('Các số vừa đọc bằng OCR chưa xác nhận; đừng xem đây là kết quả đo thực tế.');
+ return result(lines.join('\n'),'suggestion');
+}
 function create(){
  let current=null,previous=null,critMode=null,goal=null,unconfirmed=false;
  function reset(){current=previous=null;critMode=goal=null;unconfirmed=false;}
@@ -59,6 +92,7 @@ function create(){
   // A new picture replaces the active build; never silently combine two pictures.
   if(confirmed&&current&&JSON.stringify(current.facts)===JSON.stringify(next.facts)){unconfirmed=false;return analyze(current,{critMode,goal});}
   previous=current;current=next;critMode=null;unconfirmed=!confirmed;
+  if(previous)return compareImages(previous,current,{critMode,goal,unconfirmed});
   return analyze(current,{critMode,goal,unconfirmed});
  }
  function reply(input,saved=[]){
@@ -95,7 +129,11 @@ function create(){
   if(/^(tong|tong he so|la tong|chi mang la tong|cong them|phan cong them|la cong them|thuong chi mang)$/.test(q)&&current)return analyze(current,{critMode,goal,unconfirmed});
   if(!/(anh|hinh|chi so|tinh|phan tich|sat thuong|dps|build|goi y|toi uu|nen|tang|doi|manh|yeu|boss|farm|trang bi|ky nang|tiep|vi sao|tai sao|so sanh|cong kich|chi mang|crit|hoi chieu)/.test(q))return null;
   if(!current)return result('Thần chưa có chỉ số để tính. Bệ hạ gửi ảnh bảng chỉ số; thần sẽ đọc số, lập phép tính và hỏi đúng phần còn thiếu. Ảnh được phân tích ngay, chỉ lưu khi ngài chọn ghi nhớ.','question');
-  if(/so sanh|anh truoc|mon truoc/.test(q)){
+  if(/so sanh|anh truoc|mon truoc|chon (mon|cai|anh) nao|cai nao (manh|tot)|mon nao (manh|tot)|anh (1|2) (hay|voi) anh (1|2)|nen giu (mon|anh) nao|nen lay (mon|anh) nao/.test(q)){
+   if(!previous)return result('Thần mới có một phương án. Bệ hạ gửi ảnh món thứ hai để so sánh và cho biết đánh boss hay farm.','question');
+   return compareImages(previous,current,{critMode,goal,unconfirmed});
+  }
+  if(false){ // Unreachable legacy comparator retained for compatibility review.
    if(!previous)return result('Hiện chỉ có một bảng chỉ số trong phiên. Bệ hạ gửi thêm ảnh của phương án còn lại để so sánh; thần sẽ giữ từng bộ riêng.','question');
    const a=values(previous),b=values(current),lines=[];
    for(const key of Object.keys(b))if(a[key]!==undefined&&a[key]!==b[key])lines.push(S.labels[key]+': '+fmt(a[key])+' → '+fmt(b[key])+' ('+(b[key]>a[key]?'+':'')+fmt(b[key]-a[key])+').');
@@ -119,5 +157,5 @@ function create(){
  }
  return {image,reply,reset};
 }
-return {create,analyze,metrics};
+return {create,analyze,metrics,compareImages};
 });

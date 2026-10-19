@@ -63,6 +63,11 @@ function observe(state,input,options={}){
  if(base.mechanicId&&base.mechanicId!==nextId){
   base.claims=[];base.conflicts=[];
  }
+ // A new unrelated mechanic invalidates stale comparison hypotheses.
+ if(!selected&&base.variants.A&&
+   ![base.variants.A.mechanicId,base.variants.B?.mechanicId].includes(nextId))
+  base.variants={};
+ if(base.photoTail&&base.photoTail.mechanicId!==nextId)base.photoTail=null;
  base.mechanicId=nextId;
  const rawCount=B.pieceCount(input);
  const relevant=nextId==='tarta'&&rawCount!==null&&/(\bmon\b|\bpieces?\b)/.test(q);
@@ -95,6 +100,9 @@ function audit(state){
  if(s.mechanicId==='tarta'){
   if(count===null)return {status:'unverified',blocking:['Chưa biết đủ 4 món Tarta hay chưa.'],
    nextTest:'Đếm số món Tarta đang mặc trước khi xét Hellscream/Earthspike.',pieceCount:null};
+  if(count>4)return {status:'invalid-count',
+   blocking:['Bộ Tarta chỉ xét 4 món; số '+count+' cần xác minh, không suy được hiệu ứng.'],
+   nextTest:'Đếm lại đúng các món thuộc Tarta và nhập một số từ 1 đến 4.',pieceCount:null};
   if(count<4)return {status:'prerequisite-false',
    blocking:['Chỉ có '+count+'/4 món Tarta, không kích hoạt mức thưởng đủ 4 món.'],
    nextTest:'So số món đã trang bị, rồi kiểm tra kích nổ Earthspike.',pieceCount:count};
@@ -142,8 +150,10 @@ function auditAlternatives(state){
  const describe=(x,label)=>{
   if(x.mechanicId==='tarta'){
    if(x.pieceCount===null)return label+': chưa biết số món Tarta.';
+   if(x.pieceCount>4)return label+': số món Tarta '+x.pieceCount+' không hợp lệ (tối đa 4).';
    if(x.pieceCount<4)return label+': '+x.pieceCount+'/4 Tarta, chưa đạt điều kiện 4 món.';
-   return label+': khai báo '+x.pieceCount+'/4 Tarta; còn phải xác minh Hellscream/Earthspike.';
+   const provenance=x.source==='unconfirmed-ocr'?'OCR chưa xác nhận':'người chơi khai báo';
+   return label+': '+provenance+' '+x.pieceCount+'/4 Tarta; còn phải xác minh Hellscream/Earthspike.';
   }
   return label+': có tên cơ chế nhưng chưa có đủ trạng thái kích hoạt.';
  };

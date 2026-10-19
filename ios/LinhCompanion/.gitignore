@@ -12,3 +12,6 @@ build/
 *.xcuserstate
 xcuserdata/
 LinhCompanion.xcodeproj/
+
+__pycache__/
+*.pyc

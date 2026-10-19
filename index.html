@@ -409,16 +409,21 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      pendingImage=imageMemory.candidate(raw,observation);
      approveImage.disabled=!pendingImage;
      imageStatus.textContent=imageMemory.describe(pendingImage);
+     // A named SS9 mechanic can be recognized even when OCR finds no numeric
+     // stats or generic tags. Answer the relevant question without saving OCR.
+     const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];
      if(pendingImage){
        const analysis=coach.image(pendingImage);
-       const named=window.SocratesSeasonKnowledge.lookup(raw);
        show(analysis.text+(named.length?'\n\n'+named[0].text:''),analysis.kind,0);
        return;
      }
-     show(pendingImage?
-       'Socrates đọc được vài dấu hiệu. Bệ hạ xem và bấm Ghi nhớ nếu OCR đúng nhé.':
-       'Socrates chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.',
-       pendingImage?'question':'dialogue',14000);
+     if(named.length){
+       coach.reset();
+       imageStatus.textContent='Đã nhận ra tên cơ chế SS9, nhưng chưa đọc được chỉ số đủ tin cậy; ảnh không được ghi nhớ.';
+       show(named[0].text+'\n\nĐể đánh giá có nên dùng, Bệ hạ gửi bảng chỉ số rõ hơn hoặc cho biết đang đánh boss hay farm nhé.','question',0);
+       return;
+     }
+     show('Socrates chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.','question',14000);
    }catch(error){
      console.warn('Socrates OCR failed:',error?.name,error?.message);
      if(myScan===scanToken){

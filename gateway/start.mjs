@@ -5,7 +5,7 @@ const port=Number(process.env.PORT||3000);
 createServer(async (req,res)=>{
  const chunks=[];let total=0;
  try{
-  for await(const chunk of req){total+=chunk.length;if(total>13000){res.writeHead(413);res.end();return;}chunks.push(chunk);}
+  for await(const chunk of req){total+=chunk.length;if(total>1500000){res.writeHead(413);res.end();return;}chunks.push(chunk);}
   const headers={};for(const [k,v] of Object.entries(req.headers))headers[k]=Array.isArray(v)?v.join(','):v||'';
   const url='http://local'+(req.url||'/');
   const request=new Request(url,{method:req.method,headers,...(req.method==='GET'||req.method==='HEAD'?{}:{body:Buffer.concat(chunks)})});

@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Linh">
-<meta name="description" content="Linh: nhân vật bạn đồng hành, suy luận bằng quan sát đã lưu trên máy. Không tự xem màn hình game khác qua Safari.">
+<meta name="description" content="Trò chuyện cùng Linh ngay trên iPhone: Linh phản hồi bằng chữ, có giọng đọc và nhớ mạch trò chuyện trong phiên.">
 <title>Linh</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
@@ -52,10 +52,26 @@ main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:cent
 .linh.is-holding .body{filter:brightness(1.18)}
 .linh.bloom{animation:reaction .5s ease-out,bob 4s ease-in-out infinite}
 .speech{width:min(86vw,330px);min-height:60px;display:grid;place-items:center;position:relative;margin-top:-6px}
-.thought{font-size:14px;font-weight:540;line-height:1.48;letter-spacing:.005em;max-width:310px;text-align:center;padding:12px 16px;border-radius:17px;color:#eff9ff;background:#152442dc;border:1px solid #79baf32f;box-shadow:0 13px 28px #050b1d44;opacity:0;transform:translateY(8px) scale(.98);transition:opacity .28s,transform .28s;pointer-events:none}
+.thought{font-size:14px;font-weight:540;line-height:1.48;letter-spacing:.005em;max-width:330px;text-align:center;padding:12px 16px;border-radius:17px;color:#eff9ff;background:#152442dc;border:1px solid #79baf32f;box-shadow:0 13px 28px #050b1d44;opacity:0;transform:translateY(8px) scale(.98);transition:opacity .28s,transform .28s;pointer-events:none}
 .thought.show{opacity:1;transform:translateY(0) scale(1)}
 .thought[data-kind="calculation"]{border-color:#8de6bc6b}
 .thought[data-kind="memory"]{border-color:#b2a2ff68}
+.said{min-height:18px;max-width:330px;color:#a9b9d9;font-size:11px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 0 7px}
+.chat-dock{display:flex;align-items:center;gap:8px;width:min(91vw,385px);background:#131e36ec;border:1px solid #89c8ff4e;border-radius:24px;padding:7px 8px 7px 15px;box-shadow:0 14px 35px #01051666;margin-top:13px}
+.chat-dock[hidden]{display:none!important}
+.chat-dock input{appearance:none;background:transparent;min-width:0;flex:1;color:#eef9ff;border:none;outline:none;font:400 16px/1.5 -apple-system,BlinkMacSystemFont,sans-serif;caret-color:#a7e9ff}
+.chat-dock input::placeholder{color:#8195b5}
+.chat-dock button{display:grid;place-items:center;flex:none;width:38px;height:38px;border:0;border-radius:50%;background:#5077ba;color:#f7fdff;cursor:pointer;font-size:18px;line-height:1}
+.chat-dock button:focus-visible{outline:2px solid #b5f5ff;outline-offset:3px}
+.chat-dock #mic{background:#273c63}
+.chat-dock #mic[hidden]{display:none!important}
+.chat-dock #mic.listening{background:#9c476f}
+.chatting .world{min-height:0;padding-top:0}
+.chatting .stage{height:min(45dvh,275px);min-height:145px}
+.chatting .linh{width:190px;height:190px;max-width:49vw;max-height:49vw}
+.chatting .speech{min-height:90px;margin-top:-3px}
+.chatting .thought{max-width:330px}
+.chatting .subtle{letter-spacing:0}
 .subtle{font-size:10px;line-height:1.45;letter-spacing:.05em;text-align:center;color:#92a7c8ab;margin:0;user-select:none}
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 @keyframes bob{0%,100%{transform:translateY(4px)}50%{transform:translateY(-10px)}}
@@ -75,26 +91,44 @@ main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:cent
       <span class="ring" aria-hidden="true"></span>
       <i class="particle p1" aria-hidden="true"></i><i class="particle p2" aria-hidden="true"></i>
       <i class="particle p3" aria-hidden="true"></i><i class="particle p4" aria-hidden="true"></i>
-      <button type="button" class="linh" id="linh" aria-label="Linh. Chạm để nghe một gợi ý. Giữ để bật hoặc tắt giọng nói.">
+      <button type="button" class="linh" id="linh" aria-label="Linh. Chạm để trò chuyện. Giữ để bật hoặc tắt giọng đọc.">
         <span class="body"></span>
         <span class="face"><span class="eye l"></span><span class="eye r"></span><span class="cheek l"></span><span class="cheek r"></span><span class="mouth"></span></span>
       </button>
     </div>
-    <div class="speech"><div id="thought" class="thought" aria-hidden="true"></div></div>
+    <div class="speech">
+      <div>
+        <p id="said" class="said" hidden></p>
+        <div id="thought" class="thought" aria-hidden="true"></div>
+      </div>
+    </div>
+    <form id="chatDock" class="chat-dock" hidden autocomplete="off">
+      <input id="chatMessage" type="text" maxlength="300" autocomplete="off" aria-label="Nhắn cho Linh" placeholder="Nói với Linh…" enterkeyhint="send">
+      <button id="mic" type="button" hidden aria-label="Nói bằng giọng nói" title="Dùng mic nếu Safari hỗ trợ">🎙</button>
+      <button id="send" type="submit" aria-label="Gửi cho Linh">➤</button>
+    </form>
   </div>
-  <p class="subtle">Linh Web · Trí nhớ trên máy · Không quan sát game khác</p>
+  <p class="subtle">Trò chuyện cục bộ · Giữ Linh để bật giọng đọc</p>
   <span class="sr-only" id="liveStatus" aria-live="polite" aria-atomic="true"></span>
 </main>
 <script src="./web-companion.js"></script>
+<script src="./web-dialogue.js"></script>
 <script>
 (()=>{
  'use strict';
  // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
- const brain=window.LinhWebCompanion;
+ const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
  const linh=document.getElementById('linh');
  const thought=document.getElementById('thought');
  const live=document.getElementById('liveStatus');
- if(!brain||!linh||!thought){if(live)live.textContent='Linh chưa tải được bộ suy luận cục bộ.';return;}
+ const dock=document.getElementById('chatDock');
+ const field=document.getElementById('chatMessage');
+ const said=document.getElementById('said');
+ const mic=document.getElementById('mic');
+ if(!brain||!chat||!linh||!thought){
+   if(live)live.textContent='Linh chưa tải được bộ hội thoại cục bộ.';
+   return;
+ }
  const get=k=>{try{return localStorage.getItem(k)}catch(_){return null}};
  const set=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(_){return false}};
  let session;
@@ -103,50 +137,64 @@ main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:cent
  session=brain.startVisit(session);
  set(brain.STATE_KEY,session);
  let legacy=brain.readLegacy(get(brain.LEGACY_KEY));
- let hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
- const clearReaction=()=>{linh.classList.remove('talking','thinking','happy','bloom')};
+ let dialogue={focus:'general'},hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
+ let recognition=null,recognizing=false;
+ const clearReaction=()=>linh.classList.remove('talking','thinking','happy','bloom');
  const silence=()=>{try{window.speechSynthesis?.cancel()}catch(_){}};
- function show(message,kind='greeting',duration=5600){
-   const text=String(message||'').slice(0,96);
+ function show(message,kind='dialogue',duration=11000){
+   const text=String(message||'').slice(0,chat.MAX_REPLY);
    if(!text)return;
    thought.textContent=text;
    thought.dataset.kind=kind;
    thought.classList.add('show');
-   thought.setAttribute('aria-hidden','false');
+   thought.setAttribute('aria-hidden','true');
    live.textContent=text;
    clearReaction();
    linh.classList.add(kind==='question'?'thinking':kind==='greeting'?'happy':'talking','bloom');
    clearTimeout(hideTimer);clearTimeout(reactTimer);
-   reactTimer=setTimeout(clearReaction,850);
-   hideTimer=setTimeout(()=>{thought.classList.remove('show');thought.setAttribute('aria-hidden','true');},duration);
+   reactTimer=setTimeout(clearReaction,950);
+   hideTimer=setTimeout(()=>thought.classList.remove('show'),duration);
  }
  function speak(message){
-   if(!session.voice||!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window))return;
+   if(!session.voice || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window))return;
    silence();
-   try{const u=new SpeechSynthesisUtterance(message);u.lang='vi-VN';u.rate=1.03;window.speechSynthesis.speak(u)}
-   catch(_){/* voice is optional; text is always shown */}
+   try{
+     const u=new SpeechSynthesisUtterance(message);
+     u.lang='vi-VN';u.rate=1.03;
+     window.speechSynthesis.speak(u);
+   }catch(_){/* Browser voice is optional; text always displays. */}
  }
- function chooseThought(){
-   session=brain.tap(session);
-   // Read-only bridge: legacy-dashboard remains independent, never overwritten.
-   legacy=brain.readLegacy(get(brain.LEGACY_KEY));
-   const next=brain.nextThought(session,legacy);
-   session.lastIdea=next.key;
-   set(brain.STATE_KEY,session);
-   show(next.text,next.kind);
-   speak(next.text);
-   if(navigator.vibrate)try{navigator.vibrate(10)}catch(_){}
+ function openChat(){
+   if(dock.hidden){
+     dock.hidden=false;
+     document.body.classList.add('chatting');
+     show('Linh nghe đây! Bệ hạ muốn nói gì với Linh?','greeting',6500);
+   }
+   field.focus();
+ }
+ function send(raw){
+   const message=String(raw||'').trim().slice(0,chat.MAX_INPUT);
+   if(!message)return;
+   if(dock.hidden)openChat();
+   field.value='';
+   // Session context only; raw conversation is NOT saved to localStorage.
+   const reply=chat.respond(message,dialogue,legacy);
+   const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
+   dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};
+   if(clear){said.hidden=true;said.textContent='';}
+   else{said.hidden=false;said.textContent='Bệ hạ: '+message.slice(0,90);}
+   show(reply.text,reply.kind,14000);
+   speak(reply.text);
  }
  function toggleVoice(){
    if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){
-     show('Trình duyệt này chưa hỗ trợ giọng nói của Linh.','question');
-     return;
+     show('Safari này chưa hỗ trợ giọng đọc. Linh vẫn trò chuyện bằng chữ nhé.','question');return;
    }
    session.voice=!session.voice;
    set(brain.STATE_KEY,session);
    silence();
-   const msg=session.voice?'Linh sẽ đọc gợi ý khi Bệ hạ chạm.':'Linh sẽ nói bằng chữ để không làm phiền.';
-   show(msg,'greeting',3800);
+   const msg=session.voice?'Linh sẽ đọc lời trả lời khi Bệ hạ nhắn.':'Linh sẽ trả lời bằng chữ, không làm phiền nữa.';
+   show(msg,'greeting',4500);
    if(session.voice)speak(msg);
  }
  linh.addEventListener('pointerdown',e=>{
@@ -162,17 +210,49 @@ main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:cent
  });
  for(const ev of ['pointerup','pointercancel','pointerleave']){
    linh.addEventListener(ev,()=>{
-     holding=false;
-     clearTimeout(holdTimer);
-     linh.classList.remove('is-holding');
+     holding=false;clearTimeout(holdTimer);linh.classList.remove('is-holding');
    });
  }
  linh.addEventListener('click',()=>{
-   if(suppressClick){suppressClick=false;return}
-   chooseThought();
+   if(suppressClick){suppressClick=false;return;}
+   openChat();
  });
- // Prevent the mobile long-press context menu while keeping keyboard click.
  linh.addEventListener('contextmenu',e=>e.preventDefault());
+ dock.addEventListener('submit',e=>{
+   e.preventDefault();
+   send(field.value);
+ });
+ const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(Recognition){
+   mic.hidden=false;
+   mic.addEventListener('click',()=>{
+     if(recognizing){try{recognition?.stop()}catch(_){}return;}
+     // Mic is activated only by the explicit user click. Browser speech
+     // recognition MAY use an external OS/provider service.
+     try{
+       recognition=new Recognition();
+       recognition.lang='vi-VN';
+       recognition.continuous=false;
+       recognition.interimResults=false;
+       recognition.maxAlternatives=1;
+       recognition.onresult=e=>{
+         const words=e.results?.[0]?.[0]?.transcript;
+         if(words)send(words);
+       };
+       recognition.onerror=e=>{
+         if(e.error!=='no-speech' && e.error!=='aborted')
+           show('Không nhận được giọng nói. Bệ hạ có thể nhắn bằng chữ nhé.','question');
+       };
+       recognition.onend=()=>{recognizing=false;mic.classList.remove('listening')};
+       recognition.start();
+       recognizing=true;mic.classList.add('listening');
+       show('Linh đang nghe…','greeting',4200);
+     }catch(_){
+       recognizing=false;mic.classList.remove('listening');
+       show('Không mở được mic trên Safari này. Bệ hạ nhắn chữ nhé.','question');
+     }
+   });
+ }
  window.addEventListener('storage',e=>{
    if(e.key===brain.LEGACY_KEY)legacy=brain.readLegacy(e.newValue);
    if(e.key===brain.STATE_KEY){
@@ -181,15 +261,14 @@ main{min-height:100dvh;display:grid;grid-template-rows:1fr auto;place-items:cent
  });
  document.addEventListener('visibilitychange',()=>{
    if(document.hidden){
-     silence();
-     holding=false;
-     clearTimeout(holdTimer);
+     silence();holding=false;clearTimeout(holdTimer);
      linh.classList.remove('is-holding');
+     if(recognizing)try{recognition?.stop()}catch(_){}
    }else{
      legacy=brain.readLegacy(get(brain.LEGACY_KEY));
    }
  });
- show(brain.greeting(session,new Date().getHours()),'greeting',4300);
+ show(brain.greeting(session,new Date().getHours()),'greeting',4800);
  if('serviceWorker' in navigator&&location.protocol==='https:'){
    navigator.serviceWorker.register('./sw.js').catch(()=>{});
  }

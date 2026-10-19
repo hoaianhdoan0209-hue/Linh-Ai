@@ -1,0 +1,48 @@
+name: Linh Stream Bridge — Kiểm thử Docker, KHÔNG triển khai
+on:
+  push:
+    paths:
+      - 'stream-bridge/**'
+      - '.github/workflows/stream-bridge-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-smoke:
+    name: Build receiver and test privately on CI runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test OCR rule logic and secret handling
+        run: |
+          cd stream-bridge
+          python3 -m unittest -v test_stream.py
+      - name: Docker build (no Railway deployment)
+        run: docker build --tag linh-stream-bridge:test ./stream-bridge
+      - name: Test protected HTTP and nginx receiver configuration
+        run: |
+          set -euo pipefail
+          docker run --name linh-stream-ci -d \
+            -e STREAM_KEY='test-ci-stream-key-0123456789abcde' \
+            -e STATUS_TOKEN='test-ci-status-token-9876543210abc' \
+            -e PORT=8080 \
+            -p 127.0.0.1:18880:8080 \
+            linh-stream-bridge:test
+          trap 'docker rm -f linh-stream-ci || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18880/healthz >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:18880/healthz
+          test "$(curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:18880/status)" = 401
+          test "$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H 'Authorization: Bearer wrong-token' \
+            http://127.0.0.1:18880/status)" = 401
+          curl -fsS -H 'Authorization: Bearer test-ci-status-token-9876543210abc' \
+            http://127.0.0.1:18880/status | python3 -c \
+              'import json,sys; x=json.load(sys.stdin); assert not x["active"]; assert x["last_idea"] is None'
+          docker exec linh-stream-ci nginx -t -c /app/nginx.conf
+          echo "PASS: Docker health, secret access, private RTMP config"

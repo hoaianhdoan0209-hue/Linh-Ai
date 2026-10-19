@@ -16,15 +16,15 @@ function endpoint(raw){
  return u.toString();
 }
 function create(){
- let server='',token='',history=[],inFlight=false;
+ let server='',token='',history=[],inFlight=false,revision=0;
  function configure(url,access){
   const safe=endpoint(url),t=String(access||'');
   if(t.length<8||t.length>256)throw Error('Mã truy cập gateway phải dài 8–256 ký tự.');
-  server=safe;token=t;history=[];
+  revision++;server=safe;token=t;history=[];
   return {ready:true,endpoint:server};
  }
- function disconnect(){server='';token='';history=[];inFlight=false;}
- function clear(){history=[];}
+ function disconnect(){revision++;server='';token='';history=[];inFlight=false;}
+ function clear(){revision++;history=[];inFlight=false;}
  function status(){return {ready:!!(server&&token),endpoint:server,
    turns:history.length,mode:'external-model-opt-in'};}
  async function ask(question,{confirm,remoteFetch=fetch}={}){
@@ -38,7 +38,7 @@ function create(){
   // The authorization token is in a separate header, never in the preview.
   if(typeof confirm!=='function'||!(await confirm({endpoint:server,body:payload})))
    return {ok:false,cancelled:true,reason:'Đã hủy gửi dữ liệu ra ngoài.'};
-  inFlight=true;
+  inFlight=true;const startedAt=revision;
   try{
    const res=await remoteFetch(server,{
     method:'POST',mode:'cors',cache:'no-store',credentials:'omit',
@@ -47,14 +47,16 @@ function create(){
    });
    if(!res.ok)return {ok:false,reason:res.status===429?'AI tạm giới hạn lượt gọi.':'Cổng AI chưa phản hồi ('+res.status+').'};
    const raw=await res.json();
+   if(startedAt!==revision)return {ok:false,cancelled:true,reason:'Phiên AI đã bị xóa hoặc ngắt.'};
    const reply=typeof raw?.reply==='string'?raw.reply.trim().slice(0,3200):'';
    if(!reply)return {ok:false,reason:'AI không trả về văn bản hợp lệ.'};
    history.push({role:'user',text:q},{role:'assistant',text:reply.slice(0,420)});
    history=history.slice(-6);
    return {ok:true,reply};
   }catch(_){
+   if(startedAt!==revision)return {ok:false,cancelled:true,reason:'Phiên AI đã kết thúc.'};
    return {ok:false,reason:'Không kết nối được gateway AI. Có thể máy chủ đang tắt.'};
-  }finally{inFlight=false;}
+  }finally{if(startedAt===revision)inFlight=false;}
  }
  return {configure,disconnect,clear,status,ask};
 }

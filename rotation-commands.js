@@ -12,7 +12,7 @@ const L=typeof module!=='undefined'&&module.exports?require('./rotation-lab.js')
 const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase().trim();
 const v=x=>Number(String(x).replace(',','.'));
 const MAX_LENGTH=900;
-const guide='Ví dụ phép thử giả định: mô phỏng 20s; skill shot damage 1000 cooldown 2s; skill bomb damage 3000 cooldown 8s. Với hiệu ứng: effect boost skill shot factor 1,3 assumed.';
+const guide='Ví dụ: mô phỏng 20s; resource 30/100 regen 5/s; skill shot damage 1000 cooldown 2s cost 10; skill bomb damage 3000 cooldown 8s. Hiệu ứng giả định: effect boost skill shot factor 1,3 assumed.';
 function parse(original){
  const input=norm(String(original??'').slice(0,MAX_LENGTH));
  if(!/^mo phong\b|^tinh vong chieu\b|^thu rotation\b|^rotation\b/.test(input))return null;
@@ -20,13 +20,28 @@ function parse(original){
  const first=pieces.shift()||'',d=first.match(/(\d+(?:[.,]\d+)?)\s*(s|giay|seconds?)\b/);
  if(!d)return {error:'Chưa có thời lượng 1–300s. '+guide};
  const skills=[],effects=[];
+ let resource=null,globalCooldown=0,targetType='boss';
  for(const part of pieces){
+  const energy=part.match(/^resource\s+(\d+(?:[.,]\d+)?)\s*\/\s*(\d+(?:[.,]\d+)?)\s+regen\s+(\d+(?:[.,]\d+)?)\s*\/\s*s$/);
+  if(energy){
+   if(resource)return {error:'Chỉ được khai báo một nguồn tài nguyên trong phép thử.'};
+   resource={initial:v(energy[1]),max:v(energy[2]),regen:v(energy[3])};
+   continue;
+  }
+  const lock=part.match(/^global\s+cooldown\s+(\d+(?:[.,]\d+)?)\s*s$/);
+  if(lock){globalCooldown=v(lock[1]);continue;}
+  const target=part.match(/^target\s+(boss|mob)$/);
+  if(target){targetType=target[1];continue;}
   const skill=part.match(/^(?:skill|ky nang)\s+([a-z0-9_-]+)\s+(?:damage|sat thuong)\s+(\d+(?:[.,]\d+)?)\s+(?:cooldown|hoi(?: chieu)?)\s+(\d+(?:[.,]\d+)?)\s*(?:s|giay)?(?:\s+(.*))?$/);
   if(skill){
    const id=skill[1],extra=skill[4]||'';
    const data={id,cooldown:v(skill[3]),hits:[{damage:v(skill[2])}]};
    const cost=extra.match(/\bcost\s+(\d+(?:[.,]\d+)?)/);
    if(cost)data.cost=v(cost[1]);
+   const cast=extra.match(/\bcast\s+(\d+(?:[.,]\d+)?)\s*s/);
+   if(cast)data.castTime=v(cast[1]);
+   const delay=extra.match(/\bdelay\s+(\d+(?:[.,]\d+)?)\s*s/);
+   if(delay)data.hits[0].delay=v(delay[1]);
    const status=extra.match(/\b(?:status|trang thai)\s+([a-z0-9_-]+)\s+(\d+(?:[.,]\d+)?)\s*(?:s|giay)/);
    if(status){data.hits[0].status=status[1];data.hits[0].statusDuration=v(status[2]);}
    skills.push(data);
@@ -45,7 +60,10 @@ function parse(original){
   return {error:'Dòng chưa đúng cú pháp: '+part.slice(0,80)+'. '+guide};
  }
  if(!skills.length)return {error:'Chưa có kỹ năng và sát thương cơ sở. '+guide};
- const model={duration:v(d[1]),skills,effects};
+ if(skills.some(x=>x.cost>0)&&!resource)
+  return {error:'Đã khai báo tiêu hao nhưng chưa nhập tài nguyên. Ví dụ: resource 30/100 regen 5/s.'};
+ const model={duration:v(d[1]),skills,effects,globalCooldown,targetType,
+  ...(resource?{resource}:{})};
  const valid=L.validate(model);
  return valid.ok?{model}:{error:valid.error};
 }

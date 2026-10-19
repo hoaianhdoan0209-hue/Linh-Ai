@@ -1,3 +1,12 @@
+# Linh Web 1.0 — Một nhân vật có trí nhớ, không yêu cầu nhập liệu
+
+Trang Web chính `index.html` nay có **Linh tự phản ứng với mỗi lần chạm**, gợi ý hoặc câu hỏi thật ngắn (tối đa 96 ký tự), ánh mắt/biểu cảm và nhắc lại quan sát đã xác nhận từ bản phân tích cũ — **chỉ đọc cục bộ**, không thay đổi `linh-web-local-v02`. Một lần giữ nhân vật trên màn hình có thể bật/tắt giọng đọc; mặc định im lặng. Trí nhớ riêng của Linh dùng key `linh-companion-web-v1`, chỉ lưu số lượt ghé, số lần chạm, bật/tắt giọng và mã câu gợi ý trước; không lưu ảnh, OCR hay tài khoản.
+
+Linh chỉ sử dụng **các quan sát OCR đã được người dùng chấp nhận**, ghi chú được đánh dấu kiểm chứng và phép đo có cùng ngữ cảnh khi tạo gợi ý dữ liệu. Không coi dữ liệu mẫu là quá trình chơi thật, không suy đoán nguyên nhân khi chỉ có hai số. Không dùng AI đám mây. Máy có thể truy cập bản cũ tại [legacy-dashboard.html](legacy-dashboard.html) mà không mất dữ liệu.
+
+**Ranh giới:** Safari/PWA trên iPhone vẫn **không thể tự quan sát Soul Knight Prequel khi game chạy trong ứng dụng khác**. Mọi câu nói trên Web chỉ dựa vào kinh nghiệm tổng quát hoặc dữ liệu đã lưu trước đó; đây là bộ suy luận quy tắc, không phải AI có thể hiểu mọi cơ chế game. Những thông tin chưa được xác minh vẫn là gợi ý thử nghiệm, không phải kết luận.
+
+---
 # Linh 0.9 — Một ứng dụng iPhone tự đổi theo phiên bản iOS
 
 **Thiết kế hiện tại: không cần hai bản cài.** Cùng một app `LinhCompanion` có mức hỗ trợ iOS 18.0, tự chọn **ReplayKit Broadcast Extension trên iOS 18–26** và **ScreenCaptureKit trên iOS 27+**. Cùng sử dụng Vision OCR, bộ suy luận và trí nhớ tổng hợp cục bộ. Trên iOS 18, người chơi nhấn nút chia sẻ chính thức nằm trên nhân vật Linh; trên iOS 27, chạm Linh để mở bộ chọn của iOS. Không có menu chọn phiên bản.

@@ -194,6 +194,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 <script src="./build-systems.js?v=2.8.0"></script>
 <script src="./ss9-evidence-graph.js?v=2.8.0"></script>
 <script src="./class-catalog.js?v=2.8.0"></script>
+<script src="./ss9-class-roster.js?v=2.8.0"></script>
 <script src="./rotation-lab.js?v=2.8.0"></script>
 <script src="./rotation-commands.js?v=2.8.0"></script>
 <script src="./thinking-guard.js?v=2.8.0"></script>
@@ -213,6 +214,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const buildSystems=window.SocratesBuildSystems;
  const evidenceGraph=window.SocratesEvidenceGraph;
  const classCatalog=window.SocratesClassCatalog;
+ const classRoster=window.SocratesClassRoster;
  const rotations=window.SocratesRotationCommands;
  const promptStrategy=window.SocratesPromptStrategy;
  const thinkingGuard=window.SocratesThinkingGuard;
@@ -242,7 +244,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const aiStatus=document.getElementById('aiStatus');
  const aiCheck=document.getElementById('aiCheck');
  let gatewayProbeToken=0;
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!classCatalog||!ocrEditor||!visionEditor||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!aiCheck||!visionUpload||!visionEvidence||!visionAnalyze||!approveVision||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!classCatalog||!classRoster||!ocrEditor||!visionEditor||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!aiCheck||!visionUpload||!visionEvidence||!visionAnalyze||!approveVision||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -342,7 +344,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const promptAdvice=photoRequest||photoRecall?null:promptStrategy.answer(message,{context:buildContext});
    const deepBuild=photoRequest||photoRecall?null:buildSystems.assess(message,{context:buildContext});
    const sourcedMechanic=photoRequest||photoRecall?null:evidenceGraph.explain(message);
-   const sourcedClass=photoRequest||photoRecall?null:classCatalog.answer(message);
+   const sourcedClass=photoRequest||photoRecall?null:
+     (classCatalog.find(message).length?classCatalog.answer(message):
+       classRoster.answer(message)||classCatalog.answer(message));
    const groundedPatch=studied?.kind==='official-patch'?
      {...studied,text:studied.text+(deepBuild?'\n\n'+deepBuild.text:'')}:null;
    let reply=measuredReply || (studied?.action?studied:null) || rotationReply || thinkingAdvice || groundedPatch || (contextual?.kind==='calculation'?contextual:null) || sourcedMechanic || sourcedClass || promptAdvice || deepBuild || buildAcknowledgment || (photoRequest?null:patchFollowup) || (photoRequest?null:photoRecall?null:contextual) || (photoRequest?null:studied) || (photoRecall?
@@ -561,6 +565,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      return n.length>3&&(' '+norm+' ').includes(' '+n+' ');
    };
    const observations=[];
+   for(const c of classRoster.identified(text)){
+     if(includesName(c.name))observations.push({kind:'other',name:c.name,confidence:'medium'});
+   }
    for(const c of classCatalog.find(text)){
      if(includesName(c.name))observations.push({kind:'other',name:c.name,confidence:'medium'});
      for(const sk of [...c.active,...c.passive]){

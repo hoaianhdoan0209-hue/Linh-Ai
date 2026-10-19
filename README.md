@@ -1,3 +1,19 @@
+# Socrates Web 1.5 — tính toán từ dữ kiện và ghi nhớ có kiểm chứng
+
+Socrates trên **trang Web chính** đã nối trực tiếp việc đọc ảnh và trí nhớ vào hội thoại. Không cần mở dashboard cũ để dùng các phép tính nhanh. Tất cả chạy cục bộ trên thiết bị; không có máy chủ mới.
+
+**Một số câu có thể nhắn ngay dưới nhân vật:**
+
+- **"Tính sát thương 1000 với 20% và 30%"**: đặt song song *nếu cộng* = 1500 và *nếu nhân* = 1560; đây là **hai công thức giả định**, chưa biết game thật chọn cách nào.
+- **"Tính chí mạng với sát thương thường 1000"**: khi có tỷ lệ và thưởng chí mạng từ **cùng một ảnh OCR đã được xác nhận**, ước lượng hệ số trung bình theo giả định tỷ lệ thưởng cộng trên sát thương thường. Thiếu cặp chỉ số trong cùng ảnh thì không tự ghép hai món trang bị khác nhau.
+- **"Ghi nhớ game: boss rắn có thể kháng độc"**: ghi vào bộ nhớ cục bộ dưới dạng *ghi chú Bệ hạ cung cấp — chưa kiểm chứng*. Socrates không tự gọi đó là cơ chế đã được chứng minh.
+- **"Đo sát thương boss rắn: 1000"** rồi **"Đo sát thương boss rắn: 1250"**: lưu hai số đo Bệ hạ nhập, hiển thị chênh lệch 25% khi chúng có cùng nhãn. Nhãn trùng **không bảo đảm cùng trang bị/mục tiêu/điều kiện** nên chưa khẳng định nguyên nhân.
+- **"Socrates đã học gì"**, **"So sánh số đo"**, **"Quên ghi chú game"**, **"Quên số đo"** để xem trí nhớ/tính toán, xóa có xác nhận. Nút **"Quên ảnh đã học"** vẫn chỉ xóa dữ kiện OCR từ ảnh.
+
+**Giới hạn:** Chỉ số được xác nhận nghĩa là Bệ hạ xác nhận **OCR đọc đúng chữ**, không có nghĩa là công thức trong game đúng. Bộ tối ưu combo nhiều hiệu ứng vẫn ở phần phân tích cũ và tính theo mô hình giả định; Web chính chưa đo DPS thật hoặc tự nhận diện mọi hiệu ứng. Ba vùng dữ liệu (ảnh xác nhận, ghi chú do người dùng cung cấp, số đo do người dùng nhập) **phân biệt riêng**, có giới hạn độ dài/số lượng, không lưu ảnh gốc, không đồng bộ tự động giữa Web và bản native chưa ký. Trình duyệt iOS có thể tạm dừng Web khi rời sang trò chơi.
+
+---
+
 # Socrates — người bạn thông thái trên iPhone
 
 **Tên mới: Socrates (Sô-crát).** Đây là tên hiển thị trên Web, PWA, bảng phân tích cũ và bản iOS đang phát triển. Đường dẫn GitHub cũ, mã nội bộ `Linh*`, bundle identifiers và khóa dữ liệu `linh-*` được giữ nguyên để không làm mất hồ sơ game, trí nhớ và quyền App Group đã cấu hình.

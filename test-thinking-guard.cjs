@@ -84,6 +84,11 @@ const double=G.observe(G.empty(),'phương án A Tarta 3 món; phương án B Ta
 assert.equal(G.auditAlternatives(double).status,'separate-options');
 assert.equal(double.variants.A.pieceCount,3);
 assert.equal(double.variants.B.pieceCount,4);
+const activeTarta=G.observe(G.empty(),'Tarta 3 món',{source:'user-text'});
+assert.equal(G.audit(G.observe(activeTarta,'Tôi có 4 món đồ để hỏi giá')).pieceCount,3,
+ 'Unrelated item counts must not overwrite set status');
+assert.equal(G.audit(G.observe(activeTarta,'4 món')).status,'conflict',
+ 'A short direct set count can remain a contextual followup');
 const impossible=G.observe(G.empty(),'Tarta 5 món',{source:'user-text'});
 assert.equal(G.audit(impossible).status,'invalid-count');
 assert.equal(G.audit(impossible).pieceCount,null);

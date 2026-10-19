@@ -91,4 +91,15 @@ const diff=G.observe(double,'Anemoian Cortain',{source:'user-text'});
 assert.equal(G.auditAlternatives(diff),null,'Unrelated mechanic must expire old comparison');
 const imageProvenance=G.observePhoto(G.observePhoto(G.empty(),'Tarta 3 món'),'Tarta 4 món');
 assert.match(G.answer('so sánh hai ảnh',imageProvenance).text,/OCR chưa xác nhận 4\/4/);
+for(const [name,token] of [['Karmic Cinderpult','Adhesive Gunpowder'],
+ ['Anemoian Cortain','Fortitude'],['Charred Aperture','Iridescence']]){
+ const scenario=G.observe(G.empty(),name,{source:'user-text'});
+ const advice=G.answer('vì sao không kích hoạt?',scenario);
+ assert.equal(advice.reason,'unverified');
+ assert.match(advice.text,new RegExp(token));
+ assert.match(advice.text,/Phép thử tiếp theo/);
+}
+const tarta3=G.observe(G.empty(),'Tarta 3 món',{source:'user-text'});
+assert.equal(G.answer('có đủ điều kiện không?',tarta3).reason,'prerequisite-false');
+assert.match(G.answer('có đủ điều kiện không?',tarta3).text,/3\/4/);
 console.log('PASS: session evidence, contradictions, corrected set counts, source provenance and conservative weighted decisions');

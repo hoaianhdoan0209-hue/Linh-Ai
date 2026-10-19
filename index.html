@@ -187,7 +187,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  session=brain.startVisit(session);
  set(brain.STATE_KEY,session);
  let legacy=brain.readLegacy(get(brain.LEGACY_KEY));
- let dialogue={focus:'general'},hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
+ let dialogue={focus:'general'},lastPatch=null,hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
  let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
  let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
  let measurements=experiments.sanitize(get(experiments.KEY));
@@ -239,7 +239,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const measuredReply=measurement || experiments.answer(message,measurements);
    const contextual=coach.reply(message,savedImages);
    const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy,measurements);
-   let reply=measuredReply || (studied?.action?studied:null) || (photoRecall?null:contextual) || studied || (photoRecall?
+   const patchFollowup=gameBrain.followup(message,lastPatch);
+   let reply=measuredReply || (studied?.action?studied:null) || patchFollowup || (photoRecall?null:contextual) || studied || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -271,6 +272,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      }else reply={text:'Socrates sẽ giữ nguyên những ghi chú game đã lưu.',kind:'memory',focus:'game'};
    }
    const clear=/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(chat.norm(message));
+   if(clear)lastPatch=null;
+   else if(reply===studied&&studied?.kind==='official-patch')lastPatch=studied;
    dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};
    if(clear){said.hidden=true;said.textContent='';}
    else{said.hidden=false;said.textContent='Bệ hạ: '+message.slice(0,90);}
@@ -378,6 +381,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(!file)return;
    lastInteractionAt=Date.now();
    closeImage();
+   lastPatch=null;
    if(!/^image\/(png|jpeg|webp)$/.test(file.type)||file.size>10*1024*1024){
      show('Hãy chọn ảnh PNG, JPG hoặc WebP dưới 10 MB nhé.','question',12000);
      return;
@@ -412,6 +416,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      // A named SS9 mechanic can be recognized even when OCR finds no numeric
      // stats or generic tags. Answer the relevant question without saving OCR.
      const named=window.SocratesSeasonKnowledge?.lookup(raw)||[];
+     lastPatch=named[0]||null;
      if(pendingImage){
        const analysis=coach.image(pendingImage);
        show(analysis.text+(named.length?'\n\n'+named[0].text:''),analysis.kind,0);

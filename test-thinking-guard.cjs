@@ -66,4 +66,22 @@ const different=G.observe(same,'phương án B Karmic Cinderpult',{source:'user-
 assert.equal(G.auditAlternatives(different).status,'different-mechanics');
 assert.equal(G.answer('so sánh hai phương án',different).reason,'non-comparable-builds');
 assert.equal(G.auditAlternatives(G.empty()),null);
+// Screenshot sequences are independent alternatives. Newest two form the pair.
+let photos=G.observePhoto(G.empty(),'Tarta 3 món');
+assert.equal(G.audit(photos).status,'prerequisite-false');
+assert.equal(G.auditAlternatives(photos).status,'incomplete');
+photos=G.observePhoto(photos,'Tarta 4 món');
+assert.equal(G.audit(photos).status,'unknown','Two images do not establish currently equipped gear');
+assert.equal(G.auditAlternatives(photos).status,'separate-options');
+assert.equal(G.auditAlternatives(photos).items.A.pieceCount,3);
+assert.equal(G.auditAlternatives(photos).items.B.pieceCount,4);
+assert.match(G.answer('so sánh hai ảnh',photos).text,/A: 3\/4/);
+photos=G.observePhoto(photos,'Tarta 2 món');
+assert.equal(G.auditAlternatives(photos).items.A.pieceCount,4);
+assert.equal(G.auditAlternatives(photos).items.B.pieceCount,2);
+assert.equal(G.observePhoto(G.empty(),'không có chữ rõ').photoTail,null);
+const double=G.observe(G.empty(),'phương án A Tarta 3 món; phương án B Tarta 4 món');
+assert.equal(G.auditAlternatives(double).status,'separate-options');
+assert.equal(double.variants.A.pieceCount,3);
+assert.equal(double.variants.B.pieceCount,4);
 console.log('PASS: session evidence, contradictions, corrected set counts, source provenance and conservative weighted decisions');

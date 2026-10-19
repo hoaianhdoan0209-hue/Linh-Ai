@@ -55,6 +55,10 @@ const sum=B.answer('Socrates đã học gì',images,loaded,{observationCount:4,v
 has(sum,'1 ảnh OCR');
 has(sum,'1 ghi chú');
 has(sum,'4 phép đo');
+const withTests=B.answer('Socrates đã học gì',images,loaded,
+  {observationCount:4,verifiedOCR:2},
+  [{source:'user-measured',context:'boss rắn',damage:1000}]);
+has(withTests,'1 số đo nhập tại đây');
 assert.match(sum.text,/chưa kiểm chứng/i);
 has(B.answer('so sánh phép đo sát thương',images,loaded,{comparison:'1000 → 1200 (+20%). Chưa rõ nguyên nhân.'}),
  '1000');

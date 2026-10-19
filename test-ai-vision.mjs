@@ -70,7 +70,7 @@ const approved=await bridge.askImage('Đọc trang bị',image,{confirm:({body,i
  return true;
 },remoteFetch:upload});
 assert.equal(approved.ok,true);assert.equal(sent,1);
-assert.equal(bridge.status().turns,2);
+assert.equal(bridge.status().turns,0,'Unverified model image text must not enter future chat history');
 bridge.clear();assert.equal(bridge.status().turns,0);
 bridge.disconnect();assert.equal(bridge.status().ready,false);
 // Closing an image during a remote request must not restore stale image context.

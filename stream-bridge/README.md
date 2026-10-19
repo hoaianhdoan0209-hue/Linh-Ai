@@ -1,6 +1,6 @@
 # Linh Stream Bridge — Thử iPhone → PRISM → OCR → Discord
 
-**Tình trạng:** Chỉ là bản thử mã nguồn. **Chưa triển khai máy chủ Railway, chưa nhận video từ iPhone, chưa gửi gợi ý Discord thật.** Không dùng API Discord Go Live.
+**Tình trạng:** Chỉ là bản thử mã nguồn. **Chưa triển khai máy chủ Railway, chưa nhận video từ iPhone, chưa gửi gợi ý Discord thật.** Kiểm thử Docker nhận HTTP thành công, nhưng **bài thử video RTMP giả lập → OCR vẫn chưa đạt (0 khung hình nhận được)**. **KHÔNG triển khai dùng thật khi chưa sửa lỗi này và chưa có đường truyền mã hóa.** Không dùng API Discord Go Live.
 
 ## Luồng hoạt động
 

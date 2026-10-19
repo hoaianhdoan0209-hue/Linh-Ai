@@ -71,13 +71,14 @@ function compareImages(first,second,{critMode=null,goal=null,unconfirmed=false}=
   const name=bothSpeed?'DPS giả định':'sát thương trung bình mỗi đòn giả định';
   lines.push(name+': A ≈ '+fmt(valueA)+'; B ≈ '+fmt(valueB)+' ('+(valueB>=valueA?'+':'')+fmt((valueB/valueA-1)*100)+'%).');
   advantage=valueB>valueA?'B':valueA>valueB?'A':null;
-  lines.push(advantage?'Nếu cùng kỹ năng, mục tiêu và điều kiện, mô hình nghiêng về '+advantage+'.':'Theo mô hình hai phương án ngang nhau.');
+  lines.push(advantage?'Chỉ trong mô hình chỉ số cô lập, phương án '+advantage+' cho giá trị lớn hơn; CHƯA thể chọn món đó cho cả build.':'Theo mô hình chỉ số cô lập, hai phương án ngang nhau; CHƯA thể xếp hạng build.');
  }else{
   if(ma.base!==undefined&&mb.base!==undefined){
    lines.push('Sát thương cơ sở trong ảnh: A '+fmt(ma.base)+'; B '+fmt(mb.base)+'. Chưa đủ hệ số chí mạng để xếp hạng hiệu quả tổng.');
   }
   lines.push('Chưa đủ dữ kiện đồng nhất để khẳng định A hay B mạnh hơn.');
  }
+ lines.push('Bắt buộc kiểm tra: class/kỹ năng chủ lực, bộ và cấp Legendary, Fatestone, Sacred Soul, affix, Eidolon và điều kiện kích hoạt. Mất một tương tác có thể đảo kết quả.');
  if(goal==='farm')lines.push('Đánh farm cần thêm tầm đánh, diện rộng và thời gian dọn nhóm quái.');
  else if(goal==='boss')lines.push('Đánh boss cần thêm hồi chiêu và số đo trên cùng boss.');
  else lines.push('Bệ hạ định đánh boss hay farm để thần chọn tiêu chí phù hợp?');

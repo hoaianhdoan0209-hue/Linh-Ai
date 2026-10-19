@@ -27,6 +27,7 @@ jobs:
       - name: Kiểm thử Linh và bộ suy luận
         run: |
           node test-site.mjs
+          node test-web-companion.cjs
           node test-native.mjs
           node test-vision.cjs
           node test-learning.cjs
@@ -46,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/ocr/lang
-          cp index.html legacy-dashboard.html vision-engine.js assistant-engine.js assistant-ui.js sw.js manifest.webmanifest icon.svg dist/
+          cp index.html web-companion.js legacy-dashboard.html vision-engine.js assistant-engine.js assistant-ui.js sw.js manifest.webmanifest icon.svg dist/
           touch dist/.nojekyll
           npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund tesseract.js@5.1.1 tesseract.js-core@5.1.1
           cp node_modules/tesseract.js/dist/tesseract.min.js dist/ocr/

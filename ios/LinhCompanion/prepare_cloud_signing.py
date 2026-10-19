@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Prepare XcodeGen source for cloud signing, never read or emit Apple credentials."""
 import argparse
+import json
+import shutil
 from pathlib import Path
 import re
 import sys
@@ -34,7 +36,31 @@ def main():
     if config.count(marker) != 2:
         raise RuntimeError("XcodeGen version fields changed; cannot keep targets in sync")
     config = config.replace(marker, 'CFBundleVersion: "' + str(args.build_number) + '"')
+    config = config.replace(
+        'ASSETCATALOG_COMPILER_APPICON_NAME: ""',
+        'ASSETCATALOG_COMPILER_APPICON_NAME: "AppIcon"',
+    )
+    if config.count('ASSETCATALOG_COMPILER_APPICON_NAME: "AppIcon"') != 1:
+        raise RuntimeError("XcodeGen app icon compiler configuration changed")
     project.write_text(config, encoding="utf-8")
+
+    # Reuse the existing Linh PWA icon, not a generated replacement image.
+    # The cloud Mac converts the SVG to PNG before running XcodeGen.
+    icon_source = source.parents[1] / "icon.svg"
+    if not icon_source.is_file():
+        raise RuntimeError("Missing existing Linh icon.svg")
+    shutil.copyfile(icon_source, destination / "LinhIcon.svg")
+    icon_dir = destination / "Sources/Assets.xcassets/AppIcon.appiconset"
+    icon_dir.mkdir(parents=True, exist_ok=True)
+    (icon_dir / "Contents.json").write_text(json.dumps({
+        "images": [{
+            "filename": "AppIcon.png",
+            "idiom": "universal",
+            "platform": "ios",
+            "size": "1024x1024",
+        }],
+        "info": {"author": "xcode", "version": 1},
+    }), encoding="utf-8")
 
     if config.count("com.apple.security.application-groups:") != 2:
         raise RuntimeError("Both signed targets must have an App Group entitlement")

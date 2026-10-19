@@ -28,8 +28,16 @@ workflows:
           fi
           python3 ios/LinhCompanion/prepare_cloud_signing.py \
             --bundle-id "$LINH_BUNDLE_ID" \
-            --build-number "$PROJECT_BUILD_NUMBER" \
+            --build-number "$(( ${PROJECT_BUILD_NUMBER:-1} + 2 ))" \
             --output "$CM_BUILD_DIR/cloud-generated/LinhCompanion"
+          # TestFlight requires a real app icon. Convert the repository's
+          # existing Linh SVG, rather than substituting a generic icon.
+          if ! command -v rsvg-convert >/dev/null 2>&1; then
+            brew install librsvg
+          fi
+          rsvg-convert --width=1024 --height=1024 \
+            "$CM_BUILD_DIR/cloud-generated/LinhCompanion/LinhIcon.svg" \
+            --output="$CM_BUILD_DIR/cloud-generated/LinhCompanion/Sources/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
           xcodegen generate \
             --spec "$CM_BUILD_DIR/cloud-generated/LinhCompanion/project.yml" \
             --project "$CM_BUILD_DIR/cloud-generated/LinhCompanion"

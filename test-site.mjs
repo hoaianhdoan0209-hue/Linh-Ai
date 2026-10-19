@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {Script} from 'node:vm';
 
 const ui = readFileSync(new URL('./index.html',import.meta.url),'utf8');
+for(const match of ui.matchAll(/<script(?:\s+[^>]*)?>([\s\S]*?)<\/script>/gi)){
+ if(match[1].trim())assert.doesNotThrow(()=>new Script(match[1]),'Main Web inline JavaScript must parse');
+}
+
 const legacy = readFileSync(new URL('./legacy-dashboard.html',import.meta.url),'utf8');
 const manifest=JSON.parse(readFileSync(new URL('./manifest.webmanifest',import.meta.url),'utf8'));
 assert.equal(manifest.name,'Socrates','PWA installed title must use the renamed sage');

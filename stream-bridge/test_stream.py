@@ -88,7 +88,7 @@ class LinhStreamProbeTests(unittest.TestCase):
                           server.recognize_idea("Critical chance: 24%")))
         poison = server.recognize_idea("Burn and poison effects on this weapon")
         self.assertEqual(poison[0], "burn-poison")
-        self.assertIn("Thử", poison[1])
+        self.assertIn("thử riêng", poison[1])
         self.assertLessEqual(len(poison[1]), 96)
 
     def test_nginx_security_settings(self):

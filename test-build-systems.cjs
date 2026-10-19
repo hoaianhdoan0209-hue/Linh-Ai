@@ -39,4 +39,16 @@ const forge=B.assess('Forged và Celesturgic affix nên chọn gì?');
 assert.match(forge.text,/khác nhau/);
 assert.equal(B.inspect('Mật khẩu riêng: 123'),null);
 assert.ok(B.assess('Karmic Cinderpult').text.length<=800);
+// The same build can accumulate explicitly mentioned layers across turns,
+// but casual chat or an unrelated question should never be hijacked.
+let state=B.inspect('Tôi chơi Wildwalker với Breath of the Wild',{source:'user-text'});
+assert.ok(state.systemIds.includes('class'));
+assert.ok(state.systemIds.includes('skills'));
+state=B.merge(state,B.inspect('Anemoian Cortain',{source:'user-text'}));
+const deep=B.assess('nên dùng không?',{context:state});
+assert.match(deep.text,/Fortitude/);
+assert.ok(!deep.missing.some(x=>x.includes('lớp nhân vật')));
+assert.equal(B.assess('Cảm ơn',{context:state}),null);
+assert.equal(B.assess('xóa hội thoại',{context:state}),null);
+assert.equal(B.merge(state,null).season,'SS9');
 console.log('PASS: 11 SS9 build systems, gated triggers, source-aware OCR and no imaginary global DPS');

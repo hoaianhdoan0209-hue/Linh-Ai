@@ -45,4 +45,27 @@ jobs:
             http://127.0.0.1:18880/status | python3 -c \
               'import json,sys; x=json.load(sys.stdin); assert not x["active"]; assert x["last_idea"] is None'
           docker exec linh-stream-ci nginx -t -c /app/nginx.conf
+          # Push a SYNTHETIC video to loopback RTMP; no iPhone, Discord, or Railway.
+          # The test checks that the protected receiver really consumes frames.
+          docker exec -d linh-stream-ci \
+            ffmpeg -hide_banner -loglevel error -nostdin -re \
+            -f lavfi -i 'testsrc2=size=960x540:rate=15' \
+            -t 26 -an -c:v libx264 -preset ultrafast -pix_fmt yuv420p \
+            -f flv 'rtmp://127.0.0.1:1935/live/test-ci-stream-key-0123456789abcde'
+          # After enough seconds for ffmpeg to output a sampled frame,
+          # last_frame_at becomes non-null if the complete path is wired.
+          found=0
+          for attempt in $(seq 1 25); do
+            if curl -fsS -H 'Authorization: Bearer test-ci-status-token-9876543210abc' \
+              http://127.0.0.1:18880/status | python3 -c \
+              'import json,sys; d=json.load(sys.stdin); assert d["active"] and d["last_frame_at"] is not None' \
+              >/dev/null 2>&1; then found=1; break; fi
+            sleep 1
+          done
+          if [ "$found" != 1 ]; then
+            echo "FAIL: RTMP synthetic video did not reach OCR frame reader"
+            docker logs linh-stream-ci | tail -30
+            exit 1
+          fi
+          echo "PASS: synthetic RTMP frames reached Linh OCR loop"
           echo "PASS: Docker health, secret access, private RTMP config"

@@ -132,8 +132,11 @@ function answer(q){
     ' theo nguồn SS9. Hãy chọn một class và gửi màn hình kỹ năng của chính class đó.',
    kind:'mechanics',focus:'game',evidenceScope:'cross-class-guard'};
  }
- const chosen=chosenSpecial.length?chosenSpecial.slice(0,3):
-  detail.specs.slice(0,cls.name==='Aegis'?5:2);
+ const askedList=/(?:cac|nhung|danh sach|liet ke|tat ca)/.test(norm(q))&&
+   /(?:specialization|chuyen mon)/.test(norm(q));
+ const limit=askedList?8:3;
+ const chosen=chosenSpecial.length?chosenSpecial.slice(0,limit):
+  detail.specs.slice(0,cls.name==='Aegis'?(askedList?8:5):2);
  const effects=chosenEdge.length?chosenEdge.slice(0,2):detail.edges.slice(0,2);
  let text='Hồ sơ build '+cls.name+' ['+cls.grade+']. '+cls.style+'.';
  if(profile){

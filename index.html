@@ -135,6 +135,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
       </div>
       <div class="photo-actions">
         <button type="button" id="approveImage" class="primary" disabled>Ghi nhớ điều đã đọc</button>
+         <button type="button" id="visionAnalyze" hidden disabled>Hỏi AI xem ảnh (cần đồng ý)</button>
         <button type="button" id="dismissImage">Bỏ qua</button>
       </div>
     </div>
@@ -158,6 +159,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
 <script src="./web-ai-bridge.js?v=2.3.0"></script>
+<script src="./web-vision-upload.js?v=2.3.0"></script>
 <script src="./stat-schema.js?v=2.3.0"></script>
 <script src="./vision-engine.js?v=2.3.0"></script>
 <script src="./web-image-memory.js?v=2.3.0"></script>
@@ -177,6 +179,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
  const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
  const aiBridge=window.SocratesAIBridge?.create();
+ const visionUpload=window.SocratesVisionUpload;
  const coach=window.SocratesCoach.create();
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
  const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
@@ -198,6 +201,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const imagePreview=document.getElementById('imagePreview');
  const imageStatus=document.getElementById('imageStatus');
  const approveImage=document.getElementById('approveImage');
+ const visionAnalyze=document.getElementById('visionAnalyze');
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
@@ -205,7 +209,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const aiEndpoint=document.getElementById('aiEndpoint'),aiAccess=document.getElementById('aiAccess');
  const aiConnect=document.getElementById('aiConnect'),aiDismiss=document.getElementById('aiDismiss');
  const aiStatus=document.getElementById('aiStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!visionUpload||!visionAnalyze||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -222,7 +226,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
  let measurements=experiments.sanitize(get(experiments.KEY));
  let analysisVisible=false;
- let pendingImage=null,previewURL=null,scanToken=0,scanning=false,ocrScriptPromise=null;
+ let pendingImage=null,pendingVisionFile=null,previewURL=null,scanToken=0,scanning=false,ocrScriptPromise=null;
  let lastInteractionAt=Date.now(),lastDisplayedAt=Date.now(),proactiveCount=0;
  let recognition=null,recognizing=false;
  const clearReaction=()=>linh.classList.remove('talking','thinking','happy','bloom');
@@ -271,7 +275,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      return;
    }
    if(/^(tat ai rieng|ngat ai rieng)$/.test(normalized)){
-     aiBridge.disconnect();aiSetup.hidden=true;aiStatus.textContent='Đang dùng trí tuệ cục bộ · AI riêng chưa kết nối';
+     aiBridge.disconnect();visionAnalyze.hidden=true;aiSetup.hidden=true;aiStatus.textContent='Đang dùng trí tuệ cục bộ · AI riêng chưa kết nối';
      aiSettings.textContent='Kết nối AI riêng (tùy chọn)';
      show('Đã ngắt AI riêng và xóa lịch sử hội thoại AI trong RAM.', 'memory',0);return;
    }
@@ -404,9 +408,43 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      aiBridge.configure(aiEndpoint.value,aiAccess.value);
      aiAccess.value='';aiEndpoint.value='';aiSetup.hidden=true;
      aiStatus.textContent='AI riêng đã bật · Mỗi câu gửi đều cần phê duyệt';
+     visionAnalyze.hidden=!(pendingVisionFile&&!photoReview.hidden);
      aiSettings.textContent='Cổng AI riêng đã kết nối';
      show('Cổng AI được cấu hình trong RAM của tab, chưa gửi tin nào. Bệ hạ có thể hỏi tự nhiên; mỗi lần chuyển dữ liệu ra ngoài đều phải duyệt. Gõ “tắt AI riêng” để ngắt.','memory',0);
    }catch(error){aiAccess.value='';show(error.message,'question',0);}
+ });
+ visionAnalyze.addEventListener('click',async()=>{
+   if(scanning||!pendingVisionFile||!aiBridge.status().ready){
+     show('Chọn ảnh trước, kết nối AI riêng rồi thử lại.','question',0);return;
+   }
+   const file=pendingVisionFile,scan=scanToken;
+   visionAnalyze.disabled=true;
+   try{
+     // Downscaled canvas pixels only. EXIF is stripped on device.
+     const image=await visionUpload.encode(file);
+     if(scan!==scanToken||file!==pendingVisionFile)return;
+     const question=(field.value.trim()||
+       'Hãy nhìn ảnh Soul Knight Prequel này: nhận dạng tên kỹ năng, trang bị, tier và hiệu ứng thấy rõ. Chỉ nêu chi tiết nhìn thấy; nếu chữ hoặc biểu tượng mờ thì nói chưa rõ. Không khẳng định đồ đang mặc hay DPS thật.').slice(0,700);
+     const result=await aiBridge.askImage(question,image,{
+       confirm:({endpoint,body,imagePreview})=>{
+         if(scan!==scanToken||file!==pendingVisionFile)return false;
+         const outgoing=JSON.parse(body),{image:excluded,...textOnly}=outgoing;
+         return window.confirm(
+           'Cho phép gửi ẢNH GAME HIỂN THỊ PHÍA TRÊN qua gateway AI riêng?\n'+endpoint+
+           '\n\nJPEG đã giảm xuống '+imagePreview.width+' × '+imagePreview.height+
+           ' ('+imagePreview.bytes+' byte), bỏ EXIF. Thông tin tên người chơi còn HIỂN THỊ TRONG ẢNH vẫn có thể bị chia sẻ.\n\n'+
+           'Cùng nội dung chữ/lịch sử gửi đi:\n'+JSON.stringify(textOnly,null,2)+
+           '\n\nNhà cung cấp mô hình có thể xử lý/lưu ảnh. Hủy để KHÔNG gửi.');
+       }
+     });
+     if(scan!==scanToken||file!==pendingVisionFile)return;
+     if(result.ok){field.value='';show(result.reply,'dialogue',0);speak(result.reply);}
+     else if(!result.cancelled)show('AI hình ảnh: '+result.reason,'question',0);
+   }catch(error){
+     if(scan===scanToken)show('Không thể chuẩn bị ảnh cho AI: '+(error?.message||'lỗi ảnh'),'question',0);
+   }finally{
+     if(scan===scanToken)visionAnalyze.disabled=scanning;
+   }
  });
  dock.addEventListener('submit',e=>{
    e.preventDefault();
@@ -454,6 +492,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    ++scanToken;
    scanning=false;
    pendingImage=null;
+   pendingVisionFile=null;
+   visionAnalyze.hidden=true;
+   visionAnalyze.disabled=true;
    approveImage.disabled=true;
    imageInput.value='';
    photoReview.hidden=true;
@@ -506,6 +547,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      return;
    }
    const myScan=++scanToken;
+   pendingVisionFile=file;
+   visionAnalyze.hidden=!aiBridge.status().ready;
+   visionAnalyze.disabled=true;
    photoReview.hidden=false;
    previewURL=URL.createObjectURL(file);
    imagePreview.src=previewURL;
@@ -586,7 +630,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      }
    }finally{
      if(worker)try{await worker.terminate()}catch(_){}
-     if(myScan===scanToken)scanning=false;
+     if(myScan===scanToken){scanning=false;visionAnalyze.disabled=!aiBridge.status().ready;}
    }
  }
  photo.addEventListener('click',()=>{lastInteractionAt=Date.now();imageInput.click()});

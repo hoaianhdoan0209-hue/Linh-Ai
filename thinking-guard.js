@@ -12,7 +12,7 @@
 'use strict';
 const B=typeof module!=='undefined'&&module.exports?require('./build-systems.js'):globalThis.SocratesBuildSystems;
 const norm=B.norm;
-function empty(){return {season:'SS9',mechanicId:null,claims:[],conflicts:[],variants:{},revision:0};}
+function empty(){return {season:'SS9',mechanicId:null,claims:[],conflicts:[],variants:{},photoTail:null,revision:0};}
 function bounded(state){
  if(!state||state.season!=='SS9')return empty();
  return {season:'SS9',mechanicId:state.mechanicId||null,
@@ -22,6 +22,8 @@ function bounded(state){
     .map(k=>[k,{mechanicId:state.variants[k].mechanicId,
       pieceCount:state.variants[k].pieceCount??null,
       source:state.variants[k].source||'unconfirmed'}])),
+  photoTail:state.photoTail?{mechanicId:state.photoTail.mechanicId,
+    pieceCount:state.photoTail.pieceCount??null,source:'unconfirmed-ocr'}:null,
   revision:Math.min(1000,Math.max(0,state.revision||0))};
 }
 function observe(state,input,options={}){
@@ -31,6 +33,17 @@ function observe(state,input,options={}){
  const nextId=detected?.mechanicIds?.[0]||base.mechanicId;
  if(!nextId)return base;
  const source=options.source==='unconfirmed-ocr'?'unconfirmed-ocr':'user-reported';
+ // Support both alternatives in one message, but never infer an A/B variant
+ // without a label. This is a *declaration* of alternatives, not current gear.
+ const pairs=[...q.matchAll(/(?:phuong an|anh|bo|mon)\s+([ab])\s+(?:(?:co|du|dang mac)\s+)?(?:tarta\s+)?([0-6])\s*(?:\/\s*4\s*)?mon\b/g)];
+ if(nextId==='tarta'&&pairs.length>=2){
+  for(const match of pairs){
+    const key=match[1].toUpperCase(),count=Number(match[2]);
+    base.variants[key]={mechanicId:nextId,pieceCount:count,source};
+  }
+  base.revision++;
+  return base;
+ }
  // Explicit A/B are ALTERNATIVES, not contradictory reports of one build.
  const named=options.scenario||q.match(/(?:^|\s)(?:phuong an|phuong an so|anh|bo|mon)\s+([ab])(?:\s|$)/)?.[1]?.toUpperCase();
  const label=typeof named==='string'?named.toUpperCase():null;
@@ -93,6 +106,30 @@ function audit(state){
    nextTest:'Giữ cùng mục tiêu, so hit Adhesive Gunpowder khi có/không có cokerize.',pieceCount:null};
  return {status:'unverified',blocking:['Chưa có điều kiện kích hoạt và phép đo đầy đủ.'],
   nextTest:'Giữ cùng mục tiêu, so riêng một thay đổi trong hai lượt đo.',pieceCount:null};
+}
+// The two most recent screenshots are always different alternatives, not
+// independent confirmations that the player has equipped both simultaneously.
+function observePhoto(state,raw){
+ const previous=bounded(state);
+ const latest=observe(empty(),raw,{source:'unconfirmed-ocr'});
+ const now=latest.mechanicId?{mechanicId:latest.mechanicId,
+   pieceCount:latest.claims[latest.claims.length-1]?.value??null,
+   source:'unconfirmed-ocr'}:null;
+ const out=empty();
+ if(previous.photoTail){
+  out.variants.A={...previous.photoTail};
+  if(now)out.variants.B=now;
+  out.photoTail=now;
+  out.revision=previous.revision+1;
+ }else if(now){
+  out.variants.A=now;
+  out.photoTail=now;
+  // One screenshot can still be corrected by the player, but is not confirmed.
+  out.mechanicId=latest.mechanicId;
+  out.claims=latest.claims;
+  out.revision=previous.revision+1;
+ }
+ return out;
 }
 function auditAlternatives(state){
  const s=bounded(state),a=s.variants.A,b=s.variants.B;
@@ -162,5 +199,5 @@ function compareOptions(options,criteria){
   tie:a===b,scope:'weighted-measurements-only',
   warning:'Chỉ là bảng so tiêu chí đã đo, không tự chứng minh hiệu quả tổng build hay quan hệ nhân quả.'};
 }
-return {empty,observe,audit,auditAlternatives,answer,compareOptions};
+return {empty,observe,observePhoto,audit,auditAlternatives,answer,compareOptions};
 });

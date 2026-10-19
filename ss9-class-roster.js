@@ -96,6 +96,12 @@ const direct=[
   release,style,base:[],source:url,grade,verifiedEffect:false}));
 const all=Object.freeze([...basics,...combined,...direct]);
 const aliases=Object.freeze({
+ // Vietnamese search aliases; not claims about official localized names.
+ 'phap su tu linh':'Necromancer','thuat si tu linh':'Necromancer',
+ 'chien binh':'Warrior','sat thu':'Assassin','cung thu':'Archer',
+ 'phap su lua':'Pyromancer','phap su bao':'Tempest Mage',
+ 'phap su nguyen to':'Elementalist','ky si bong toi':'Dreadknight',
+ 'cung thu bong toi':'Dark Ranger','phap su tinh tu':'Astral Mage',
  'lightbinder':'Lightbringer','pyroshot':'Artillerist',
  'dread knight':'Dreadknight','dreadknight':'Dreadknight',
  'farstrider':'Farstrider','fastrider':'Farstrider','windwalker':'Wildwalker',

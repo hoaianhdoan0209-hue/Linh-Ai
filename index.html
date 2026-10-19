@@ -113,6 +113,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 @media(max-height:570px){.world{min-height:0;padding-top:0}.stage{max-height:55dvh}.speech{min-height:54px;margin-top:-12px}.linh{max-height:52dvh;max-width:52dvh}.thought{font-size:12px;padding:9px 12px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
+<link rel="stylesheet" href="./fantasy-chat.css?v=2.11.0">
 </head>
 <body>
 <main>
@@ -182,25 +183,26 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./web-ai-bridge.js?v=2.10.0"></script>
-<script src="./web-vision-upload.js?v=2.10.0"></script>
-<script src="./vision-evidence.js?v=2.10.0"></script>
-<script src="./stat-schema.js?v=2.10.0"></script>
-<script src="./vision-engine.js?v=2.10.0"></script>
-<script src="./web-image-memory.js?v=2.10.0"></script>
-<script src="./season-knowledge.js?v=2.10.0"></script>
-<script src="./web-game-brain.js?v=2.10.0"></script>
-<script src="./web-game-experiments.js?v=2.10.0"></script>
-<script src="./build-systems.js?v=2.10.0"></script>
-<script src="./ss9-evidence-graph.js?v=2.10.0"></script>
-<script src="./class-catalog.js?v=2.10.0"></script>
-<script src="./ss9-class-roster.js?v=2.10.0"></script>
-<script src="./class-build-knowledge.js?v=2.10.0"></script>
-<script src="./rotation-lab.js?v=2.10.0"></script>
-<script src="./rotation-commands.js?v=2.10.0"></script>
-<script src="./thinking-guard.js?v=2.10.0"></script>
-<script src="./prompt-strategy.js?v=2.10.0"></script>
-<script src="./game-coach.js?v=2.10.0"></script>
+<script src="./web-ai-bridge.js?v=2.11.0"></script>
+<script src="./web-vision-upload.js?v=2.11.0"></script>
+<script src="./vision-evidence.js?v=2.11.0"></script>
+<script src="./stat-schema.js?v=2.11.0"></script>
+<script src="./vision-engine.js?v=2.11.0"></script>
+<script src="./web-image-memory.js?v=2.11.0"></script>
+<script src="./season-knowledge.js?v=2.11.0"></script>
+<script src="./web-game-brain.js?v=2.11.0"></script>
+<script src="./web-game-experiments.js?v=2.11.0"></script>
+<script src="./build-systems.js?v=2.11.0"></script>
+<script src="./ss9-evidence-graph.js?v=2.11.0"></script>
+<script src="./class-catalog.js?v=2.11.0"></script>
+<script src="./ss9-class-roster.js?v=2.11.0"></script>
+<script src="./class-build-knowledge.js?v=2.11.0"></script>
+<script src="./rotation-lab.js?v=2.11.0"></script>
+<script src="./rotation-commands.js?v=2.11.0"></script>
+<script src="./thinking-guard.js?v=2.11.0"></script>
+<script src="./prompt-strategy.js?v=2.11.0"></script>
+<script src="./game-coach.js?v=2.11.0"></script>
+<script src="./fantasy-chat.js?v=2.11.0"></script>
 <script>
 (()=>{
  'use strict';
@@ -275,6 +277,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    if(!text)return;
    lastDisplayedAt=Date.now();
    analysisVisible=duration===0;
+   window.SocratesChatUI?.add('assistant',text,kind);
    thought.textContent=text;
    thought.dataset.kind=kind;
    thought.classList.add('show');
@@ -304,6 +307,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const experiment=/^(?:mô phỏng|mo phong|tính vòng chiêu|tinh vong chieu|thu rotation|rotation)\b/iu.test(input);
    const message=input.slice(0,experiment?900:chat.MAX_INPUT);
    if(!message)return;
+   window.SocratesChatUI?.add('user',message);
    lastInteractionAt=Date.now();
    field.value='';
    // Session context only; raw conversation is NOT saved to localStorage.

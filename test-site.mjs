@@ -47,8 +47,7 @@ assert.ok(ui.includes("gameBrain.nextStudyPrompt(savedImages,gameNotes)"),
  'Learning must affect grounded proactive questions');
 assert.ok(ui.includes("if(set(gameBrain.KEY,{version:1,items:studied.notes}))"),
  'Explicit saved game notes must only be considered learned after local storage succeeds');
-assert.ok(!/<(?:select|textarea|nav|section|h1|h2|h3)\b/i.test(ui),
-  'Home must not expose settings, explanations, forms or menus');
+assert.ok(ui.includes('fantasy-chat.js?v=2.11.0'), 'Approved chat interface must load');
 assert.ok(ui.includes('Safari PWA cannot stream the screen'),
   'Do not promise web screen capture');
 assert.ok(!/getDisplayMedia\(/.test(ui),'Web must not pretend to capture other apps');
@@ -57,11 +56,11 @@ assert.ok(ui.includes('secondCanvas.width=0;secondCanvas.height=0;'),
  'Temporary enhanced screenshots must be discarded');
 assert.ok(ui.includes('const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);'),
  'Upload instructions must not be overridden by a stale build');
-assert.ok(ui.includes('build-systems.js?v=2.10.0'), 'Load SS9 prerequisite engine');
-assert.ok(ui.includes('ss9-evidence-graph.js?v=2.10.0'), 'Load curated official relationship graph');
-assert.ok(ui.includes('class-catalog.js?v=2.10.0'), 'Official class catalogue must ship');
-assert.ok(ui.includes('ss9-class-roster.js?v=2.10.0'), '39 candidate classes require a source-scoped roster');
-assert.ok(ui.includes('class-build-knowledge.js?v=2.10.0'),
+assert.ok(ui.includes('build-systems.js?v=2.11.0'), 'Load SS9 prerequisite engine');
+assert.ok(ui.includes('ss9-evidence-graph.js?v=2.11.0'), 'Load curated official relationship graph');
+assert.ok(ui.includes('class-catalog.js?v=2.11.0'), 'Official class catalogue must ship');
+assert.ok(ui.includes('ss9-class-roster.js?v=2.11.0'), '39 candidate classes require a source-scoped roster');
+assert.ok(ui.includes('class-build-knowledge.js?v=2.11.0'),
  'Source-backed class skill specialization and equipment graph must load');
 assert.ok(ui.includes('classBuildKnowledge.answer(message)'),
  'Socrates must answer class build and specialization questions with dated mechanisms');
@@ -84,7 +83,7 @@ assert.ok(ui.includes("visionEditor.innerText||visionEditor.textContent"), 'Corr
 assert.ok(ui.includes('if(!window.confirm(\'Đã sửa đúng chữ'), 'User must approve exactly corrected OCR evidence before storage');
 assert.ok(ui.includes('evidenceGraph.explain(message)'), 'Graph must contribute to conversational skill details');
 assert.ok(ui.includes('const sourcedOCR=evidenceGraph.explain(raw);'), 'OCR must identify sourced named mechanics');
-assert.ok(ui.includes('rotation-lab.js?v=2.10.0') && ui.includes('rotation-commands.js?v=2.10.0'),
+assert.ok(ui.includes('rotation-lab.js?v=2.11.0') && ui.includes('rotation-commands.js?v=2.11.0'),
  'Ship discrete event rotation modules in the page');
 assert.ok(ui.includes('const rotationReply=rotations.answer(message);'),
  'Main chat must pass explicit player experiment text to the simulator');
@@ -92,7 +91,7 @@ assert.ok(ui.includes('buildSystems.assess(message,{context:buildContext})'), 'G
 assert.ok(ui.includes('buildContext=buildSystems.merge(buildContext,nextBuild)'),
  'Explicit build clues should accumulate in conversation only');
 assert.ok(ui.includes("buildContext=buildSystems.inspect(raw,{source:'image'});"), 'OCR extracts dependency context');
-assert.ok(ui.includes('thinking-guard.js?v=2.10.0'), 'Thinking guard loaded before prompt strategy');
+assert.ok(ui.includes('thinking-guard.js?v=2.11.0'), 'Thinking guard loaded before prompt strategy');
 assert.ok(ui.includes('thinkingGuard.observe(thinkingState,message,{source:'), 'Thinking guard observes only relevant messages');
 assert.ok(ui.includes("thinkingState=thinkingGuard.observePhoto(thinkingState,raw);"),
  'Two recent screenshots must be tracked as separate hypotheses');
@@ -100,19 +99,19 @@ assert.ok(ui.includes('if(nextBuild&&!alternativeTurn)buildContext=buildSystems.
  'An A/B hypothetical comparison must not become the active equipment');
 assert.ok(ui.includes("if(clear){lastPatch=null;buildContext=null;thinkingState=thinkingGuard.empty();aiBridge.clear();}"),
  'Clear dialogue must remove session-only hypotheses');
-assert.ok(ui.includes('prompt-strategy.js?v=2.10.0'),
+assert.ok(ui.includes('prompt-strategy.js?v=2.11.0'),
  'Prompt planning must be loaded from same-origin JavaScript');
 assert.ok(ui.includes('promptStrategy.answer(message,{context:buildContext})'),
  'Game chat must use context-aware prompt planning before generic fallback');
-assert.ok(ui.includes('web-ai-bridge.js?v=2.10.0'), 'Optional own-model bridge must load');
+assert.ok(ui.includes('web-ai-bridge.js?v=2.11.0'), 'Optional own-model bridge must load');
 assert.ok(ui.includes('id="aiCheck"'), 'Users need a real gateway health-check action');
 assert.ok(ui.includes('SocratesAIBridge.probe(gateway)'), 'UI must contact actual Render health endpoint');
 assert.ok(ui.includes('Đã lưu cấu hình nhưng CHƯA kết nối được Render'),
  'Saving credentials is not proof of server connection');
 assert.ok(ui.includes("aiSettings.textContent=result.ok?'AI riêng: Render online'"),
  'Connected indicator must be based on actual Render health result');
-assert.ok(ui.includes('web-vision-upload.js?v=2.10.0'), 'Optional image downsizing module must load');
-assert.ok(ui.includes('vision-evidence.js?v=2.10.0'),
+assert.ok(ui.includes('web-vision-upload.js?v=2.11.0'), 'Optional image downsizing module must load');
+assert.ok(ui.includes('vision-evidence.js?v=2.11.0'),
  'Bounded schema validator must be available before accepting image AI responses');
 assert.ok(ui.includes('id="approveVision" hidden disabled'),
  'Model vision labels must require a separate explicit review action');

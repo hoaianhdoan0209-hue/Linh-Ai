@@ -31,3 +31,9 @@ assert.match(R.answer('Astreon').text,/Độc lập/);
 assert.equal(R.answer('Xin chào Socrates'),null);
 assert.equal(R.answer('món trang bị tôi đang dùng'),null);
 console.log('PASS: SS9 10+25+4 provisional roster, Nyxen, aliases, source flags, 4 disputed/corrected pairings');
+
+for (const [query,name] of [["pháp sư tử linh","Necromancer"],["chiến binh","Warrior"],["pháp sư nguyên tố","Elementalist"]]) {
+ const roster=require("./ss9-class-roster.js");
+ require("node:assert/strict").equal(roster.identified(query)[0]?.name,name);
+ require("node:assert/strict").equal(require("./gateway/ss9-class-roster.cjs").identified(query)[0]?.name,name);
+}

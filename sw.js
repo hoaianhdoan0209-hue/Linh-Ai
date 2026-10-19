@@ -1,6 +1,6 @@
 // Socrates Web 1.5: cache public static assets only; never private screenshots or saved game data.
-const CACHE='linh-site-1.6.1';
-const ASSETS=['./stat-schema.js?v=1.6.1','./game-coach.js?v=1.6.1','./season-knowledge.js?v=1.6.1','./','./index.html','./web-companion.js','./web-dialogue.js','./web-image-memory.js?v=1.6.1','./web-game-brain.js?v=1.6.1','./web-game-experiments.js?v=1.6.1','./legacy-dashboard.html','./vision-engine.js?v=1.6.1','./assistant-engine.js','./assistant-ui.js','./manifest.webmanifest','./icon.svg'];
+const CACHE='linh-site-1.6.2';
+const ASSETS=['./stat-schema.js?v=1.6.2','./game-coach.js?v=1.6.2','./season-knowledge.js?v=1.6.2','./','./index.html','./web-companion.js','./web-dialogue.js','./web-image-memory.js?v=1.6.2','./web-game-brain.js?v=1.6.2','./web-game-experiments.js?v=1.6.2','./legacy-dashboard.html','./vision-engine.js?v=1.6.2','./assistant-engine.js','./assistant-ui.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',ev=>{ev.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',ev=>{ev.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('linh-site-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',ev=>{

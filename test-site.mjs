@@ -61,12 +61,13 @@ assert.ok(ui.includes('said.textContent='),'User text must never be injected as 
 assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-only');
 assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
  'Web home must not overwrite existing game profiles');
-const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8').replace(/\?v=[0-9.]+/g,'');
+const offlineRaw=readFileSync(new URL('./sw.js',import.meta.url),'utf8');
+const offline=offlineRaw.replace(/\?v=[0-9.]+/g,'');
 const assetsVersion=ui.match(/game-coach\.js\?v=([0-9.]+)/)?.[1];
 assert.ok(assetsVersion,'Game coach must have a deployed asset version');
-assert.ok(offline.includes("'./game-coach.js?v="+assetsVersion+"'"),
+assert.ok(offlineRaw.includes("'./game-coach.js?v="+assetsVersion+"'"),
  'PWA must precache the same coach version as the page');
-assert.ok(offline.includes("const CACHE='linh-site-"+assetsVersion+"'"),
+assert.ok(offlineRaw.includes("const CACHE='linh-site-"+assetsVersion+"'"),
  'Updating the assistant must rotate PWA cache version');
 assert.ok(offline.includes("'./web-game-experiments.js'"),
  'Service worker must cache the offline measurement ledger');

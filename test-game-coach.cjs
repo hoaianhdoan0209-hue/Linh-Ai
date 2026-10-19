@@ -38,7 +38,7 @@ assert.doesNotMatch(JSON.stringify(saved),/Sát thương đòn thường|Công k
 assert.match(C.create().reply('phân tích ảnh',saved).text,/1\.000/);
 const fs=require('node:fs'),html=fs.readFileSync('index.html','utf8');
 assert.ok(html.includes('const analysis=coach.image(pendingImage)'));
-assert.ok(html.includes('coach.reply(message,savedImages)'));
+assert.ok(html.includes('coach.reply(message,lastPatch?[]:savedImages)'));
 // Two screenshot alternatives must remain separate and yield a conditional choice.
 const alphaRaw='Sát thương đòn thường: 1000\nTỷ lệ chí mạng: 30%\nSát thương chí mạng: 200%\nTốc độ đánh: 2 đòn/s';
 const betaRaw='Sát thương đòn thường: 1100\nTỷ lệ chí mạng: 40%\nSát thương chí mạng: 200%\nTốc độ đánh: 2 đòn/s';

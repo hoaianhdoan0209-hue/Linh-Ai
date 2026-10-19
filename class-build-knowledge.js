@@ -159,7 +159,7 @@ function answer(q){
  const activeCombos=combos.filter(row=>
    relatedClasses(cls.name).some(owner=>norm(owner)===norm(row.owner))&&
    row.names.every(name=>exact(q,name)));
-  const effects=chosenEdge.length?chosenEdge.slice(0,2):detail.edges.slice(0,2);
+  const effects=chosenEdge.length?chosenEdge.slice(0,3):detail.edges.slice(0,3);
  let text='Hồ sơ build '+cls.name+' ['+cls.grade+']. '+cls.style+'.';
  if(profile){
   text+='\nActive đã thấy trong trang class: '+profile.active.join('; ')+'.';
@@ -207,7 +207,7 @@ function evidence(q){
    source:v.source,sourceDate:v.sourceDate,seasonScope:v.seasonScope,
    formulaVerified:false
   })),
-  mechanics:(chosenEdge.length?chosenEdge:x.edges.slice(0,2)).map(v=>({
+  mechanics:(chosenEdge.length?chosenEdge:x.edges.slice(0,3)).map(v=>({
    item:v.item,skill:v.skill,trigger:v.trigger,effect:v.effect,
    source:graph.sources[v.source]?.url,sourceDate:v.sourceDate,
    formulaVerified:false

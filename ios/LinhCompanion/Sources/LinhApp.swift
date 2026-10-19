@@ -3,10 +3,11 @@ import SwiftUI
 @main
 struct LinhApp: App {
     @StateObject private var session = LinhCoordinator()
+    @StateObject private var voice = SocratesVoiceCompanion()
 
     var body: some Scene {
         WindowGroup {
-            LinhFace(session: session)
+            LinhFace(session: session, voice: voice)
                 .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                     session.refreshFromReplayKit()
                 }
@@ -17,6 +18,7 @@ struct LinhApp: App {
 /// The only visible interface is Socrates. iOS owns every permission picker.
 struct LinhFace: View {
     @ObservedObject var session: LinhCoordinator
+    @ObservedObject var voice: SocratesVoiceCompanion
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hovering = false
 
@@ -147,6 +149,52 @@ struct LinhFace: View {
                 .onAppear { hovering = true }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 8) {
+                Text(voice.status)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.90))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .accessibilityAddTraits(.updatesFrequently)
+
+                if !voice.lastSpoken.isEmpty {
+                    Text(voice.lastSpoken)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color(red: 0.70, green: 0.89, blue: 1))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+
+                HStack(spacing: 12) {
+                    Button {
+                        voice.toggleConversation()
+                    } label: {
+                        Label(voice.isConversationActive ? "Dừng nghe" : "Bật hội thoại",
+                              systemImage: voice.isConversationActive ? "mic.slash.fill" : "mic.fill")
+                    }
+                    .tint(voice.isConversationActive ? .red : .blue)
+
+                    Button {
+                        voice.playGreeting()
+                    } label: {
+                        Label("Nghe lời chào", systemImage: "speaker.wave.2.fill")
+                    }
+                    .tint(.indigo)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
+
+                Text("Micro chỉ bật khi được cho phép. Không lưu hay gửi âm thanh.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.65))
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(Color(red: 0.05, green: 0.09, blue: 0.20).opacity(0.95))
         }
     }
 }

@@ -169,7 +169,7 @@ function auditAlternatives(state){
 }
 function answer(input,state){
  const s=bounded(state),q=norm(String(input??'').slice(0,400)),a=audit(s);
- const topical=/(so sanh|chon|nen|thay|test|thu|xac minh|tai sao|vi sao|loi|dung|tarta|karmic|build|boss|farm)/.test(q);
+ const topical=/(so sanh|chon|nen|thay|test|thu|xac minh|tai sao|vi sao|loi|dung|tarta|karmic|build|boss|farm|kich hoat|dieu kien|du set)/.test(q);
  if(!topical)return null;
  const ab=auditAlternatives(s);
  const compare=/(so sanh|chon|nen lay|nen dung|manh hon|tot hon|anh nao|mon nao|phuong an)/.test(q);

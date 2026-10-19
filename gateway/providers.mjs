@@ -7,7 +7,7 @@ export function resolveModelConfig(env={}){
  const provider=String(env.SOCRATES_AI_PROVIDER||'gemini').trim();
  if(!['gemini','openai-compatible'].includes(provider))throw Error('Unsupported AI provider');
  if(provider==='gemini'){
-  return {provider,model:String(env.GEMINI_MODEL||'gemini-2.5-flash-lite').slice(0,90),
+  return {provider,model:String(env.GEMINI_MODEL||'gemini-3.5-flash-lite').slice(0,90),
    key:String(env.GEMINI_API_KEY||'')};
  }
  const base=String(env.SOCRATES_AI_BASE_URL||'').trim();

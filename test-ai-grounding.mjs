@@ -8,6 +8,28 @@ assert.equal(gatewayGraph,graph,'Private server graph must equal the public sour
 const webClasses=readFileSync(new URL('./class-catalog.js',import.meta.url),'utf8');
 const serverClasses=readFileSync(new URL('./gateway/class-catalog.cjs',import.meta.url),'utf8');
 assert.equal(serverClasses,webClasses,'Private AI class data must match the public official catalogue');
+const webRoster=readFileSync(new URL('./ss9-class-roster.js',import.meta.url),'utf8');
+const gatewayRoster=readFileSync(new URL('./gateway/ss9-class-roster.cjs',import.meta.url),'utf8');
+assert.equal(gatewayRoster,webRoster,'Candidate 39-class roster must be synchronized byte-for-byte');
+const necro=buildEvidence('Necromancer');
+assert.equal(necro.classFacts[0].name,'Necromancer');
+assert.deepEqual(necro.classFacts[0].base,['Voidfarer','Animancer']);
+const paragon=buildEvidence('Paragon');
+assert.equal(paragon.rosterFacts[0].name,'Paragon');
+assert.deepEqual(paragon.rosterFacts[0].base,['Aegis','Lightbringer']);
+assert.ok(paragon.warnings.some(x=>x.includes('nguồn thứ cấp')));
+const stormwarden=buildEvidence('Stormwarden');
+assert.equal(stormwarden.rosterFacts[0].grade,'conflicting-sources');
+assert.deepEqual(stormwarden.rosterFacts[0].base,[]);
+assert.ok(stormwarden.warnings.some(x=>x.includes('mâu thuẫn')));
+const nyxen=buildEvidence('Nyxen');
+assert.equal(nyxen.rosterFacts[0].kind,'direct');
+const list=buildEvidence('bao nhiêu class trong game?');
+assert.equal(list.rosterOverview.basic.length,10);
+assert.equal(list.rosterOverview.combined.length,25);
+assert.equal(list.rosterOverview.direct.length,4);
+assert.equal(list.rosterOverview.officialComplete,false);
+
 const classEvidence=buildEvidence('Dark Ranger: Nightpiercer');
 assert.ok(classEvidence.classFacts.some(x=>x.name==='Dark Ranger'));
 assert.ok(classEvidence.classFacts.some(x=>x.base.join(' + ')==='Voidfarer + Archer'));

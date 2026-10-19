@@ -1,3 +1,11 @@
+## Socrates 2.6 — nền tảng AI tra nguồn theo kỹ năng
+
+Mỗi câu hỏi Soul Knight Prequel SS9 gửi đến **gateway AI đã được chủ sở hữu bật** nay có thể đi kèm chỉ những quan hệ kỹ năng/trang bị liên quan có nguồn, ngày và điều kiện. Trợ lý giữ lời cảnh báo khi bản ghi 15/09 và 16/10 có hệ số khác nhau, và bộ kiểm tra sau mô hình chặn một số lỗi mở rộng chỉ số thành DPS toàn build. [Đọc giao thức và checklist thử nghiệm](research/ai-grounding-v2.6.md).
+
+**Chưa có model thực sự chạy sẵn**; không có ảnh tự động upload, không có khẳng định chính xác DSP/DPS SS9 ngoài phép đo. 
+
+---
+
 # Socrates 2.4 — thử nghiệm AI thị giác với ảnh do người chơi chọn
 
 Socrates đã có đường **Hỏi AI xem ảnh (cần đồng ý)** trên ảnh Soul Knight Prequel được chọn thủ công. Chế độ này **chỉ hiện sau khi kết nối cổng AI HTTPS riêng**, cần phê duyệt trước mỗi lần gửi ảnh; nếu không có model thị giác thì vẫn đọc OCR cục bộ như cũ. Ảnh được thu nhỏ và mã hóa lại qua canvas (không dùng ảnh gốc và EXIF), nhưng tên nhân vật/ID có thể vẫn thấy qua pixel. **Chưa có model thật được triển khai hay kiểm thử ảnh trên iPhone**, không thể gọi đây là AI nhận diện game đã nghiệm thu.

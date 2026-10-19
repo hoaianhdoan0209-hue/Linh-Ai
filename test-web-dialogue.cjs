@@ -9,8 +9,9 @@ const good=r=>{
     'No fake game observation');
   return r;
 };
-assert.match(good(D.respond('Chào Linh')).text,/Linh đây/);
-assert.match(good(D.respond('Linh là ai')).text,/quy tắc cục bộ/);
+assert.match(good(D.respond('Chào Socrates')).text,/Socrates đây/);
+assert.match(good(D.respond('Socrates ơi')).text,/Socrates đây/);
+assert.match(good(D.respond('Socrates là ai')).text,/quy tắc cục bộ/);
 assert.match(good(D.respond('Linh có xem game không')).text,/không nhìn được/);
 assert.match(good(D.respond('Hôm nay tôi buồn quá')).text,/nghe/);
 assert.equal(D.respond('có', {focus:'support'}).focus,'support');

@@ -173,7 +173,7 @@
     const topic=detail.split(/[:.;]/,1)[0].trim().slice(0,48);
     const boss=/boss/.test(q),farm=/farm/.test(q);
     const caution=/adhesive gunpowder/i.test(detail)?
-      'Điều kiện kích hoạt: 480% chỉ gắn với Adhesive Gunpowder, không áp mọi kỹ năng.':
+      'Cần kiểm tra điều kiện kích hoạt: 480% chỉ gắn với Adhesive Gunpowder, không áp mọi kỹ năng.':
       /4 mon|4 món/i.test(detail)?
       'Cần đủ 4 món để kích hoạt, không nên suy hệ số cho 2–3 món.':
       /Wolong/i.test(detail)?

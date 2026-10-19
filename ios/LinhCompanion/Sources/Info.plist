@@ -11,7 +11,11 @@
  <key>CFBundleVersion</key><string>1</string>
  <key>LSRequiresIPhoneOS</key><true/>
  <key>UILaunchScreen</key><dict/>
- <key>UIBackgroundModes</key><array><string>screen-capture</string></array>
+ <key>UIBackgroundModes</key><array><string>screen-capture</string><string>audio</string></array>
+ <key>NSMicrophoneUsageDescription</key>
+ <string>Socrates chỉ nghe khi bạn bật hội thoại. Âm thanh không được lưu hay gửi lên mạng.</string>
+ <key>NSSpeechRecognitionUsageDescription</key>
+ <string>Socrates nhận dạng tiếng nói trên thiết bị khi bạn cho phép.</string>
  <key>UISupportedInterfaceOrientations</key>
  <array><string>UIInterfaceOrientationPortrait</string></array>
 </dict>

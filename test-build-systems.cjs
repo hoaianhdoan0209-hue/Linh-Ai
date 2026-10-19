@@ -32,7 +32,7 @@ const generic=B.assess('nên tối ưu build ra sao?');
 assert.match(generic.text,/Không thể xếp hạng build/);
 assert.match(generic.text,/Specialization/);
 assert.match(generic.text,/Fatestone/);
-assert.match(generic.text,/Eidolon/);
+assert.ok(generic.missing.some(x=>x.includes('Eidolon')),'Eidolon must remain a tracked dependency even when not in top three questions');
 const old=B.assess('fatebound nào mạnh nhất');
 assert.match(old.text,/SS8 chuyển sang Fatestone/);
 const forge=B.assess('Forged và Celesturgic affix nên chọn gì?');

@@ -32,6 +32,7 @@ jobs:
           node test-web-companion.cjs
           node test-web-dialogue.cjs
           node test-web-ai-bridge.cjs
+          node test-web-gateway-probe.cjs
           node test-web-image-memory.cjs
           node test-game-coach.cjs
           node test-build-systems.cjs
@@ -49,6 +50,7 @@ jobs:
           node test-assistant.cjs
           node test-cloud.cjs
           node test-gateway.mjs
+          node test-gateway-health.mjs
           node test-ai-providers.mjs
           node test-ai-vision.mjs
           node test-ai-grounding.mjs

@@ -10,10 +10,8 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const KEY='linh-web-image-memory-v1', LIMIT=40, MAX_AGE=365*24*3600*1000;
-  const LABELS=Object.freeze({
-    critChance:'Tỷ lệ chí mạng',critDamage:'ST chí mạng',
-    attack:'Tăng công',armorPen:'Xuyên giáp',resistPen:'Xuyên kháng'
-  });
+  const schema=typeof module!=='undefined'&&module.exports?require('./stat-schema.js'):globalThis.SocratesStats;
+  const LABELS=Object.freeze(schema.labels);
   const TOPICS=Object.freeze({
     burn:'thiêu đốt',poison:'độc',crit:'chí mạng',cooldown:'hồi chiêu',
     armor:'giáp',duration:'thời lượng',stack:'cộng dồn',stacks:'cộng dồn',
@@ -35,8 +33,8 @@
     const facts=unique((Array.isArray(v.facts)?v.facts:[]).map(f=>{
       if(!f||!Object.hasOwn(LABELS,f.key))return null;
       const n=Number(f.value);
-      return Number.isFinite(n)&&n>=0&&n<=1000?{key:f.key,value:Math.round(n*100)/100}:null;
-    }).filter(Boolean).map(f=>JSON.stringify(f))).slice(0,8).map(x=>JSON.parse(x));
+      return schema.valid(f.key,n)?{key:f.key,value:Math.round(n*100)/100}:null;
+    }).filter(Boolean).map(f=>JSON.stringify(f))).slice(0,16).map(x=>JSON.parse(x));
     const tags=unique((Array.isArray(v.tags)?v.tags:[]).map(t=>t?.key)
       .filter(t=>typeof t==='string'&&Object.hasOwn(TOPICS,t))).slice(0,10);
     if(!facts.length&&!tags.length)return null;
@@ -87,7 +85,7 @@
     if(!preview)return 'Socrates chưa đọc rõ chỉ số hoặc từ khóa. Chưa có gì để ghi nhớ.';
     const v=[];
     for(const f of preview.facts||[]){
-      if(Object.hasOwn(LABELS,f.key))v.push(LABELS[f.key]+': '+f.value+'%');
+      if(Object.hasOwn(LABELS,f.key))v.push(schema.format(f));
     }
     for(const t of preview.tags||[]){
       if(Object.hasOwn(TOPICS,t))v.push(TOPICS[t]);
@@ -99,7 +97,7 @@
     const items=sanitize({version:1,items:saved});
     if(!items.length)return 'Socrates chưa lưu kiến thức từ ảnh nào được xác nhận.';
     const last=items.at(-1);
-    const facts=last.facts.map(x=>LABELS[x.key]+' '+x.value+'%').slice(0,2);
+    const facts=last.facts.map(x=>schema.format(x)).slice(0,2);
     const tags=last.tags.map(x=>TOPICS[x]).slice(0,2);
     const line=[...facts,...tags].join(', ');
     return 'Socrates nhớ '+items.length+' ảnh đã xác nhận chữ. Gần nhất: '+

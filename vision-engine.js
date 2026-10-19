@@ -1,6 +1,7 @@
 /* Socrates Vision v0.3: local, deterministic OCR-text interpretation. Not a generative AI. */
 (function(root,factory){const api=factory();if(typeof module!=='undefined'&&module.exports)module.exports=api;root.LinhVision=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 'use strict';
+const schema=typeof module!=='undefined'&&module.exports?require('./stat-schema.js'):globalThis.SocratesStats;
 const patterns=[
 ['critChance','Tỷ lệ chí mạng',/(?:tỷ|tỉ)\s*lệ\s*chí\s*mạng|crit(?:ical)?\s*(?:rate|chance)/i],
 ['critDamage','ST chí mạng tăng thêm',/sát\s*thương\s*chí\s*mạng|crit(?:ical)?\s*(?:damage|dmg)/i],
@@ -8,11 +9,43 @@ const patterns=[
 ['armorPen','Xuyên giáp',/xuyên\s*giáp|armor\s*penetration/i],
 ['resistPen','Xuyên kháng',/xuyên\s*kháng|resistance\s*penetration/i]
 ];
+const extraPatterns=[
+ ['baseDamage',/^(?:sát thương (?:đòn )?thường|normal (?:hit )?damage|base damage)\s*[:=：]?\s*([\d., ]+)/i,''],
+ ['attackPower',/^(?:công kích|tấn công|sức tấn công|attack power|atk|attack)\s*[:=：]?\s*([\d., ]+)/i,''],
+ ['spellPower',/^(?:sức mạnh phép|phép thuật|spell power|magic power)\s*[:=：]?\s*([\d., ]+)/i,''],
+ ['health',/^(?:máu|sinh lực|hp|health|max hp)\s*[:=：]?\s*([\d., ]+)/i,''],
+ ['defense',/^(?:giáp|phòng thủ|defense|def|armor)\s*[:=：]?\s*([\d., ]+)/i,''],
+ ['attackSpeed',/^(?:nhịp đánh|attack rate|attacks per second|tốc độ đánh)\s*[:=：]?\s*(\d+(?:[.,]\d+)?)/i,'rate'],
+ ['cooldown',/^(?:hồi chiêu|cooldown)(?:\s+(?:kỹ năng|time))?\s*[:=：]?\s*(\d+(?:[.,]\d+)?)/i,'seconds'],
+ ['duration',/^(?:thời lượng|duration|kéo dài|thời gian hiệu lực)\s*[:=：]?\s*(\d+(?:[.,]\d+)?)/i,'seconds'],
+ ['maxStacks',/^(?:số tầng tối đa|tối đa|maximum stacks|max stacks)\s*[:=：]?\s*(\d+)/i,'count'],
+ ['skillDamage',/^(?:hệ số kỹ năng|skill damage)\s*[:=：]?\s*(\d+(?:[.,]\d+)?)/i,'percent'],
+ ['damageBonus',/^(?:tăng sát thương|damage bonus)\s*[:=：]?\s*\+?(\d+(?:[.,]\d+)?)/i,'percent']
+];
+function extraStats(text){
+ const out=[];
+ for(const raw of String(text||'').slice(0,12000).split(/\r?\n|[;；]/)){
+  const line=raw.trim();if(line.length>100)continue;
+  for(const [key,re,unit] of extraPatterns){
+   const m=line.match(re);if(!m)continue;
+   const rest=line.slice(m[0].length).trim();
+   if(unit==='percent'&&!/^%/.test(rest))continue;
+   if(!unit&&/^%|[0-9]|[.,]/.test(rest))continue;
+   if(unit==='rate'&&!/^(?:đòn\s*\/\s*s|lần\s*\/\s*s|hits?\s*\/\s*s|attacks?\s*\/\s*s|aps)\b/i.test(rest))continue;
+   if(unit==='seconds'&&!/^(?:s\b|sec|seconds?|giây)/i.test(rest))continue;
+   const number=m[1].trim();
+   // Thousands grouping applies to absolute stats only, decimals to time/rates.
+   let n=Number((!unit&&/^\d{1,3}(?:[., ]\d{3})+$/.test(number))?number.replace(/[., ]/g,''):number.replace(/ /g,'').replace(',','.'));
+   if(schema.valid(key,n))out.push({key,label:schema.labels[key],value:n,source:line,confidence:'vừa'});
+  }
+ }
+ return out;
+}
 function extractStats(text){
-const out=[];for(const line of String(text||'').slice(0,12000).split(/\r?\n/)){
+const out=extraStats(text);for(const line of String(text||'').slice(0,12000).split(/\r?\n/)){
 if(line.length>92||/(?:mỗi|khi\s+(?:đánh|trúng|gây)|trong\s+\d|per\s+stack)/i.test(line))continue;
-for(const [key,label,re] of patterns){const m=re.exec(line);if(!m||line.slice(0,m.index).trim().length>18)continue;const x=/^\s*[:=：]?\s*(?:tăng|\+)?\s*(\d+(?:[.,]\d+)?)\s*%/.exec(line.slice(m.index+m[0].length));if(!x)continue;const n=Number(x[1].replace(',','.'));if(Number.isFinite(n)&&n>=0&&n<=1000)out.push({key,label,value:n,source:line.trim(),confidence:'vừa'});}
-}return [...new Map(out.map(f=>[f.key,f])).values()].slice(0,10);
+for(const [key,label,re] of patterns){const m=re.exec(line);if(!m||line.slice(0,m.index).trim().length>18)continue;const x=/^\s*[:=：]?\s*(?:tăng|\+)?\s*(\d+(?:[.,]\d+)?)\s*%/.exec(line.slice(m.index+m[0].length));if(!x)continue;const n=Number(x[1].replace(',','.'));if(Number.isFinite(n)&&schema.valid(key,n))out.push({key,label,value:n,source:line.trim(),confidence:'vừa'});}
+}return [...new Map(out.map(f=>[f.key,f])).values()].slice(0,16);
 }
 function observe(text){
 const raw=String(text||'').replace(/\r/g,'').slice(0,12000),low=raw.toLowerCase(),tags=[],questions=[],hypotheses=[],facts=extractStats(raw);

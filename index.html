@@ -53,7 +53,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 .linh.is-holding .body{filter:brightness(1.18)}
 .linh.bloom{animation:reaction .5s ease-out,bob 4s ease-in-out infinite}
 .speech{width:min(86vw,330px);min-height:60px;display:grid;place-items:center;position:relative;margin-top:-6px}
-.thought{font-size:14px;font-weight:540;line-height:1.48;letter-spacing:.005em;max-width:330px;text-align:center;padding:12px 16px;border-radius:17px;color:#eff9ff;background:#152442dc;border:1px solid #79baf32f;box-shadow:0 13px 28px #050b1d44;opacity:0;transform:translateY(8px) scale(.98);transition:opacity .28s,transform .28s;pointer-events:none}
+.thought{font-size:14px;font-weight:540;line-height:1.48;letter-spacing:.005em;max-width:330px;text-align:left;white-space:pre-line;max-height:38dvh;overflow-y:auto;padding:12px 16px;border-radius:17px;color:#eff9ff;background:#152442dc;border:1px solid #79baf32f;box-shadow:0 13px 28px #050b1d44;opacity:0;transform:translateY(8px) scale(.98);transition:opacity .28s,transform .28s;pointer-events:auto}
 .thought.show{opacity:1;transform:translateY(0) scale(1)}
 .thought[data-kind="calculation"]{border-color:#8de6bc6b}
 .thought[data-kind="memory"]{border-color:#b2a2ff68}
@@ -139,21 +139,24 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
   </div>
   <button id="eraseImages" class="erase-memory" type="button" hidden>Quên các ảnh đã học</button>
   <p class="subtle" id="learnStatus">Đang tải trí nhớ cục bộ…</p>
-  <p class="subtle">Trò chuyện cục bộ · Giữ Socrates để bật giọng đọc</p>
+  <p class="subtle">Phân tích trên máy · Chưa kết nối AI trò chuyện tự do</p>
   <span class="sr-only" id="liveStatus" aria-live="polite" aria-atomic="true"></span>
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
+<script src="./stat-schema.js"></script>
 <script src="./vision-engine.js"></script>
 <script src="./web-image-memory.js"></script>
 <script src="./season-knowledge.js"></script>
 <script src="./web-game-brain.js"></script>
 <script src="./web-game-experiments.js"></script>
+<script src="./game-coach.js"></script>
 <script>
 (()=>{
  'use strict';
  // Safari PWA cannot stream the screen of another app. Never imply real-time gameplay observation.
  const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
+ const coach=window.SocratesCoach.create();
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
  const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
  const linh=document.getElementById('linh');
@@ -188,15 +191,17 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
  let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
  let measurements=experiments.sanitize(get(experiments.KEY));
+ let analysisVisible=false;
  let pendingImage=null,previewURL=null,scanToken=0,scanning=false,ocrScriptPromise=null;
  let lastInteractionAt=Date.now(),lastDisplayedAt=Date.now(),proactiveCount=0;
  let recognition=null,recognizing=false;
  const clearReaction=()=>linh.classList.remove('talking','thinking','happy','bloom');
  const silence=()=>{try{window.speechSynthesis?.cancel()}catch(_){}};
  function show(message,kind='dialogue',duration=11000){
-   const text=String(message||'').slice(0,chat.MAX_REPLY);
+   const text=String(message||'').slice(0,4000);
    if(!text)return;
    lastDisplayedAt=Date.now();
+   analysisVisible=duration===0;
    thought.textContent=text;
    thought.dataset.kind=kind;
    thought.classList.add('show');
@@ -206,7 +211,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    linh.classList.add(kind==='question'?'thinking':kind==='greeting'?'happy':'talking','bloom');
    clearTimeout(hideTimer);clearTimeout(reactTimer);
    reactTimer=setTimeout(clearReaction,950);
-   hideTimer=setTimeout(()=>thought.classList.remove('show'),duration);
+   if(duration>0)hideTimer=setTimeout(()=>thought.classList.remove('show'),duration);
  }
  function speak(message){
    if(!session.voice || !('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window))return;
@@ -232,8 +237,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    const photoRequest=/(gui anh|gui hinh|xem anh|xem hinh|doc anh|doc hinh)/.test(normalized);
    const measurement=experiments.record(measurements,message);
    const measuredReply=measurement || experiments.answer(message,measurements);
+   const contextual=coach.reply(message,savedImages);
    const studied=measurement?null:gameBrain.answer(message,savedImages,gameNotes,legacy,measurements);
-   let reply=measuredReply || studied || (photoRecall?
+   let reply=measuredReply || (studied?.action?studied:null) || (photoRecall?null:contextual) || studied || (photoRecall?
      {text:imageMemory.recall(savedImages).slice(0,chat.MAX_REPLY),focus:'image',kind:'memory'}:
      photoRequest?
      {text:'Bệ hạ bấm nút ▧ cạnh ô nhắn để chọn ảnh. Socrates sẽ đọc chữ rồi hỏi trước khi lưu.',focus:'image',kind:'question'}:
@@ -268,7 +274,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    dialogue=clear?{focus:'general'}:{focus:reply.focus,followUp:reply.followUp};
    if(clear){said.hidden=true;said.textContent='';}
    else{said.hidden=false;said.textContent='Bệ hạ: '+message.slice(0,90);}
-   show(reply.text,reply.kind,14000);
+   show(reply.text,reply.kind,0);
    speak(reply.text);
  }
  function toggleVoice(){
@@ -403,6 +409,12 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      pendingImage=imageMemory.candidate(raw,observation);
      approveImage.disabled=!pendingImage;
      imageStatus.textContent=imageMemory.describe(pendingImage);
+     if(pendingImage){
+       const analysis=coach.image(pendingImage);
+       const named=window.SocratesSeasonKnowledge.lookup(raw);
+       show(analysis.text+(named.length?'\n\n'+named[0].text:''),analysis.kind,0);
+       return;
+     }
      show(pendingImage?
        'Socrates đọc được vài dấu hiệu. Bệ hạ xem và bấm Ghi nhớ nếu OCR đúng nhé.':
        'Socrates chưa đọc rõ chữ trong ảnh này. Thử ảnh nét hơn nhé.',
@@ -437,7 +449,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    pendingImage=null;
    approveImage.disabled=true;
    imageStatus.textContent='Đã nhớ chữ/chỉ số Bệ hạ xác nhận. Chưa khẳng định cơ chế game.';
-   show('Socrates đã nhớ những dấu hiệu được xác nhận. Cảm ơn Bệ hạ!','memory');
+   const analysis=coach.image(savedImages.at(-1),true);
+   show('Đã lưu chỉ số Bệ hạ xác nhận.\n\n'+analysis.text,analysis.kind,0);
  });
  dismissImage.addEventListener('click',()=>{lastInteractionAt=Date.now();closeImage()});
  eraseImages.addEventListener('click',()=>{
@@ -447,6 +460,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      show('Safari không xóa được dữ liệu ảnh; vui lòng kiểm tra lại.','question');return;
    }
    savedImages=[];
+   coach.reset();
    closeImage();
    refreshImageMemoryUI();
    show('Socrates đã xóa các dấu hiệu học từ ảnh trên máy này.','memory');
@@ -459,7 +473,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  ];
  function autonomousThought(){
    const now=Date.now();
-   if(document.hidden||scanning||!photoReview.hidden||recognizing)return;
+   if(analysisVisible||document.hidden||scanning||!photoReview.hidden||recognizing)return;
    if(proactiveCount>=4||now-lastInteractionAt<30000||
       now-lastDisplayedAt<(proactiveCount===0?28000:85000)||
       field.value.trim().length)return;

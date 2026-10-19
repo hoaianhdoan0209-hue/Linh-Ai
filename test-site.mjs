@@ -47,6 +47,11 @@ assert.ok(!/<(?:select|textarea|nav|section|h1|h2|h3)\b/i.test(ui),
 assert.ok(ui.includes('Safari PWA cannot stream the screen'),
   'Do not promise web screen capture');
 assert.ok(!/getDisplayMedia\(/.test(ui),'Web must not pretend to capture other apps');
+assert.ok(ui.includes('enhancedOCRCanvas(file)'), 'Low-evidence image needs optional in-memory OCR retry');
+assert.ok(ui.includes('secondCanvas.width=0;secondCanvas.height=0;'),
+ 'Temporary enhanced screenshots must be discarded');
+assert.ok(ui.includes('const contextual=photoRequest?null:coach.reply(message,lastPatch?[]:savedImages);'),
+ 'Upload instructions must not be overridden by a stale build');
 assert.ok(ui.includes('serviceWorker'),'PWA service worker must be registered');
 assert.ok(ui.includes('web-companion.js'),'Local Web assistant engine must load');
 assert.ok(ui.includes('web-dialogue.js'),'Local two-way dialogue engine must load');

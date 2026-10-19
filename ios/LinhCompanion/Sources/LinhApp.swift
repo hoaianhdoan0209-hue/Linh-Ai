@@ -14,7 +14,7 @@ struct LinhApp: App {
     }
 }
 
-/// The only visible interface is Linh. iOS owns every permission picker.
+/// The only visible interface is Socrates. iOS owns every permission picker.
 struct LinhFace: View {
     @ObservedObject var session: LinhCoordinator
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -125,7 +125,7 @@ struct LinhFace: View {
                         ReplayKitPicker()
                             .frame(width: 64, height: 64)
                             .offset(y: 22)
-                            .accessibilityLabel("Cho Linh xem game")
+                            .accessibilityLabel("Cho Socrates xem game")
                     }
                 }
                 .contentShape(Circle())
@@ -142,8 +142,8 @@ struct LinhFace: View {
                         }
                 )
                 .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Linh")
-                .accessibilityHint("Chạm để cho Linh đi cùng. Giữ để dừng quan sát.")
+                .accessibilityLabel("Socrates")
+                .accessibilityHint("Chạm để cho Socrates đi cùng. Giữ để dừng quan sát.")
                 .onAppear { hovering = true }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

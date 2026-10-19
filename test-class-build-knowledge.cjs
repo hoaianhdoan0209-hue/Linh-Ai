@@ -28,6 +28,8 @@ const leap=K.answer('Shield Blitz kết hợp Skyfall và Concuss thế nào?');
 assert.match(leap.text,/Skyfall/);
 assert.match(leap.text,/Concuss/);
 assert.match(leap.text,/2024-11-07/);
+assert.match(leap.text,/Phối hợp Concuss \+ Skyfall/);
+assert.match(leap.text,/chance to stun/);
 assert.match(K.answer('Build Artillerist nên dùng gear và skill nào?').text,/Karmic Cinderpult/);
 assert.match(K.answer('Build Artillerist nên dùng gear và skill nào?').text,/Adhesive Gunpowder/);
 assert.match(K.answer('Tôi build Necromancer sử dụng kỹ năng gì?').text,/Ghostrider/);

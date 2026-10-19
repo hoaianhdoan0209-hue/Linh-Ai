@@ -82,6 +82,9 @@ assert.ok(ui.includes('id="visionAnalyze" hidden disabled'), 'Image upload contr
 assert.ok(ui.includes("visionUpload.encode(file)"), 'Image bytes must be reduced via canvas before model upload');
 assert.ok(ui.includes("aiBridge.askImage(question,image,"), 'Vision model requests are separate from text chat');
 assert.ok(ui.includes("window.confirm(") && ui.includes("Thông tin tên người chơi"), 'Screenshot must require consent with visible personal-data warning');
+assert.ok(ui.includes('isValid:()=>scan===scanToken&&file===pendingVisionFile'),
+ 'AI image backend must not retain result for a dismissed screenshot');
+assert.ok(ui.includes('CHƯA XÁC NHẬN trong game'), 'AI vision is a hypothesis, never approved equipment data');
 assert.ok(ui.includes('if(scan!==scanToken||file!==pendingVisionFile)return;'),
   'AI vision results for dismissed images must be discarded');
 assert.ok(ui.includes("pendingVisionFile=null;"), 'Closing image must drop in-memory file reference');

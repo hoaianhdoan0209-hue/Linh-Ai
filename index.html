@@ -136,6 +136,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
       <div class="photo-actions">
         <button type="button" id="approveImage" class="primary" disabled>Ghi nhớ điều đã đọc</button>
          <button type="button" id="visionAnalyze" hidden disabled>Hỏi AI xem ảnh (cần đồng ý)</button>
+        <button type="button" id="approveVision" hidden disabled>Xác nhận tên AI đọc đúng</button>
         <button type="button" id="dismissImage">Bỏ qua</button>
       </div>
     </div>
@@ -160,6 +161,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 <script src="./web-dialogue.js"></script>
 <script src="./web-ai-bridge.js?v=2.4.0"></script>
 <script src="./web-vision-upload.js?v=2.4.0"></script>
+<script src="./vision-evidence.js?v=2.4.0"></script>
 <script src="./stat-schema.js?v=2.4.0"></script>
 <script src="./vision-engine.js?v=2.4.0"></script>
 <script src="./web-image-memory.js?v=2.4.0"></script>
@@ -180,6 +182,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const brain=window.LinhWebCompanion,chat=window.LinhDialogue;
  const aiBridge=window.SocratesAIBridge?.create();
  const visionUpload=window.SocratesVisionUpload;
+ const visionEvidence=window.SocratesVisionEvidence;
  const coach=window.SocratesCoach.create();
  const vision=window.LinhVision,imageMemory=window.LinhImageMemory;
  const gameBrain=window.SocratesGameBrain,experiments=window.SocratesExperiments;
@@ -202,6 +205,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const imageStatus=document.getElementById('imageStatus');
  const approveImage=document.getElementById('approveImage');
  const visionAnalyze=document.getElementById('visionAnalyze');
+ const approveVision=document.getElementById('approveVision');
  const dismissImage=document.getElementById('dismissImage');
  const eraseImages=document.getElementById('eraseImages');
  const learnStatus=document.getElementById('learnStatus');
@@ -209,7 +213,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  const aiEndpoint=document.getElementById('aiEndpoint'),aiAccess=document.getElementById('aiAccess');
  const aiConnect=document.getElementById('aiConnect'),aiDismiss=document.getElementById('aiDismiss');
  const aiStatus=document.getElementById('aiStatus');
- if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!visionUpload||!visionAnalyze||!linh||!thought){
+ if(!brain||!chat||!vision||!imageMemory||!gameBrain||!experiments||!buildSystems||!evidenceGraph||!rotations||!promptStrategy||!thinkingGuard||!aiBridge||!visionUpload||!visionEvidence||!visionAnalyze||!approveVision||!linh||!thought){
    if(live)live.textContent='Socrates chưa tải được bộ hội thoại cục bộ.';
    return;
  }
@@ -223,6 +227,8 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  let legacy=brain.readLegacy(get(brain.LEGACY_KEY));
  let dialogue={focus:'general'},lastPatch=null,buildContext=null,thinkingState=thinkingGuard.empty(),hideTimer,reactTimer,holdTimer,holding=false,suppressClick=false;
  let savedImages=imageMemory.sanitize(get(imageMemory.KEY));
+ let acceptedVision=visionEvidence.sanitize(get(visionEvidence.KEY));
+ let pendingVisionEvidence=null;
  let gameNotes=gameBrain.sanitize(get(gameBrain.KEY));
  let measurements=experiments.sanitize(get(experiments.KEY));
  let analysisVisible=false;
@@ -439,7 +445,19 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
        }
      });
      if(scan!==scanToken||file!==pendingVisionFile)return;
-     if(result.ok){field.value='';show('Nhận định AI từ ảnh (CHƯA XÁC NHẬN trong game):\n'+result.reply,'dialogue',0);speak(result.reply);}
+     if(result.ok){
+       const structured=visionEvidence.parse(result.reply);
+       pendingVisionEvidence=structured?visionEvidence.annotate(structured,evidenceGraph):null;
+       approveVision.hidden=!pendingVisionEvidence?.observations.length;
+       approveVision.disabled=!pendingVisionEvidence?.observations.length;
+       field.value='';
+       if(pendingVisionEvidence){
+         imageStatus.textContent='AI đã phân loại ảnh. Chưa lưu tên hay xác nhận món đang mặc.';
+         show(visionEvidence.summary(pendingVisionEvidence),'dialogue',0);
+       }else{
+         show('AI chưa trả về dữ kiện ảnh đúng cấu trúc. Không có gì được lưu vào build.\n'+result.reply.slice(0,900),'question',0);
+       }
+     }
      else if(!result.cancelled)show('AI hình ảnh: '+result.reason,'question',0);
    }catch(error){
      if(scan===scanToken)show('Không thể chuẩn bị ảnh cho AI: '+(error?.message||'lỗi ảnh'),'question',0);
@@ -484,15 +502,18 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  }
 
  function refreshImageMemoryUI(){
-   eraseImages.hidden=savedImages.length===0;
+   eraseImages.hidden=savedImages.length===0&&acceptedVision.length===0;
    eraseImages.textContent='Quên '+savedImages.length+' ảnh đã học';
-   learnStatus.textContent=savedImages.length+' ảnh OCR đã xác nhận · '+gameNotes.length+
+   learnStatus.textContent=savedImages.length+' ảnh OCR, '+acceptedVision.length+' hồ sơ ảnh AI được xác nhận · '+gameNotes.length+
      ' ghi chú · '+measurements.length+' số đo';
  }
  function closeImage(){
    ++scanToken;
    scanning=false;
    pendingImage=null;
+   pendingVisionEvidence=null;
+   approveVision.hidden=true;
+   approveVision.disabled=true;
    pendingVisionFile=null;
    visionAnalyze.hidden=true;
    visionAnalyze.disabled=true;
@@ -634,6 +655,34 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      if(myScan===scanToken){scanning=false;visionAnalyze.disabled=!aiBridge.status().ready;}
    }
  }
+ approveVision.addEventListener('click',()=>{
+   if(!pendingVisionEvidence?.observations.length||scanning||!pendingVisionFile)return;
+   const text=visionEvidence.summary(pendingVisionEvidence);
+   if(!window.confirm('Xác nhận chỉ các TÊN, tier và số món AI đã đọc đúng?\n\n'+text))return;
+   let verified={...pendingVisionEvidence};
+   if(verified.panel==='equipped'&&verified.equipState==='equipped'&&
+      !window.confirm('Xác nhận ảnh này thực sự là TRANG BỊ ĐANG MẶC, không phải Codex, đồ trong túi hay preview?')){
+     verified={...verified,equipState:'unknown'};
+   }
+   const next=visionEvidence.approve(acceptedVision,verified);
+   if(!next.added){show('Những nhãn ảnh này đã được lưu từ trước.','memory',0);return;}
+   if(!set(visionEvidence.KEY,{version:1,items:next.items})){
+     show('Safari không lưu được nhãn ảnh. Chưa ghi vào trí nhớ.','question',0);return;
+   }
+   acceptedVision=next.items;
+   const latest=next.items.at(-1);
+   const chosen=visionEvidence.namesForBuild(latest);
+   if(chosen.length){
+     const inspected=buildSystems.inspect(chosen.join(' '),{source:'user-text'});
+     if(inspected)buildContext=buildSystems.merge(buildContext,inspected);
+   }
+   refreshImageMemoryUI();
+   pendingVisionEvidence=null;approveVision.hidden=true;approveVision.disabled=true;
+   show('Đã lưu '+latest.observations.length+' nhãn ảnh do Bệ hạ xác nhận. '+
+    (chosen.length?'Chỉ các tên từ trang bị được xác nhận mới góp vào ngữ cảnh build. ':
+      'Chưa coi ảnh là trang bị đang mặc. ')+
+    'Điều này chưa chứng minh cơ chế hoặc DPS.','memory',0);
+ });
  photo.addEventListener('click',()=>{lastInteractionAt=Date.now();imageInput.click()});
  imageInput.addEventListener('change',()=>readImage(imageInput.files?.[0]));
  approveImage.addEventListener('click',()=>{
@@ -661,10 +710,11 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  eraseImages.addEventListener('click',()=>{
    lastInteractionAt=Date.now();
    if(!window.confirm('Xóa toàn bộ trí nhớ học từ ảnh trên máy này?'))return;
-   if(!set(imageMemory.KEY,{version:1,items:[]})){
+   if(!set(imageMemory.KEY,{version:1,items:[]})||!set(visionEvidence.KEY,{version:1,items:[]})){
      show('Safari không xóa được dữ liệu ảnh; vui lòng kiểm tra lại.','question');return;
    }
    savedImages=[];
+   acceptedVision=[];
    coach.reset();
    closeImage();
    refreshImageMemoryUI();
@@ -696,6 +746,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  window.addEventListener('storage',e=>{
    if(e.key===brain.LEGACY_KEY)legacy=brain.readLegacy(e.newValue);
    if(e.key===imageMemory.KEY){savedImages=imageMemory.sanitize(e.newValue);refreshImageMemoryUI();}
+   if(e.key===visionEvidence.KEY){acceptedVision=visionEvidence.sanitize(e.newValue);refreshImageMemoryUI();}
    if(e.key===gameBrain.KEY){gameNotes=gameBrain.sanitize(e.newValue);refreshImageMemoryUI();}
    if(e.key===experiments.KEY){measurements=experiments.sanitize(e.newValue);refreshImageMemoryUI();}
    if(e.key===brain.STATE_KEY){

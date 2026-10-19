@@ -47,6 +47,12 @@ jobs:
             ios/LinhCompanion/Tests/InsightTests.swift \
             -o /tmp/linh-insight-tests
           /tmp/linh-insight-tests
+      - name: Kiểm thử bộ hội thoại giọng nói Socrates trên Swift
+        run: |
+          swiftc ios/LinhCompanion/Sources/SocratesVoiceDialog.swift \
+            ios/LinhCompanion/Tests/SocratesVoiceDialogTests.swift \
+            -o /tmp/socrates-voice-tests
+          /tmp/socrates-voice-tests
       - name: Chuẩn bị PWA và OCR cùng nguồn
         run: |
           set -euo pipefail

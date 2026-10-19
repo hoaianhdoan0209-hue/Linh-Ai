@@ -26,6 +26,8 @@ jobs:
           node-version: '22'
       - name: Kiểm thử Linh và bộ suy luận
         run: |
+          python3 -m compileall -q stream-bridge/server.py stream-bridge/test_stream.py
+          (cd stream-bridge && python3 -m unittest test_stream.py -v)
           node test-site.mjs
           node test-web-companion.cjs
           node test-native.mjs

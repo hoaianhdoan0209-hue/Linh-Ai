@@ -1,0 +1,14 @@
+# Locally signed applications and Apple signing material must stay private.
+signed-output/
+DerivedData/
+build/
+*.ipa
+*.p12
+*.mobileprovision
+*.provisionprofile
+*.cer
+*.p8
+*.key
+*.xcuserstate
+xcuserdata/
+LinhCompanion.xcodeproj/

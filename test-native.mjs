@@ -38,8 +38,32 @@ assert.ok(project.includes('LinhBroadcast')&&project.includes('embed: true'),
           'Broadcast extension must ship with host app');
 assert.ok(project.includes('NSExtensionPointIdentifier: com.apple.broadcast-services-upload'),
           'XcodeGen generates Info.plist: extension point must be in project.yml');
-assert.ok(project.includes('UIBackgroundModes: [screen-capture]'),
-          'XcodeGen must preserve system capture background mode');
+assert.ok(project.includes('UIBackgroundModes: [screen-capture, audio]'),
+          'XcodeGen must preserve capture plus real native audio background mode');
+assert.ok(plist.includes('<string>audio</string>') &&
+          plist.includes('NSMicrophoneUsageDescription') &&
+          plist.includes('NSSpeechRecognitionUsageDescription') &&
+          project.includes('NSMicrophoneUsageDescription:') &&
+          project.includes('NSSpeechRecognitionUsageDescription:'),
+          'Background audio and explicit mic/speech permissions must appear in source AND generated project config');
+const voice=read('./ios/LinhCompanion/Sources/SocratesVoiceCompanion.swift');
+const voiceRules=read('./ios/LinhCompanion/Sources/SocratesVoiceDialog.swift');
+for(const marker of ['AVAudioSession.sharedInstance().setCategory(','.playAndRecord',
+                        '.playback','.mixWithOthers','AVAudioApplication.requestRecordPermission()',
+                        'SFSpeechRecognizer.requestAuthorization',
+                        'recognition.supportsOnDeviceRecognition',
+                        'next.requiresOnDeviceRecognition = true',
+                        'stopListening()','AVSpeechSynthesizer','isConversationActive = false']) {
+ assert.ok(voice.includes(marker),'Missing opted-in real audio/speech path: '+marker);
+}
+assert.ok(!voice.includes('URLSession')&&!voice.includes('Data(contentsOf:'),
+ 'Native voice feature must not upload audio or download arbitrary content');
+assert.ok(voiceRules.includes('SocratesVoiceDialog') && voiceRules.includes('reply(to input: String)'),
+ 'On-device reply engine must not invent general AI');
+assert.ok(face.includes('voice.toggleConversation()')&&face.includes('voice.playGreeting()'),
+ 'Native UI must expose user initiated voice mode and sample playback');
+assert.ok(!voice.includes('while true')&&!voice.includes('silentAudio')&&!voice.includes('keepAlive'),
+ 'No fake silent audio background loop');
 assert.ok((project.split('com.apple.security.application-groups:').length - 1) === 2,
           'App Group must be declared for BOTH signed targets in XcodeGen');
 assert.ok(broadcast.includes('guard LinhSharedStore.hasSharedContainer') &&

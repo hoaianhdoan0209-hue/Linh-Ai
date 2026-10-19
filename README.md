@@ -1,3 +1,11 @@
+# Socrates 2.4 — thử nghiệm AI thị giác với ảnh do người chơi chọn
+
+Socrates đã có đường **Hỏi AI xem ảnh (cần đồng ý)** trên ảnh Soul Knight Prequel được chọn thủ công. Chế độ này **chỉ hiện sau khi kết nối cổng AI HTTPS riêng**, cần phê duyệt trước mỗi lần gửi ảnh; nếu không có model thị giác thì vẫn đọc OCR cục bộ như cũ. Ảnh được thu nhỏ và mã hóa lại qua canvas (không dùng ảnh gốc và EXIF), nhưng tên nhân vật/ID có thể vẫn thấy qua pixel. **Chưa có model thật được triển khai hay kiểm thử ảnh trên iPhone**, không thể gọi đây là AI nhận diện game đã nghiệm thu.
+
+Xem [giao thức ảnh, giới hạn và kiểm thử](research/vision-upload-v2.4.md) hoặc [kiến trúc tự sở hữu AI](research/socrates-owned-ai-architecture.md).
+
+---
+
 # Socrates 2.3 — bước đầu có thể kết nối AI riêng
 
 Theo định hướng nhân vật AI [Moeru AI/AIRI](https://github.com/moeru-ai/airi) và adapter mô hình [xsAI](https://github.com/moeru-ai/xsai), Socrates đã có chế độ kết nối **mô hình AI riêng tùy chọn** qua gateway HTTPS của chính chủ. Chế độ này **không tự bật** và không gửi ảnh hoặc chat khi chưa có xác nhận. Cổng hiện hỗ trợ Gemini và OpenAI-compatible (ví dụ mô hình do chủ máy tự host).

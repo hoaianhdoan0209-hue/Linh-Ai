@@ -34,6 +34,7 @@ jobs:
           node test-web-image-memory.cjs
           node test-game-coach.cjs
           node test-build-systems.cjs
+          node test-ss9-evidence-graph.cjs
           node test-rotation-lab.cjs
           node test-rotation-commands.cjs
           node test-prompt-strategy.cjs
@@ -67,7 +68,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/ocr/lang
-          cp stat-schema.js build-systems.js rotation-lab.js rotation-commands.js prompt-strategy.js thinking-guard.js game-coach.js season-knowledge.js index.html web-companion.js web-dialogue.js web-image-memory.js web-game-brain.js web-game-experiments.js legacy-dashboard.html vision-engine.js assistant-engine.js assistant-ui.js sw.js manifest.webmanifest icon.svg dist/
+          cp stat-schema.js build-systems.js ss9-evidence-graph.js rotation-lab.js rotation-commands.js prompt-strategy.js thinking-guard.js game-coach.js season-knowledge.js index.html web-companion.js web-dialogue.js web-image-memory.js web-game-brain.js web-game-experiments.js legacy-dashboard.html vision-engine.js assistant-engine.js assistant-ui.js sw.js manifest.webmanifest icon.svg dist/
           touch dist/.nojekyll
           npm install --no-save --no-package-lock --ignore-scripts --no-audit --no-fund tesseract.js@5.1.1 tesseract.js-core@5.1.1
           cp node_modules/tesseract.js/dist/tesseract.min.js dist/ocr/

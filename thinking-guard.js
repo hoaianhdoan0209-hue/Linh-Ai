@@ -70,7 +70,9 @@ function observe(state,input,options={}){
  if(base.photoTail&&base.photoTail.mechanicId!==nextId)base.photoTail=null;
  base.mechanicId=nextId;
  const rawCount=B.pieceCount(input);
- const relevant=nextId==='tarta'&&rawCount!==null&&/(\bmon\b|\bpieces?\b)/.test(q);
+ const countOnly=/^(?:(?:da\s+)?(?:du|co|mac)\s+)?[1-6]\s*(?:\/\s*4)?\s*(?:mon|pieces?)$/.test(q);
+ const relevant=nextId==='tarta'&&rawCount!==null&&/(\bmon\b|\bpieces?\b)/.test(q)&&
+   (detected?.mechanicIds?.includes('tarta')||countOnly);
  if(!relevant)return base;
  const correction=/\b(dinh chinh|sua lai|nham|thuc ra|noi lai)\b/.test(q);
  if(correction){base.claims=[];base.conflicts=[];}

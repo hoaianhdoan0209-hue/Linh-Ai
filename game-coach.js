@@ -96,6 +96,12 @@ function create(){
   if(previous)return compareImages(previous,current,{critMode,goal,unconfirmed});
   return analyze(current,{critMode,goal,unconfirmed});
  }
+ function reviseImage(item,confirmed=false){
+  const next=clean(item);if(!next)return analyze(null);
+  // An OCR edit replaces the same screenshot, not a second equipment option.
+  current=next;unconfirmed=!confirmed;
+  return previous?compareImages(previous,current,{critMode,goal,unconfirmed}):analyze(current,{critMode,goal,unconfirmed});
+ }
  function reply(input,saved=[]){
   const raw=String(input??'').slice(0,700),q=norm(raw);
   if(/^(xoa hoi thoai|quen cuoc tro chuyen|xoa tro chuyen)$/.test(q)){reset();return null;}
@@ -153,7 +159,7 @@ function create(){
   }
   return analyze(current,{critMode,goal,unconfirmed});
  }
- return {image,reply,reset};
+ return {image,reviseImage,reply,reset};
 }
 return {create,analyze,metrics,compareImages};
 });

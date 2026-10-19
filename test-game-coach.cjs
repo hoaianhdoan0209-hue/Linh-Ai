@@ -62,3 +62,12 @@ assert.match(choice.text,/Fatestone/);
 assert.match(choice.text,/Mất một tương tác có thể đảo kết quả/);
 assert.equal(C.compareImages(null,item).kind,'question');
 console.log('PASS: OCR → immediate analysis → multi-turn crit/DPS math → specific advice; build isolation and opt-in memory');
+
+// Correcting one photo must replace its numbers without inventing a second build.
+const edited=C.create();
+edited.image(M.candidate(raw,V.observe(raw)));
+edited.reply('tổng');
+edited.reviseImage(M.candidate('Sát thương đòn thường: 1100\nTỷ lệ chí mạng: 30%\nSát thương chí mạng: 200%\nTốc độ đánh: 2 đòn/s',V.observe('Sát thương đòn thường: 1100\nTỷ lệ chí mạng: 30%\nSát thương chí mạng: 200%\nTốc độ đánh: 2 đòn/s')));
+assert.match(edited.reply('DPS').text,/2\.860/);
+assert.match(edited.reply('so sánh').text,/một phương án/);
+assert.match(edited.reply('DPS').text,/OCR chưa xác nhận/);

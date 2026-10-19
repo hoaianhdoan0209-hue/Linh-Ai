@@ -113,7 +113,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 @media(max-height:570px){.world{min-height:0;padding-top:0}.stage{max-height:55dvh}.speech{min-height:54px;margin-top:-12px}.linh{max-height:52dvh;max-width:52dvh}.thought{font-size:12px;padding:9px 12px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
-<link rel="stylesheet" href="./fantasy-chat.css?v=2.11.0">
+<link rel="stylesheet" href="./fantasy-chat.css?v=2.11.1">
 </head>
 <body>
 <main>
@@ -157,6 +157,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
         <p>Đổi tên sẽ xóa suy đoán về tier và số món của dòng đó. Xác nhận ảnh là trang bị đang mặc sẽ được hỏi riêng.</p>
       </div>
       <div class="photo-actions">
+        <button type="button" id="recalculateImage" disabled>Tính lại từ chữ đã sửa</button>
         <button type="button" id="approveImage" class="primary" disabled>Ghi nhớ điều đã đọc</button>
          <button type="button" id="visionAnalyze" hidden disabled>Hỏi AI xem ảnh (cần đồng ý)</button>
         <button type="button" id="approveVision" hidden disabled>Xác nhận tên AI đọc đúng</button>
@@ -183,26 +184,26 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
 </main>
 <script src="./web-companion.js"></script>
 <script src="./web-dialogue.js"></script>
-<script src="./web-ai-bridge.js?v=2.11.0"></script>
-<script src="./web-vision-upload.js?v=2.11.0"></script>
-<script src="./vision-evidence.js?v=2.11.0"></script>
-<script src="./stat-schema.js?v=2.11.0"></script>
-<script src="./vision-engine.js?v=2.11.0"></script>
-<script src="./web-image-memory.js?v=2.11.0"></script>
-<script src="./season-knowledge.js?v=2.11.0"></script>
-<script src="./web-game-brain.js?v=2.11.0"></script>
-<script src="./web-game-experiments.js?v=2.11.0"></script>
-<script src="./build-systems.js?v=2.11.0"></script>
-<script src="./ss9-evidence-graph.js?v=2.11.0"></script>
-<script src="./class-catalog.js?v=2.11.0"></script>
-<script src="./ss9-class-roster.js?v=2.11.0"></script>
-<script src="./class-build-knowledge.js?v=2.11.0"></script>
-<script src="./rotation-lab.js?v=2.11.0"></script>
-<script src="./rotation-commands.js?v=2.11.0"></script>
-<script src="./thinking-guard.js?v=2.11.0"></script>
-<script src="./prompt-strategy.js?v=2.11.0"></script>
-<script src="./game-coach.js?v=2.11.0"></script>
-<script src="./fantasy-chat.js?v=2.11.0"></script>
+<script src="./web-ai-bridge.js?v=2.11.1"></script>
+<script src="./web-vision-upload.js?v=2.11.1"></script>
+<script src="./vision-evidence.js?v=2.11.1"></script>
+<script src="./stat-schema.js?v=2.11.1"></script>
+<script src="./vision-engine.js?v=2.11.1"></script>
+<script src="./web-image-memory.js?v=2.11.1"></script>
+<script src="./season-knowledge.js?v=2.11.1"></script>
+<script src="./web-game-brain.js?v=2.11.1"></script>
+<script src="./web-game-experiments.js?v=2.11.1"></script>
+<script src="./build-systems.js?v=2.11.1"></script>
+<script src="./ss9-evidence-graph.js?v=2.11.1"></script>
+<script src="./class-catalog.js?v=2.11.1"></script>
+<script src="./ss9-class-roster.js?v=2.11.1"></script>
+<script src="./class-build-knowledge.js?v=2.11.1"></script>
+<script src="./rotation-lab.js?v=2.11.1"></script>
+<script src="./rotation-commands.js?v=2.11.1"></script>
+<script src="./thinking-guard.js?v=2.11.1"></script>
+<script src="./prompt-strategy.js?v=2.11.1"></script>
+<script src="./game-coach.js?v=2.11.1"></script>
+<script src="./fantasy-chat.js?v=2.11.1"></script>
 <script>
 (()=>{
  'use strict';
@@ -616,6 +617,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    visionAnalyze.hidden=true;
    visionAnalyze.disabled=true;
    approveImage.disabled=true;
+   document.getElementById('recalculateImage').disabled=true;
    imageInput.value='';
    photoReview.hidden=true;
    imagePreview.hidden=true;
@@ -725,6 +727,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      pendingImage=imageMemory.candidate(raw,observation);
      pendingOCRLabels=collectOCRLabels(raw);
      approveImage.disabled=!pendingImage&&!pendingOCRLabels?.observations.length;
+   document.getElementById('recalculateImage').disabled=!pendingImage;
      imageStatus.textContent=pendingImage?imageMemory.describe(pendingImage):
        pendingOCRLabels?.observations.length?
          'Đã nhận thấy tên class/kỹ năng. Hãy sửa chữ rồi bấm Ghi nhớ để xác nhận.':
@@ -821,6 +824,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    pendingImage=imageMemory.candidate(text,vision.observe(text));
    pendingOCRLabels=collectOCRLabels(text);
    approveImage.disabled=!pendingImage&&!pendingOCRLabels?.observations.length;
+   document.getElementById('recalculateImage').disabled=!pendingImage;
    imageStatus.textContent=pendingImage?
      'Có chỉ số/từ khóa sau khi sửa. Xem lại chữ trước khi bấm Ghi nhớ.':
      pendingOCRLabels?.observations.length?
@@ -829,6 +833,18 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
  });
  photo.addEventListener('click',()=>{lastInteractionAt=Date.now();imageInput.click()});
  imageInput.addEventListener('change',()=>readImage(imageInput.files?.[0]));
+ document.getElementById('recalculateImage').addEventListener('click',()=>{
+   if(scanning)return;
+   const corrected=String(ocrEditor.innerText||ocrEditor.textContent||'').trim().slice(0,1800);
+   const revised=imageMemory.candidate(corrected,vision.observe(corrected));
+   if(!revised){imageStatus.textContent='Chưa có chỉ số hợp lệ để tính lại.';return;}
+   lastPatch=window.SocratesSeasonKnowledge?.lookup(corrected)?.[0]||null;
+   buildContext=buildSystems.inspect(corrected,{source:'image'});
+   thinkingState=thinkingGuard.observePhoto(thinkingState,corrected);
+   const analysis=coach.reviseImage(revised);
+   show('Đã dùng chữ Bệ hạ sửa để tính trong phiên; chưa ghi nhớ.\n\n'+analysis.text,analysis.kind,0);
+   lastInteractionAt=Date.now();closeImage();field.focus();
+ });
  approveImage.addEventListener('click',()=>{
    if(scanning)return;
    const corrected=String(ocrEditor.innerText||ocrEditor.textContent||'').trim().slice(0,1800);
@@ -864,6 +880,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
      imageStatus.textContent='Không có dữ kiện mới hoặc Safari từ chối lưu. Chưa xác nhận đã ghi nhớ.';
      return;
    }
+   if(storedFacts&&pendingImage)coach.reviseImage(pendingImage,true);
    pendingImage=null;pendingOCRLabels=null;
    approveImage.disabled=true;
    imageStatus.textContent='Đã lưu dữ kiện OCR do Bệ hạ sửa và xác nhận. Không khẳng định đây là đồ đang mặc.';

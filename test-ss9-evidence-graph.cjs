@@ -1,7 +1,7 @@
 'use strict';
 const assert=require('node:assert/strict');
 const G=require('./ss9-evidence-graph.js');
-assert.equal(G.relations.length,18);
+assert.equal(G.relations.length,25);
 assert.equal(new Set(G.relations.map(x=>x.id)).size,G.relations.length);
 for(const row of G.relations){
  assert.equal(row.validatedDamageFormula,false,row.id);
@@ -33,4 +33,10 @@ assert.equal(G.find("Wei Martial's Lash",{includeCommunity:true})[0].source,'com
 assert.ok(!G.explain('Tôi buồn'), 'Natural language conversation should not be hijacked');
 assert.match(G.explain('Syzygial Passage').text,/Smartcast/);
 assert.match(G.explain('Gale Flash').text,/Battlelust/);
-console.log('PASS: 18 official/community provenance-scoped skill+gear relations; old sources excluded and no fake empirical DPS');
+assert.match(G.explain("Nyax's Embrace 4pc").text,/0.5s for 4s/);
+assert.match(G.explain('Deadly Tempo').text,/Rage/);
+assert.match(G.explain('Multishot').text,/Calamitous/);
+assert.match(G.explain('Onslaught').text,/DoT/);
+assert.match(G.explain('Razorward - Gyral').text,/0.25s/);
+assert.match(G.explain('The Orrery').text,/Lumine Flux/);
+console.log('PASS: 25 official/community provenance-scoped skill+gear relations; old sources excluded and no fake empirical DPS');

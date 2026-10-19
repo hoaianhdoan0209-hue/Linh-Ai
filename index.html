@@ -120,7 +120,7 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
       </div>
     </div>
     <form id="chatDock" class="chat-dock" autocomplete="off">
-      <input id="chatMessage" type="text" maxlength="300" autocomplete="off" aria-label="Nhắn cho Socrates" placeholder="Nói với Socrates…" enterkeyhint="send">
+      <input id="chatMessage" type="text" maxlength="900" autocomplete="off" aria-label="Nhắn cho Socrates" placeholder="Nói với Socrates…" enterkeyhint="send">
       <button id="photo" type="button" aria-label="Gửi ảnh cho Socrates" title="Chọn ảnh">▧</button>
       <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Chọn ảnh để Socrates đọc">
       <button id="mic" type="button" hidden aria-label="Nói bằng giọng nói" title="Dùng mic nếu Safari hỗ trợ">🎙</button>
@@ -232,7 +232,9 @@ main{min-height:100dvh;display:flex;flex-direction:column;justify-content:center
    field.focus();
  }
  function send(raw){
-   const message=String(raw||'').trim().slice(0,chat.MAX_INPUT);
+   const input=String(raw||'').trim();
+   const experiment=/^(?:mô phỏng|mo phong|tính vòng chiêu|tinh vong chieu|thu rotation|rotation)\b/iu.test(input);
+   const message=input.slice(0,experiment?900:chat.MAX_INPUT);
    if(!message)return;
    lastInteractionAt=Date.now();
    field.value='';

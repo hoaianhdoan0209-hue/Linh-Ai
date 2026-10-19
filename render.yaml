@@ -16,7 +16,7 @@ services:
       - key: LINH_ALLOWED_ORIGIN
         value: https://hoaianhdoan0209-hue.github.io
       - key: GEMINI_MODEL
-        value: gemini-2.5-flash-lite
+        value: gemini-3.5-flash-lite
       - key: GEMINI_API_KEY
         sync: false
       - key: LINH_ACCESS_TOKEN

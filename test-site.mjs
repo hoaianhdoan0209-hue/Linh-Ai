@@ -62,7 +62,7 @@ assert.ok(ui.includes('brain.LEGACY_KEY'),'Home must read legacy memory read-onl
 assert.ok(!ui.includes('localStorage.setItem(brain.LEGACY_KEY'),
  'Web home must not overwrite existing game profiles');
 const offline=readFileSync(new URL('./sw.js',import.meta.url),'utf8').replace(/\?v=[0-9.]+/g,'');
-const assetsVersion=ui.match(/game-coach\\.js\\?v=([0-9.]+)/)?.[1];
+const assetsVersion=ui.match(/game-coach\.js\?v=([0-9.]+)/)?.[1];
 assert.ok(assetsVersion,'Game coach must have a deployed asset version');
 assert.ok(offline.includes("'./game-coach.js?v="+assetsVersion+"'"),
  'PWA must precache the same coach version as the page');
